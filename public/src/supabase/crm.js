@@ -1514,7 +1514,7 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
       p_timezone_filter:
         timezoneFilter && timezoneFilter !== "all" ? mapLeadTimezoneFilterToStoredValue(timezoneFilter) : "all",
       p_owner_filter: ownerFilter || "all",
-      p_search_term: searchTerm || "",
+      p_search_term: normalizeText(options.searchTerm) || "",
       p_page: page,
       p_page_size: pageSize,
       p_sort_key: sortKey || "name",
