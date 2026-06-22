@@ -10227,6 +10227,14 @@ function getLeadExportLabel(exportType) {
   return String(exportType || "").trim() === "duplicates" ? "duplicate leads" : "unqualified leads";
 }
 
+function getSupabaseClient() {
+  const services = initSupabase();
+  if (!services.configured || !services.client) {
+    throw new Error("Supabase is not configured.");
+  }
+  return services.client;
+}
+
 function parseLeadExportDateValue(value) {
   const normalized = String(value || "").trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
