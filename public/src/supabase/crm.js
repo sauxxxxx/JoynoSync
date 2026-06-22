@@ -270,8 +270,7 @@ const LEADS_PAGE_ROW_SELECT = [
   "created_at",
   "updated_at",
   "archived_at",
-  "active_pool",
-  "meta"
+  "active_pool"
 ].join(",");
 
 const LEAD_WEEKLY_REMOVAL_PENDING = "pending";
