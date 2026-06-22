@@ -14719,17 +14719,17 @@ function renderRoute() {
       view.showWaitingPanel && state.waitingCollapsed ? "bi bi-chevron-left" : "bi bi-chevron-right";
   }
 
-  if (view.showWaitingPanel) {
+  const waitingItems = (view.waitingItems || []).map((item) => ({
+    ...item,
+    due: getWaitingItemDueInfo(item)
+  }));
+  if (view.showWaitingPanel && waitingItems.length) {
     if (appShell) {
       appShell.classList.remove("no-waiting");
     }
     if (waitingPanel) {
       waitingPanel.style.display = "grid";
     }
-    const waitingItems = (view.waitingItems || []).map((item) => ({
-      ...item,
-      due: getWaitingItemDueInfo(item)
-    }));
     const allowedFilters = new Set(["all", "overdue", "today", "tomorrow"]);
     if (!allowedFilters.has(state.waitingFilter)) {
       state.waitingFilter = "all";
