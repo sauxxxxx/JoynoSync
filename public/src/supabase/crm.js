@@ -1452,6 +1452,7 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
   const sourceFilter = normalizeText(options.sourceFilter, "all");
   const timezoneFilter = normalizeLeadTimezoneFilter(options.timezoneFilter);
   const ownerFilter = normalizeLeadOwnerFilter(options.ownerFilter, canManage);
+  const normalizedSearchTerm = normalizeText(options.searchTerm);
   const page = Math.max(1, Number(options.page) || 1);
   const pageSize = Math.max(1, Number(options.pageSize) || LEADS_PAGE_SIZE_FALLBACK);
   const sortKey = normalizeText(options.sortKey);
@@ -1514,7 +1515,7 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
       p_timezone_filter:
         timezoneFilter && timezoneFilter !== "all" ? mapLeadTimezoneFilterToStoredValue(timezoneFilter) : "all",
       p_owner_filter: ownerFilter || "all",
-      p_search_term: normalizeText(options.searchTerm) || "",
+      p_search_term: normalizedSearchTerm,
       p_page: page,
       p_page_size: pageSize,
       p_sort_key: sortKey || "name",
@@ -1545,7 +1546,7 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
         ownerFilter,
         sourceFilter,
         timezoneFilter,
-        searchTerm,
+        searchTerm: normalizedSearchTerm,
         page,
         pageSize,
         sortKey,
