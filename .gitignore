@@ -1,0 +1,43 @@
+node_modules/
+functions/node_modules/
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+.env.supabase.functions
+functions/.env
+supabase/.env
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
+*firebase-adminsdk*.json
+
+# Firebase / Supabase local state
+.firebase/
+firebase-debug.log
+supabase/.temp/
+supabase/.branches/
+
+# Test and browser artifacts
+playwright-report/
+test-results/
+blob-report/
+coverage/
+
+# Build output
+dist/
+build/
+
+# Temp/debug files
+tmp-*
+tmp_*
+*.tmp
+*.log
+
+# OS/editor local files
+.DS_Store
+Thumbs.db
+.vscode/

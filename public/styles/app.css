@@ -1,0 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+@import url("./sections/layout.css");
+@import url("./sections/dashboard-work.css");
+@import url("./sections/crm-attendance.css");
+@import url("./sections/comms.css");
+@import url("./sections/messenger.css");
+@import url("./sections/modals.css");
+@import url("./sections/responsive.css");

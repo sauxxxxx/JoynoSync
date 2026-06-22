@@ -1,0 +1,8156 @@
+.comms-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.comms-locked-view {
+  display: grid;
+  align-items: center;
+  padding: 24px;
+}
+
+.comms-access-card {
+  width: min(620px, 100%);
+  margin: 0 auto;
+  gap: 14px;
+  padding: 18px 20px;
+  background:
+    radial-gradient(circle at top right, rgba(36, 87, 214, 0.1), transparent 44%),
+    linear-gradient(180deg, #f9fbfe, #eef5fd);
+}
+
+.comms-access-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(36, 87, 214, 0.1);
+  color: #2457d6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.comms-layout.is-context-collapsed {
+  grid-template-columns: 300px 1fr 56px;
+}
+
+.comms-mode-email.comms-layout,
+.comms-mode-email.comms-layout.is-context-collapsed,
+.comms-mode-email-mailbox {
+  grid-template-columns: 300px 1fr;
+}
+
+.comms-rail {
+  border-right: 1px solid var(--line);
+  padding: 10px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  align-content: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.comms-rail::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.comms-rail-head {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+  padding-bottom: 8px;
+}
+
+.comms-search {
+  min-width: 0;
+  width: 100%;
+}
+
+.comms-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.sms-filter-row {
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sms-filter-row .mini-btn {
+  border: 0;
+  background: #eef4fb;
+  color: #35556f;
+  border-radius: 999px;
+  min-height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sms-filter-row .mini-btn:hover {
+  background: #e3eefb;
+}
+
+.sms-filter-row .mini-btn.is-active {
+  background: #dce9fa;
+  color: #1d4e83;
+}
+
+.mini-btn.is-active {
+  background: #e9f2f8;
+  border-color: #b2c7d7;
+  color: #1f3e56;
+}
+
+.comms-thread {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.comms-thread-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.thread-head-actions {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thread-actions-menu {
+  position: relative;
+}
+
+.thread-menu-toggle {
+  list-style: none;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5d7286;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.thread-menu-toggle:hover {
+  background: transparent;
+  color: #314f67;
+}
+
+.thread-actions-menu[open] .thread-menu-toggle {
+  background: transparent;
+}
+
+.thread-menu-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.thread-actions-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  border: 1px solid #d5e0ea;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(8, 28, 44, 0.12);
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  z-index: 8;
+}
+
+.thread-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 13px;
+  padding: 7px 8px;
+  cursor: pointer;
+}
+
+.thread-menu-item:hover {
+  background: #eef4f8;
+}
+
+.thread-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.conversation-list {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  padding-right: 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.conversation-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.conversation-item {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 9px;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
+}
+
+.conversation-item:hover {
+  background: #f7fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(10, 30, 45, 0.08);
+}
+
+.conversation-item.is-active {
+  border-color: #9fb1c2;
+  background: #eef4f8;
+}
+
+.conversation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.conversation-row .task-title i {
+  color: #4e6a80;
+  margin-right: 4px;
+}
+
+.conversation-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.conversation-list.email-list {
+  gap: 0;
+}
+
+.conversation-item.is-email {
+  border: 0;
+  border-bottom: 1px solid #dbe5ee;
+  border-radius: 0;
+  padding: 10px 12px;
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  text-align: left;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: background-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.conversation-item.is-email:hover {
+  background: #f4f8fd;
+  transform: none;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.conversation-item.is-email.is-active {
+  border-color: #dbe5ee;
+  background: #e7f0fb;
+  box-shadow: inset 3px 0 0 #2f6fd7;
+}
+
+.conversation-item.is-email.is-unread .conversation-email-name,
+.conversation-item.is-email.is-unread .conversation-email-subject {
+  color: #10263a;
+  font-weight: 600;
+}
+
+.conversation-list.sms-list {
+  gap: 0;
+}
+
+.conversation-item.is-sms {
+  border: 0;
+  border-bottom: 1px solid #dbe5ee;
+  border-radius: 0;
+  padding: 9px 2px;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  text-align: left;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: background-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.conversation-item.is-sms:hover {
+  background: #f5f9fd;
+  transform: none;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.conversation-item.is-sms.is-active {
+  border-color: #dbe5ee;
+  background: #e8f2ff;
+  box-shadow: inset 3px 0 0 #2f6fd7;
+}
+
+.sms-thread-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  border-radius: 999px;
+  padding: 0 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-right: 6px;
+}
+
+.sms-thread-status.is-needs-reply {
+  background: #fff3e8;
+  color: #a1671f;
+}
+
+.sms-thread-status.is-failed {
+  background: #fdeceb;
+  color: #a04842;
+}
+
+.sms-thread-status.is-scheduled {
+  background: #edf2ff;
+  color: #4361a8;
+}
+
+.sms-thread-status.is-sent {
+  background: #e8f5f0;
+  color: #2f7560;
+}
+
+.conversation-email-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a3248;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-email-link {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c9d8e7;
+  background: #eef5fc;
+  color: #365673;
+  border-radius: 999px;
+  padding: 0 6px;
+  height: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.conversation-email-time {
+  color: #6b7f90;
+  font-size: 11px;
+  flex-shrink: 0;
+  font-weight: 400;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.conversation-email-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.conversation-email-subject {
+  color: #1f3a52;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
+  flex: 0 1 auto;
+}
+
+.conversation-email-divider {
+  color: #8da0b2;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.conversation-email-preview {
+  color: #647b8e;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+}
+
+.conversation-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #e6eff8;
+  color: #33556f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.conversation-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.conversation-topline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.conversation-record-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: #edf3fb;
+  color: #44627f;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.conversation-record-badge.is-lead {
+  background: #eef6ff;
+  color: #2d6395;
+}
+
+.conversation-record-badge.is-account {
+  background: #eef7f2;
+  color: #2a7050;
+}
+
+.conversation-record-badge.is-deal {
+  background: #fff4e8;
+  color: #9a5c1d;
+}
+
+.conversation-subline {
+  color: #72859a;
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #20384d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-time {
+  margin-left: auto;
+  color: #98a8b7;
+  font-size: 10px;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.conversation-preview {
+  color: #61788d;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.35;
+}
+
+.conversation-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  height: 100%;
+  position: relative;
+}
+
+.conversation-indicators {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 1;
+  transition: opacity 0.14s ease;
+}
+
+.table-actions-menu[open] .table-actions-dropdown {
+  animation: popIn var(--motion-fast) var(--ease-emphasis);
+}
+
+.message-list {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  padding-right: 10px;
+  align-content: start;
+  background: #f8fbfd;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.message-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.comms-mode-email .message-list {
+  background: #ffffff;
+  gap: 0;
+  padding: 0 12px 16px;
+}
+
+.email-mailbox-pane {
+  min-height: 0;
+  height: 100%;
+  padding: 0 0 16px;
+}
+
+.email-mailbox-list {
+  display: grid;
+  gap: 0;
+}
+
+.comms-thread.is-email-compose-open .message-list {
+  padding-bottom: 400px;
+}
+
+.comms-thread.is-email-compose-minimized .message-list {
+  padding-bottom: 116px;
+}
+
+.comms-thread.is-email-compose-closed .message-list {
+  padding-bottom: 76px;
+}
+
+.comms-mode-email .comms-rail {
+  background: #f7f9fc;
+}
+
+.comms-mode-email .comms-rail-head {
+  display: grid;
+  gap: 8px;
+  background: #f7f9fc;
+  border-bottom: 1px solid #dce6ef;
+  padding-bottom: 10px;
+}
+
+.comms-mode-email .comms-search {
+  border: 1px solid #cfdce8;
+  background: #ffffff;
+}
+
+.email-compose-btn {
+  width: 100%;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.email-rail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.email-rail-status {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.email-rail-meta .status-chip {
+  font-size: 11px;
+}
+
+.email-rail-status .task-meta {
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email-folder-menu {
+  display: grid;
+  gap: 2px;
+  padding: 1px 0;
+}
+
+.email-folder-btn {
+  border: 0;
+  background: transparent;
+  color: #36516a;
+  padding: 7px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.email-folder-btn:hover {
+  background: #ecf3fb;
+}
+
+.email-folder-btn.is-active {
+  background: #dce9f8;
+  color: #1d5ca9;
+}
+
+.email-folder-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.email-folder-left span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.email-folder-count {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #dbe5ef;
+  color: #345069;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.email-folder-btn.is-active .email-folder-count {
+  background: #1f6fd6;
+  color: #fff;
+}
+
+.comms-mode-email .comms-thread-head {
+  background: #ffffff;
+  border-bottom: 1px solid #dce6ef;
+  padding: 10px 12px;
+}
+
+.email-mailbox-head {
+  align-items: center;
+}
+
+.email-mailbox-head-copy,
+.email-reader-head-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.email-mailbox-head-copy .block-title,
+.email-reader-head-copy .block-title,
+.email-reader-head-copy .task-meta,
+.email-mailbox-head-copy .task-meta {
+  margin: 0;
+}
+
+.email-mailbox-back {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comms-mode-sms .comms-thread-head {
+  background: #ffffff;
+  border-bottom: 1px solid #e2ebf3;
+  padding: 10px 12px;
+}
+
+.comms-mode-sms .message-list {
+  background: #ffffff;
+  padding: 12px 12px 10px;
+}
+
+.email-rail-section {
+  margin-top: 8px;
+}
+
+.email-threads-title {
+  margin: 0 0 6px;
+}
+
+.sms-rail-section {
+  margin-top: 8px;
+}
+
+.sms-threads-title {
+  margin: 0 0 6px;
+}
+
+.comms-mode-calls .message-list {
+  background: #f6f9fc;
+}
+
+.email-thread-item {
+  border: 0;
+  border-bottom: 1px solid #dbe6ef;
+  background: #fff;
+  padding: 9px 4px;
+  display: grid;
+  grid-template-columns: 14px 16px 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.email-thread-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.email-row-check {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #c8d5e1;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.email-row-star {
+  color: #90a2b3;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.email-thread-item.is-outbound .email-row-star {
+  color: #617f9f;
+}
+
+.email-thread-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #dce9f6;
+  color: #244b6b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.email-thread-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.email-thread-subject {
+  margin: 0;
+  color: #1f3a52;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email-thread-time {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.email-thread-item .task-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #5f7588;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email-thread-item.is-outbound {
+  background: #f8fbff;
+}
+
+.email-mailbox-row {
+  width: 100%;
+  min-height: 42px;
+}
+
+.email-mailbox-empty {
+  min-height: 100%;
+  align-content: start;
+  padding: 24px 18px;
+}
+
+.email-reader {
+  padding: 16px 12px 0;
+}
+
+.email-reader-card {
+  border: 1px solid #dce6ef;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 18px;
+  display: grid;
+  gap: 18px;
+}
+
+.email-reader-card-head,
+.email-reader-from {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.email-reader-card-head .task-title,
+.email-reader-card-head .task-meta,
+.email-reader-from-copy .task-title,
+.email-reader-from-copy .task-meta {
+  margin: 0;
+}
+
+.email-reader-from {
+  justify-content: flex-start;
+}
+
+.email-reader-from-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.email-reader-body {
+  display: grid;
+  gap: 14px;
+  color: #30485f;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.email-reader-body p {
+  margin: 0;
+}
+
+.email-reader-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.email-empty-thread {
+  padding: 18px 6px;
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.email-empty-thread .task-title,
+.email-empty-thread .task-meta {
+  margin: 0;
+}
+
+.email-empty-thread .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.call-log-item {
+  border: 1px solid #d8e2eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.call-log-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.call-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e7eff8;
+  color: #2d5c85;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-log-head .task-title,
+.call-log-head .task-meta,
+.call-log-item .task-meta {
+  margin: 0;
+}
+
+.message-row {
+  display: grid;
+  gap: 5px;
+  max-width: 86%;
+}
+
+.message-row.is-self {
+  margin-left: auto;
+  justify-items: stretch;
+}
+
+.message-row.is-peer {
+  margin-right: auto;
+  justify-items: stretch;
+}
+
+.message-bubble {
+  border: 1px solid #dde6ee;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 9px 10px;
+  min-width: 180px;
+  box-shadow: 0 1px 0 rgba(8, 28, 44, 0.04);
+}
+
+.message-row.is-self .message-bubble {
+  background: #e7f2ff;
+  border-color: #c7ddf5;
+  border-bottom-right-radius: 6px;
+}
+
+.message-row.is-peer .message-bubble {
+  background: #ffffff;
+  border-bottom-left-radius: 6px;
+}
+
+.message-bubble.is-important {
+  border-color: #efb7aa;
+  background: #fff5f0;
+}
+
+.message-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.message-meta strong {
+  color: #284156;
+  font-weight: 600;
+}
+
+.message-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+
+.message-row:hover .message-inline-actions,
+.message-row:focus-within .message-inline-actions {
+  opacity: 1;
+}
+
+.message-icon-btn {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #4b6579;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.message-icon-btn:hover {
+  background: #eef4fb;
+}
+
+.message-icon-btn.is-danger {
+  color: #8a3434;
+}
+
+.message-icon-btn.is-danger:hover {
+  background: #fff2f2;
+}
+
+.message-text {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-text.is-muted {
+  color: #667f94;
+}
+
+.message-bubble.is-deleted {
+  background: #f4f6f8;
+  border-color: #d5dee6;
+}
+
+.message-row.is-deleted .message-text {
+  color: #7a8f9f;
+}
+
+.message-pill.is-edited {
+  border-color: #cbd8e4;
+  background: #eef4f8;
+  color: #556f84;
+}
+
+.message-link {
+  margin-top: 6px;
+}
+
+.message-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  border: 1px solid #d8e1e9;
+  background: #f4f8fb;
+  color: #49657b;
+}
+
+.message-pill.is-important {
+  border-color: #efc2b4;
+  background: #fff2ec;
+  color: #92493a;
+}
+
+.mention-token {
+  display: inline-block;
+  color: #245f8a;
+  background: #e9f2fb;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-weight: 600;
+}
+
+.comms-composer {
+  border-top: 0;
+  padding: 10px 12px 12px;
+  background: #fff;
+  display: grid;
+  gap: 10px;
+}
+
+.comms-composer.is-email {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 6;
+  display: block;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  width: min(740px, calc(100% - 24px));
+}
+
+.comms-composer.is-email.is-minimized {
+  width: min(360px, calc(100% - 24px));
+}
+
+.comms-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.comms-mode-surface {
+  border: 1px solid #d6e0e8;
+  background: #fdfefe;
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 9px;
+}
+
+.email-surface {
+  background: #fff;
+}
+
+.compose-sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.compose-sheet-head .task-title,
+.compose-sheet-head .task-meta {
+  margin: 0;
+}
+
+.gmail-compose-card {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #cfdbe7;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 16px 34px rgba(12, 35, 58, 0.14);
+  padding: 10px;
+  gap: 10px;
+}
+
+.gmail-compose-head {
+  align-items: center;
+  border-bottom: 1px solid #e4ebf2;
+  padding-bottom: 8px;
+}
+
+.gmail-compose-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gmail-compose-window-actions .message-icon-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.gmail-compose-menu {
+  position: relative;
+}
+
+.gmail-compose-menu > summary {
+  list-style: none;
+}
+
+.gmail-compose-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.gmail-compose-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 168px;
+  border: 1px solid #d5e0ea;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(8, 28, 44, 0.12);
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  z-index: 10;
+  transform-origin: top right;
+}
+
+.gmail-compose-menu[open] .gmail-compose-menu-dropdown {
+  animation: popIn var(--motion-fast) var(--ease-emphasis);
+}
+
+.gmail-compose-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 13px;
+  padding: 7px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.gmail-compose-menu-item:hover {
+  background: #eef4f8;
+}
+
+.gmail-compose-menu-item i {
+  color: #46647d;
+}
+
+.gmail-compose-line {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.gmail-compose-line > span {
+  color: #5e7386;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gmail-compose-line input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #d7e3ee;
+  background: transparent;
+  padding: 8px 2px 7px;
+  font-size: 14px;
+  color: #1d3b53;
+}
+
+.gmail-compose-line input:focus {
+  outline: none;
+  border-bottom-color: #7ea7d2;
+}
+
+.gmail-ccbcc {
+  border: 1px solid #dbe4ed;
+  background: #f9fbfd;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.gmail-ccbcc > summary {
+  list-style: none;
+  cursor: pointer;
+  color: #39556c;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+}
+
+.gmail-ccbcc > summary::-webkit-details-marker {
+  display: none;
+}
+
+.gmail-ccbcc-grid {
+  border-top: 1px solid #e1e8f0;
+  padding: 8px 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.gmail-compose-body textarea {
+  min-height: 180px;
+  border: 1px solid #d5e1ec;
+  border-radius: 8px;
+  padding: 10px;
+  resize: vertical;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gmail-crm-strip {
+  border: 1px solid #dbe4ed;
+  background: #f9fcff;
+  border-radius: 8px;
+}
+
+.gmail-crm-strip > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #32506a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gmail-crm-strip > summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gmail-crm-strip > summary small {
+  color: #6a8094;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.gmail-crm-strip > summary::-webkit-details-marker {
+  display: none;
+}
+
+.gmail-crm-grid {
+  border-top: 1px solid #e1e8f0;
+  padding: 8px 10px 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.gmail-crm-grid .form-field {
+  margin: 0;
+}
+
+.gmail-compose-foot {
+  border-top: 1px solid #e4ebf2;
+  padding-top: 8px;
+}
+
+.gmail-send-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gmail-send-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comms-composer.is-email.is-minimized .gmail-compose-card {
+  width: 100%;
+}
+
+.comms-composer.is-email.is-minimized .gmail-compose-menu,
+.comms-composer.is-email.is-minimized .gmail-compose-line,
+.comms-composer.is-email.is-minimized .gmail-ccbcc,
+.comms-composer.is-email.is-minimized .gmail-compose-body,
+.comms-composer.is-email.is-minimized .gmail-crm-strip,
+.comms-composer.is-email.is-minimized .gmail-compose-foot {
+  display: none;
+}
+
+.gmail-compose-launcher {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 6;
+}
+
+.gmail-compose-launcher .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 10px 22px rgba(14, 38, 60, 0.18);
+}
+
+.compose-line {
+  display: grid;
+  grid-template-columns: 66px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.compose-line span {
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.compose-line input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.compose-line-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.compose-body textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  resize: vertical;
+  min-height: 180px;
+}
+
+.compose-sheet-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.compose-sheet-foot .task-meta {
+  margin: 0;
+}
+
+.sms-surface {
+  background: #ffffff;
+  border: 0;
+  border-top: 1px solid #e5edf5;
+  border-radius: 0;
+  padding: 10px 0 0;
+  gap: 8px;
+}
+
+.sms-compose-head {
+  padding: 0 12px;
+}
+
+.sms-compose-topline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 0 12px;
+}
+
+.sms-recipient-field {
+  margin: 0;
+}
+
+.sms-recipient-field input {
+  border: 1px solid #d3dfea;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.sms-schedule-btn {
+  align-self: center;
+}
+
+.sms-text-field {
+  margin: 0;
+  padding: 0 12px;
+}
+
+.sms-text-field textarea {
+  border: 1px solid #d3dfea;
+  border-radius: 12px;
+  background: #f8fbff;
+  min-height: 88px;
+  resize: vertical;
+}
+
+.sms-text-field textarea:focus {
+  outline: none;
+  border-color: #aac5e1;
+  box-shadow: 0 0 0 1px #d6e6f6;
+}
+
+.sms-counter {
+  margin: 0;
+}
+
+.sms-counter.is-over {
+  color: #9f2f2f;
+}
+
+.sms-template-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px;
+}
+
+.sms-template-row .mini-btn {
+  border: 0;
+  background: #eef3fa;
+  color: #35546f;
+  border-radius: 999px;
+  min-height: 24px;
+  padding: 0 10px;
+  font-size: 11px;
+}
+
+.sms-template-row .mini-btn:hover {
+  background: #e1ecf9;
+}
+
+.sms-compose-foot {
+  border-top: 1px solid #e7eef5;
+  margin-top: 2px;
+  padding: 8px 12px 0;
+}
+
+.sms-send-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sms-thread-quick-actions {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sms-thread-quick-actions .mini-btn {
+  border: 0;
+  background: #edf4fb;
+  color: #2e5171;
+  border-radius: 999px;
+  min-height: 24px;
+  padding: 0 9px;
+  font-size: 11px;
+}
+
+.sms-thread-quick-actions .mini-btn:hover {
+  background: #e0ebf9;
+}
+
+.sms-thread-quick-actions .mini-btn i {
+  margin-right: 4px;
+}
+
+.sms-message-row .message-bubble {
+  max-width: 520px;
+}
+
+.sms-message-bubble {
+  border: 1px solid #d5e1ec;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.sms-message-bubble.is-outbound {
+  background: #e9f3ff;
+  border-color: #bfd4ea;
+  border-bottom-right-radius: 6px;
+}
+
+.sms-message-bubble.is-inbound {
+  border-bottom-left-radius: 6px;
+}
+
+.sms-message-foot .message-meta {
+  gap: 6px;
+}
+
+.sms-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16px;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sms-status-pill.is-failed {
+  background: #fdeceb;
+  color: #a04842;
+}
+
+.sms-status-pill.is-scheduled {
+  background: #edf2ff;
+  color: #4361a8;
+}
+
+.sms-status-pill.is-delivered {
+  background: #e6f6ef;
+  color: #2f7b63;
+}
+
+.sms-status-pill.is-sent {
+  background: #e9f2fb;
+  color: #2f628f;
+}
+
+.sms-empty-thread {
+  padding: 16px 14px;
+}
+
+.call-surface {
+  background: #fcfdff;
+}
+
+.call-input {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.view-block.calls-workspace-shell {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.calls-subview-tabs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 4px;
+  border-bottom: 1px solid #e4ebf2;
+}
+
+.calls-subview-tabs .mini-btn {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #6e8397;
+  padding: 8px 0 10px;
+  min-height: 0;
+  font-size: 13px;
+  font-weight: 500;
+  position: relative;
+}
+
+.calls-subview-tabs .mini-btn:hover {
+  background: transparent;
+  color: #27435a;
+}
+
+.calls-subview-tabs .mini-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: #2f6fed;
+  opacity: 0;
+  transform: scaleX(0.25);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.calls-subview-tabs .mini-btn.is-active {
+  color: #1f5b97;
+  font-weight: 600;
+}
+
+.calls-subview-tabs .mini-btn.is-active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.calls-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 300px;
+  gap: 0;
+  min-height: 640px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.calls-live-lock-shell {
+  position: relative;
+  min-height: 640px;
+}
+
+.calls-layout.is-live-locked {
+  filter: blur(1px) saturate(0.98);
+  opacity: 0.84;
+  pointer-events: none;
+  user-select: none;
+}
+
+.calls-live-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 84% 14%, rgba(210, 228, 255, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(244, 249, 255, 0.08), rgba(238, 245, 253, 0.12));
+  backdrop-filter: blur(4px) saturate(1.01);
+}
+
+.calls-live-lock-card {
+  width: min(420px, 100%);
+  padding: 34px 30px 28px;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(244, 249, 255, 0.16)),
+    rgba(241, 247, 255, 0.06);
+  box-shadow:
+    0 18px 34px rgba(11, 31, 51, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(12px) saturate(1.04);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.calls-live-lock-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #597089;
+}
+
+.calls-live-lock-icon i {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.calls-live-lock-card h3,
+.calls-live-lock-card p {
+  margin: 0;
+}
+
+.calls-live-lock-card h3 {
+  font-size: 24px;
+  font-weight: 560;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #243f59;
+}
+
+.calls-live-lock-card p {
+  max-width: 280px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #597089;
+}
+
+.view-block.calls-layout {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.calls-layout.is-context-collapsed {
+  grid-template-columns: 320px 1fr 56px;
+}
+
+.calls-layout.is-context-hidden {
+  grid-template-columns: 320px 1fr;
+}
+
+.calls-scheduler-shell {
+  --calls-scheduler-day-head-height: 34px;
+  border: 1px solid #e4ebf2;
+  background: #ffffff;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+}
+
+.calls-scheduler-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #e4ebf2;
+  background: #ffffff;
+}
+
+.calls-scheduler-toolbar-left,
+.calls-scheduler-toolbar-right {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.calls-scheduler-toolbar-left {
+  flex: 1 1 auto;
+}
+
+.calls-scheduler-toolbar-right {
+  flex: 0 0 auto;
+}
+
+.calls-scheduler-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calls-scheduler-nav strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: #18344c;
+}
+
+.calls-scheduler-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: #f5f8fb;
+  border-radius: 999px;
+}
+
+.calls-scheduler-toggle .mini-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: #678095;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.calls-scheduler-toggle .mini-btn.is-active {
+  background: #ffffff;
+  color: #1f5b97;
+  box-shadow: 0 1px 0 rgba(10, 30, 45, 0.06);
+}
+
+.calls-scheduler-owner-select select {
+  min-height: 36px;
+  border: 1px solid #d8e4ef;
+  background: #ffffff;
+  color: #20435c;
+  padding: 0 12px;
+}
+
+.calls-scheduler-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.calls-scheduler-main.is-board-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.calls-scheduler-primary {
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  width: 100%;
+}
+
+.calls-scheduler-side {
+  border-left: 1px solid #e5edf5;
+  background: #fbfdff;
+  padding: 16px;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.calls-scheduler-side-card {
+  border: 1px solid #e4ebf2;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.calls-scheduler-side-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calls-scheduler-side-head h4,
+.calls-scheduler-side-head p {
+  margin: 0;
+}
+
+.calls-scheduler-side-head h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #17364d;
+}
+
+.calls-scheduler-side-head p {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #74879a;
+}
+
+.calls-scheduler-side-head span {
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 999px;
+  background: #edf4ff;
+  color: #1f5b97;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calls-scheduler-board {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  min-height: 0;
+  overflow: visible;
+  background: #fbfdff;
+  width: 100%;
+}
+
+.calls-scheduler-time-rail {
+  display: grid;
+  grid-template-rows: var(--calls-scheduler-day-head-height) 1fr;
+  border-right: 1px solid #e5edf5;
+  background: #fbfdff;
+}
+
+.calls-scheduler-time-rail-head {
+  min-height: var(--calls-scheduler-day-head-height);
+  border-bottom: 1px solid #e5edf5;
+  background: #ffffff;
+}
+
+.calls-scheduler-time-rail-body {
+  display: grid;
+  grid-auto-rows: var(--calls-scheduler-hour-height, 56px);
+  min-height: 672px;
+  background: #fbfdff;
+}
+
+.calls-scheduler-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  color: #8496a8;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.calls-scheduler-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 0;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.calls-scheduler-grid.is-day {
+  grid-template-columns: minmax(320px, 1fr);
+}
+
+.calls-scheduler-day {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  border-right: 1px solid #e5edf5;
+  background: #ffffff;
+}
+
+.calls-scheduler-day:last-child {
+  border-right: 0;
+}
+
+.calls-scheduler-day-head {
+  min-height: var(--calls-scheduler-day-head-height);
+  padding: 0 10px;
+  border-bottom: 1px solid #e5edf5;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calls-scheduler-day-head strong,
+.calls-scheduler-day-head span {
+  margin: 0;
+}
+
+.calls-scheduler-day-head strong {
+  color: #18354d;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.calls-scheduler-day-head span {
+  color: #74879a;
+  font-size: 11px;
+  font-weight: 500;
+  position: relative;
+  padding-left: 8px;
+  line-height: 1;
+}
+
+.calls-scheduler-day-head span::before {
+  content: "|";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b1c0cf;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.calls-scheduler-day-grid {
+  position: relative;
+  min-height: 672px;
+  background-image: linear-gradient(to bottom, rgba(229, 237, 245, 0.92) 1px, transparent 1px);
+  background-size: 100% 28px;
+}
+
+.calls-scheduler-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.calls-scheduler-slot:hover {
+  background: rgba(47, 111, 237, 0.06);
+}
+
+.calls-scheduler-slot.drop-target-active {
+  background: rgba(47, 111, 237, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(47, 111, 237, 0.3);
+}
+
+.calls-scheduler-slot.drop-target-active::before {
+  content: attr(data-slot-label);
+  position: absolute;
+  left: 10px;
+  top: -10px;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #2f6fed;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.calls-scheduler-slot.drop-target-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: #2f6fed;
+  box-shadow: 0 0 0 1px rgba(47, 111, 237, 0.15);
+  pointer-events: none;
+}
+
+.calls-scheduler-event {
+  position: absolute;
+  border: 0;
+  color: #ffffff;
+  border-radius: 0;
+  padding: 6px 8px 10px;
+  display: grid;
+  gap: 2px;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(10, 30, 45, 0.16);
+}
+
+.calls-scheduler-event.tone-call {
+  background: linear-gradient(180deg, #2f6fed, #245fd0);
+}
+
+.calls-scheduler-event.tone-callback {
+  background: linear-gradient(180deg, #875de1, #7044d0);
+}
+
+.calls-scheduler-event-time,
+.calls-scheduler-event-title,
+.calls-scheduler-event-meta,
+.calls-scheduler-event-line {
+  margin: 0;
+}
+
+.calls-scheduler-event-time {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.82;
+  line-height: 1.1;
+}
+
+.calls-scheduler-event-title {
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calls-scheduler-event-meta {
+  font-size: 10px;
+  line-height: 1.2;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calls-scheduler-event-line {
+  font-size: 11px;
+  line-height: 1.15;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 4px;
+}
+
+.calls-scheduler-event.is-tight {
+  padding: 5px 7px 8px;
+}
+
+.calls-scheduler-event.is-compact {
+  padding: 4px 7px;
+  display: flex;
+  align-items: center;
+}
+
+.calls-scheduler-event-owner {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.calls-scheduler-event.is-conflict {
+  box-shadow: inset 0 0 0 2px rgba(255, 224, 130, 0.75);
+}
+
+.calls-scheduler-event-flag {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.calls-scheduler-event-actions {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.calls-scheduler-inline-action {
+  min-height: 28px;
+  border: 1px solid #d9e6f2;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #24435c;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.calls-scheduler-inline-action.is-compact {
+  width: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  justify-content: center;
+}
+
+.calls-scheduler-inline-action:hover {
+  border-color: #bdd2e7;
+  background: #f5f9fd;
+}
+
+.calls-scheduler-event .calls-scheduler-inline-action {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.calls-scheduler-event .calls-scheduler-inline-action:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.calls-scheduler-event-resize {
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 30px;
+  height: 4px;
+  transform: translateX(-50%);
+  border: 0;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.7);
+  cursor: ns-resize;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.calls-scheduler-event:hover .calls-scheduler-event-resize,
+.calls-scheduler-event:focus-within .calls-scheduler-event-resize {
+  opacity: 1;
+}
+
+.calls-scheduler-event.is-compact .calls-scheduler-event-resize {
+  display: none;
+}
+
+.calls-scheduler-queue-list {
+  display: grid;
+  gap: 10px;
+}
+
+.calls-scheduler-load-list {
+  display: grid;
+  gap: 10px;
+}
+
+.calls-scheduler-load-row {
+  border: 1px solid #e4ebf2;
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.calls-scheduler-load-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #1f5b97;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.calls-scheduler-load-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-scheduler-load-head strong,
+.calls-scheduler-load-copy p {
+  margin: 0;
+}
+
+.calls-scheduler-load-head strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #17364d;
+}
+
+.calls-scheduler-load-copy p {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #72879a;
+}
+
+.calls-scheduler-load-status {
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.calls-scheduler-load-status.tone-working {
+  background: #e7f7ef;
+  color: #217a4c;
+}
+
+.calls-scheduler-load-status.tone-break {
+  background: #fff4d9;
+  color: #9b6a00;
+}
+
+.calls-scheduler-load-status.tone-off {
+  background: #eef2f6;
+  color: #5b7287;
+}
+
+.calls-scheduler-load-status.tone-inactive,
+.calls-scheduler-load-status.tone-invited {
+  background: #f1efff;
+  color: #6650b4;
+}
+
+.calls-scheduler-queue-card {
+  border: 1px solid #e4ebf2;
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.calls-scheduler-queue-title,
+.calls-scheduler-queue-meta {
+  margin: 0;
+}
+
+.calls-scheduler-queue-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #17364d;
+}
+
+.calls-scheduler-queue-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #72879a;
+}
+
+.calls-scheduler-queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calls-scheduler-agenda {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  max-height: 100%;
+  overflow-y: auto;
+  background: #fbfdff;
+}
+
+.calls-scheduler-agenda-day {
+  border: 1px solid #e4ebf2;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.calls-scheduler-agenda-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e8eef5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calls-scheduler-agenda-head h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #17364d;
+}
+
+.calls-scheduler-agenda-head span {
+  color: #72879a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.calls-scheduler-agenda-list {
+  padding: 10px 14px 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.calls-scheduler-agenda-item {
+  border: 1px solid #e4ebf2;
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.calls-scheduler-agenda-item.is-conflict {
+  border-color: #f0c96c;
+  background: #fff9eb;
+}
+
+.calls-scheduler-agenda-time strong,
+.calls-scheduler-agenda-time span,
+.calls-scheduler-agenda-title,
+.calls-scheduler-agenda-meta {
+  margin: 0;
+}
+
+.calls-scheduler-agenda-time strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #17364d;
+}
+
+.calls-scheduler-agenda-time span {
+  display: block;
+  margin-top: 4px;
+  color: #72879a;
+  font-size: 12px;
+}
+
+.calls-scheduler-agenda-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #18354d;
+}
+
+.calls-scheduler-agenda-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #72879a;
+}
+
+.calls-scheduler-agenda-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.calls-rail {
+  border-right: 1px solid var(--line);
+  padding: 10px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 10px 0 0 10px;
+  box-shadow: 0 1px 0 rgba(10, 30, 45, 0.06);
+}
+
+.calls-rail-head {
+  display: grid;
+  gap: 8px;
+}
+
+.calls-filter-row {
+  gap: 6px;
+}
+
+.calls-filter-note {
+  margin: 0;
+}
+
+.calls-contact-list {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding-right: 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.comms-skeleton-bar,
+.comms-skeleton-avatar,
+.comms-skeleton-icon,
+.comms-skeleton-input,
+.comms-skeleton-button {
+  display: inline-flex;
+  background: linear-gradient(90deg, #eef3f8 0%, #f7fafd 50%, #eef3f8 100%);
+  background-size: 180% 100%;
+  animation: commsSkeletonPulse 1.5s ease-in-out infinite;
+}
+
+.comms-skeleton-bar {
+  height: 10px;
+  border-radius: 999px;
+}
+
+.comms-skeleton-bar.is-title {
+  height: 14px;
+}
+
+.comms-skeleton-bar.is-preview,
+.comms-skeleton-bar.is-subtitle {
+  height: 11px;
+}
+
+.comms-skeleton-bar.is-subline {
+  height: 8px;
+}
+
+.comms-skeleton-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.comms-skeleton-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.comms-skeleton-icon.is-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.comms-skeleton-input {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 14px;
+}
+
+.comms-skeleton-button {
+  width: 84px;
+  min-width: 84px;
+  height: 42px;
+  border-radius: 12px;
+}
+
+.comms-composer-skeleton {
+  pointer-events: none;
+}
+
+@keyframes commsSkeletonPulse {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.calls-contact-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.calls-contact-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  position: relative;
+  padding: 8px 0;
+}
+
+.calls-contact-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: #e4ebf2;
+}
+
+.calls-contact-item:first-child::before {
+  display: none;
+}
+
+.calls-contact-main {
+  border: 0;
+  background: transparent;
+  color: #19354b;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calls-contact-main:hover {
+  background: #f3f8fd;
+}
+
+.calls-contact-main.is-active {
+  background: #e8f2fb;
+  box-shadow: inset 2px 0 0 #2f6fd7;
+}
+
+.calls-contact-main:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.calls-contact-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #dce8f4;
+  color: #2a4d6a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.calls-contact-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calls-contact-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b3a52;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-outcome-pill {
+  border: 0;
+  background: #f7fafd;
+  color: #3f5d74;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+}
+
+.calls-outcome-pill.outcome-connected {
+  border-color: #b9d9c9;
+  background: #eaf6ef;
+  color: #2a6a48;
+}
+
+.calls-outcome-pill.outcome-live {
+  border-color: #c9daf6;
+  background: #eef4ff;
+  color: #2d5b98;
+}
+
+.calls-outcome-pill.outcome-missed {
+  border-color: #efc9c0;
+  background: #fff0ed;
+  color: #8b3f35;
+}
+
+.calls-outcome-pill.outcome-voicemail {
+  border-color: #c9d3ee;
+  background: #eff3fd;
+  color: #365387;
+}
+
+.calls-outcome-pill.outcome-contact {
+  background: #eff4f8;
+  color: #4b6276;
+}
+
+.calls-contact-call {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #2f5575;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.calls-contact-call:hover {
+  background: #eef4f9;
+}
+
+.calls-contact-call:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calls-center {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 12px;
+  padding: 0 12px;
+  min-height: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 0 rgba(10, 30, 45, 0.06);
+}
+
+.calls-layout.is-context-hidden .calls-center {
+  border-radius: 0 10px 10px 0;
+}
+
+.calls-dialer-card {
+  border: 0;
+  background: #ffffff;
+  box-shadow: none;
+  padding: 14px;
+  display: grid;
+  gap: 11px;
+  align-content: start;
+  min-height: 0;
+  border-bottom: 1px solid #e4ebf2;
+}
+
+.calls-dialer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-dialer-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calls-dialer-head .task-title,
+.calls-dialer-head .task-meta {
+  margin: 0;
+}
+
+.calls-dialer-head .task-title {
+  letter-spacing: 0.01em;
+}
+
+.calls-agent-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.9fr) auto auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.calls-agent-card {
+  border: 1px solid #dde8f1;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fc 100%);
+  border-radius: 16px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.calls-agent-card .task-meta,
+.calls-agent-card strong {
+  margin: 0;
+}
+
+.calls-agent-card strong {
+  font-size: 14px;
+  color: #1f415b;
+}
+
+.calls-agent-card-identity {
+  align-content: center;
+}
+
+.calls-agent-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.calls-inline-field {
+  display: grid;
+  gap: 6px;
+  color: #4f677c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.calls-inline-field select {
+  min-width: 148px;
+  min-height: 36px;
+  border: 1px solid #d6e2ec;
+  border-radius: 12px;
+  background: #fff;
+  color: #1f425c;
+  padding: 0 12px;
+}
+
+.calls-toggle-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #24455f;
+  padding-top: 18px;
+}
+
+.calls-toggle-field input {
+  width: 15px;
+  height: 15px;
+}
+
+.calls-sync-btn {
+  align-self: center;
+}
+
+.calls-sync-chip {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #5b7185;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.calls-sync-chip i {
+  animation: spin 1.1s linear infinite;
+}
+
+.calls-console-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.calls-console-pill {
+  border: 0;
+  background: #f3f7fb;
+  color: #365570;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+
+.calls-console-pill i {
+  font-size: 12px;
+  color: #3f6787;
+}
+
+.calls-console-pill.is-recording {
+  background: #fff5f2;
+  color: #a04237;
+}
+
+.calls-live-status {
+  border: 0;
+  background: #f5f9fc;
+  color: #37556d;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+}
+
+.calls-live-status.status-connected {
+  background: #eaf6ef;
+  color: #2f6d4b;
+}
+
+.calls-live-status.status-ringing,
+.calls-live-status.status-dialing {
+  background: #edf3fc;
+  color: #33557f;
+}
+
+.calls-live-status.status-wrapup {
+  background: #fff6e9;
+  color: #835f18;
+}
+
+.calls-live-status.status-idle {
+  background: #f5f9fc;
+  color: #4b657b;
+}
+
+.calls-number-area {
+  display: grid;
+  gap: 8px;
+  width: min(460px, 100%);
+  margin: 0 auto;
+}
+
+.calls-number-wrap {
+  position: relative;
+}
+
+.calls-number-wrap i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #648199;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.calls-number-wrap input {
+  width: 100%;
+  height: 44px;
+  border: 0;
+  border-bottom: 1px solid #c9d8e6;
+  background: #ffffff;
+  padding: 0 10px 0 32px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #1d3b53;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.calls-number-wrap input:focus {
+  outline: none;
+  border-bottom-color: #8fb3d7;
+  box-shadow: none;
+}
+
+.calls-suggested-contact {
+  width: 100%;
+  border: 0;
+  background: #f8fbff;
+  color: #1f405a;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calls-suggested-contact:hover {
+  background: #eef5fd;
+}
+
+.calls-suggested-contact i {
+  color: #5f7d98;
+}
+
+.calls-suggested-contact.is-empty {
+  cursor: default;
+  grid-template-columns: auto 1fr;
+  color: #5e7488;
+  background: #f6f9fc;
+  min-height: 32px;
+  font-size: 11px;
+}
+
+.calls-suggested-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #d6e5f3;
+  color: #244c6e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.calls-suggested-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.calls-suggested-copy small {
+  color: #6a8095;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calls-suggested-copy strong {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.calls-suggested-copy span {
+  color: #5f768b;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: min(460px, 100%);
+  margin: 0 auto;
+}
+
+.calls-key-btn {
+  min-height: 70px;
+  border: 0;
+  background: #f5f9fd;
+  box-shadow: none;
+  color: #244156;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.calls-key-btn:hover {
+  background: #edf5fd;
+  box-shadow: none;
+}
+
+.calls-key-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.calls-key-digit {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.calls-key-letters {
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a8094;
+  min-height: 10px;
+}
+
+.calls-dialer-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: min(460px, 100%);
+  margin: 2px auto 0;
+}
+
+.calls-dialer-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.calls-dialer-actions .mini-btn,
+.calls-dialer-actions .btn {
+  height: 34px;
+}
+
+.calls-dialer-icon-btn {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calls-dialer-icon-btn i {
+  font-size: 14px;
+}
+
+.calls-start-call-btn {
+  grid-column: 1 / -1;
+  height: 42px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.calls-record-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #3f5f7a;
+  font-size: 12px;
+  font-weight: 500;
+  border: 0;
+  background: #f4f8fc;
+  padding: 6px 8px;
+  width: fit-content;
+}
+
+.calls-note-field {
+  margin: 0;
+}
+
+.calls-note-field textarea {
+  border: 0;
+  border-bottom: 1px solid #d2deea;
+  background: #ffffff;
+  min-height: 68px;
+}
+
+.calls-quick-contact-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  border-top: 1px dashed #d5e1ec;
+  padding-top: 9px;
+}
+
+.calls-quick-contact-row .task-meta {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.calls-quick-contact {
+  border: 0;
+  background: #ffffff;
+  color: #27455c;
+  padding: 6px 8px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 7px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calls-quick-contact:hover {
+  background: #eef4f9;
+}
+
+.calls-quick-contact:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calls-quick-contact-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #dce9f5;
+  color: #2a4d6a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.calls-quick-contact-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.calls-quick-contact-copy span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-quick-contact-copy small {
+  color: #698094;
+  font-size: 10px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-recent-strip {
+  border-top: 1px dashed #d5e1ec;
+  padding-top: 9px;
+  display: grid;
+  gap: 7px;
+}
+
+.calls-recent-strip .task-meta {
+  margin: 0;
+}
+
+.calls-recent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.calls-recent-pill {
+  border: 0;
+  background: #f5f9fd;
+  color: #28455d;
+  padding: 6px 8px;
+  display: grid;
+  gap: 1px;
+  align-items: start;
+  cursor: pointer;
+  text-align: left;
+}
+
+.calls-recent-pill span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.calls-recent-pill small {
+  color: #698094;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.calls-recent-pill:hover {
+  background: #edf5fd;
+}
+
+.calls-active-panel {
+  border: 0;
+  border-top: 1px solid #e4ebf2;
+  background: #ffffff;
+  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-active-panel .task-title,
+.calls-active-panel .task-meta {
+  margin: 0;
+}
+
+.calls-active-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.calls-layout {
+  grid-template-columns: 236px minmax(0, 1fr) 332px;
+  gap: 14px;
+  min-height: 680px;
+  overflow: visible;
+}
+
+.calls-rail {
+  border: 1px solid #e4ebf2;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 14px 12px;
+  gap: 12px;
+}
+
+.calls-center {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  padding: 0;
+  min-height: 0;
+  background: #ffffff;
+  border: 1px solid #e4ebf2;
+  border-radius: 12px;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.calls-dialer-column {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  min-height: 0;
+}
+
+.calls-dialer-status-card,
+.calls-dialer-card,
+.calls-active-panel {
+  border: 1px solid #e4ebf2;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.calls-dialer-status-card {
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calls-dialer-status-copy,
+.calls-dialer-status-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.calls-dialer-status-copy .task-title,
+.calls-dialer-status-copy .task-meta,
+.calls-dialer-status-meta .task-meta {
+  margin: 0;
+}
+
+.calls-dialer-status-meta {
+  justify-items: end;
+}
+
+.calls-dialer-card {
+  padding: 14px;
+  border-bottom: 0;
+}
+
+.calls-active-panel {
+  padding: 12px;
+  align-items: flex-start;
+}
+
+.calls-live-status.status-busy,
+.calls-live-status.status-connected {
+  background: #eaf6ef;
+  color: #2f6d4b;
+}
+
+.calls-live-status.status-available {
+  background: #eef4ff;
+  color: #2d5b98;
+}
+
+.calls-live-status.status-offline {
+  background: #f5f9fc;
+  color: #4b657b;
+}
+
+.calls-nav-head .task-title,
+.calls-nav-head .task-meta {
+  margin: 0;
+}
+
+.calls-list-head {
+  gap: 10px;
+}
+
+.calls-list-tabs {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #e4ebf2;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.calls-list-tabs::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.calls-list-tabs .mini-btn {
+  border: 0;
+  background: transparent;
+  color: #60778b;
+  min-height: auto;
+  padding: 0 0 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 0;
+  box-shadow: inset 0 -2px transparent;
+  flex: 0 0 auto;
+}
+
+.calls-list-tabs .mini-btn small {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.calls-list-tabs .mini-btn.is-active {
+  background: transparent;
+  color: #1f5b97;
+  box-shadow: inset 0 -2px #2f6fd7;
+}
+
+.calls-list-tabs .mini-btn:hover {
+  background: transparent;
+  color: #284a65;
+}
+
+.calls-left-list {
+  padding-right: 0;
+}
+
+.calls-left-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #71879a;
+}
+
+.calls-left-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  position: relative;
+}
+
+.calls-left-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: #e4ebf2;
+}
+
+.calls-left-row:first-child::before {
+  display: none;
+}
+
+.calls-left-row-main {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calls-left-row.is-selected .calls-left-row-main {
+  background: #e8f2fb;
+  box-shadow: inset 2px 0 0 #2f6fd7;
+}
+
+.calls-left-row-main:hover {
+  background: #f3f8fd;
+}
+
+.calls-left-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #dce8f4;
+  color: #2a4d6a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.calls-left-row-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calls-left-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-left-row-head strong,
+.calls-left-row-head small,
+.calls-left-row-meta,
+.calls-left-row-foot span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-left-row-head strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1c3d56;
+}
+
+.calls-left-row-head small {
+  color: #6f8497;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.calls-left-row-meta {
+  color: #6c8194;
+  font-size: 11px;
+}
+
+.calls-left-row-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.calls-left-row-foot span:last-child {
+  color: #6d8296;
+  font-size: 11px;
+}
+
+.calls-left-row-call {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color: #2f5575;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.calls-left-row-call:hover {
+  background: #eef4f9;
+}
+
+.calls-nav-list {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.calls-nav-item {
+  border: 0;
+  background: #f8fbff;
+  color: #203f58;
+  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calls-nav-item:hover {
+  background: #eef5fd;
+}
+
+.calls-nav-item.is-active {
+  background: #e8f2fb;
+  box-shadow: inset 2px 0 0 #2f6fd7;
+}
+
+.calls-nav-item-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.calls-nav-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #edf4fb;
+  color: #2f5b7a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.calls-nav-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.calls-nav-copy strong,
+.calls-nav-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-nav-copy strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.calls-nav-copy small {
+  color: #698094;
+  font-size: 11px;
+}
+
+.calls-nav-count {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2d5b98;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.calls-workspace-column {
+  min-height: 0;
+}
+
+.calls-workspace-head {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #e4ebf2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calls-workspace-head .task-title,
+.calls-workspace-head .task-meta {
+  margin: 0;
+}
+
+.calls-workspace-head-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.calls-workspace-head-actions .search {
+  width: min(280px, 100%);
+}
+
+.calls-workspace-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.calls-workspace-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.calls-workspace-stack {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.calls-detail-stack {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.calls-workspace-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.calls-workspace-card {
+  border: 1px solid #e4ebf2;
+  background: #ffffff;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.calls-workspace-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-workspace-card-head .task-title,
+.calls-workspace-card-head .task-meta {
+  margin: 0;
+}
+
+.calls-live-overview-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.calls-live-overview-copy,
+.calls-live-overview-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.calls-live-overview-copy .task-meta,
+.calls-live-overview-copy h3 {
+  margin: 0;
+}
+
+.calls-live-overview-copy h3 {
+  font-size: 20px;
+  line-height: 1.15;
+  color: #1c3d56;
+}
+
+.calls-live-overview-meta {
+  justify-items: end;
+}
+
+.calls-detail-hero {
+  border: 1px solid #e4ebf2;
+  background: #ffffff;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.calls-detail-hero-copy,
+.calls-detail-hero-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.calls-detail-hero-copy .task-meta,
+.calls-detail-hero-copy h3,
+.calls-detail-hero-meta .task-meta {
+  margin: 0;
+}
+
+.calls-detail-hero-copy h3 {
+  font-size: 20px;
+  line-height: 1.15;
+  color: #1c3d56;
+}
+
+.calls-detail-hero-meta {
+  justify-items: end;
+}
+
+.calls-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.calls-detail-card {
+  border: 1px solid #e4ebf2;
+  background: #ffffff;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.calls-detail-body {
+  display: grid;
+  gap: 12px;
+}
+
+.calls-detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.calls-detail-meta-grid .task-meta,
+.calls-detail-meta-grid .task-title {
+  margin: 0;
+}
+
+.calls-detail-note {
+  border-top: 1px solid #e4ebf2;
+  padding-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.calls-detail-note p {
+  margin: 0;
+}
+
+.calls-related-list {
+  display: grid;
+  gap: 0;
+}
+
+.calls-related-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #e4ebf2;
+}
+
+.calls-related-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.calls-related-row .task-title,
+.calls-related-row .task-meta {
+  margin: 0;
+}
+
+.calls-workspace-list,
+.calls-voicemail-workspace-list {
+  display: grid;
+  gap: 0;
+  align-content: start;
+}
+
+.calls-workspace-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #e4ebf2;
+}
+
+.calls-workspace-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.calls-workspace-row-main {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calls-workspace-row-main:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.calls-workspace-row.is-current .calls-workspace-row-main {
+  color: #174873;
+}
+
+.calls-workspace-row-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calls-workspace-row-copy strong,
+.calls-workspace-row-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-workspace-row-copy strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.calls-workspace-row-copy span {
+  color: #647c90;
+  font-size: 11px;
+}
+
+.calls-workspace-row-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calls-workspace-row-action {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: #f4f8fc;
+  color: #2f5575;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.calls-workspace-row-action:hover {
+  background: #edf5fd;
+}
+
+.calls-workspace-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  color: #73889b;
+}
+
+.calls-workspace-empty.is-compact {
+  min-height: 88px;
+}
+
+.calls-performance-shell {
+  align-items: start;
+  align-content: start;
+  min-height: max-content;
+}
+
+.calls-performance-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+}
+
+.calls-performance-sidebar .attendance-manager-filter-group {
+  gap: 6px;
+}
+
+.calls-performance-sidebar .attendance-manager-filter-label {
+  color: #688095;
+  letter-spacing: 0.02em;
+}
+
+.calls-performance-sidebar .attendance-manager-select-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border: 1px solid #d8e3ee;
+  border-radius: 5px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 248, 252, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 1px 2px rgba(14, 35, 58, 0.03);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.calls-performance-sidebar .attendance-manager-select-field:hover {
+  border-color: #c9d8e6;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(246, 250, 253, 0.99));
+}
+
+.calls-performance-sidebar .attendance-manager-select-field:focus-within {
+  border-color: #bcd2e7;
+  background: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 0 0 3px rgba(101, 151, 216, 0.12);
+}
+
+.calls-performance-sidebar .attendance-manager-select-field select {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #24455f;
+  padding: 0 38px 0 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.calls-performance-sidebar .attendance-manager-select-field select::-ms-expand {
+  display: none;
+}
+
+.calls-performance-sidebar .attendance-manager-select-field i {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #70879c;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.calls-performance-sidebar .attendance-manager-search {
+  min-width: 0;
+  height: 36px;
+  border-color: #d8e3ee;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 252, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 1px 2px rgba(14, 35, 58, 0.03);
+}
+
+.calls-performance-sidebar .attendance-manager-search:focus-within {
+  border-color: #bcd2e7;
+  background: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 0 0 3px rgba(101, 151, 216, 0.12);
+}
+
+.calls-performance-sidebar .attendance-manager-search input {
+  font-size: 12px;
+}
+
+.calls-performance-main {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  min-width: 0;
+  min-height: max-content;
+}
+
+.calls-performance-body {
+  min-height: 0;
+}
+
+.calls-performance-header-copy .task-title,
+.calls-performance-header-copy .task-meta {
+  margin: 0;
+}
+
+.calls-performance-summary-grid {
+  gap: 12px;
+}
+
+.calls-performance-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+}
+
+.calls-performance-kpi-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  font-size: 15px;
+}
+
+.calls-performance-kpi-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.calls-performance-kpi-copy span {
+  font-size: 12px;
+  line-height: 1.2;
+  color: #6b8195;
+}
+
+.calls-performance-kpi-copy strong {
+  font-size: 15px;
+  line-height: 1.1;
+  color: #17344d;
+  font-weight: 700;
+}
+
+.calls-performance-kpi-card.is-contacted .calls-performance-kpi-icon {
+  background: #ecf3ff;
+  color: #4b90f1;
+}
+
+.calls-performance-kpi-card.is-qualified .calls-performance-kpi-icon {
+  background: #eaf8f1;
+  color: #5ac28d;
+}
+
+.calls-performance-kpi-card.is-quota .calls-performance-kpi-icon {
+  background: #fff4e1;
+  color: #e0a33a;
+}
+
+.calls-performance-kpi-card.is-remaining .calls-performance-kpi-icon {
+  background: #fff0eb;
+  color: #ef8a5f;
+}
+
+.calls-performance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.calls-performance-card {
+  border: 1px solid #e4ebf2;
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.calls-performance-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-performance-card-head .task-title,
+.calls-performance-card-head .task-meta {
+  margin: 0;
+}
+
+.calls-performance-chart-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #73889b;
+  font-size: 13px;
+}
+
+.calls-performance-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.calls-performance-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #627b8e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.calls-performance-legend-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: #d7e3f1;
+  flex: 0 0 auto;
+}
+
+.calls-performance-legend-swatch.is-contacted {
+  background: #4b90f1;
+}
+
+.calls-performance-legend-swatch.is-qualified {
+  background: #5ac28d;
+}
+
+.calls-performance-legend-swatch.is-unqualified {
+  background: #ef6f6c;
+}
+
+.calls-performance-legend-swatch.is-hit {
+  background: #62be8a;
+}
+
+.calls-performance-legend-swatch.is-remaining {
+  background: #efb447;
+}
+
+.calls-performance-line-chart {
+  display: grid;
+  gap: 12px;
+}
+
+.calls-performance-line-svg {
+  width: 100%;
+  height: 248px;
+  display: block;
+}
+
+.calls-performance-line-frame {
+  fill: #ffffff;
+  stroke: #e3ebf4;
+  stroke-width: 1;
+}
+
+.calls-performance-line-gridline {
+  stroke: #e9eff6;
+  stroke-width: 1;
+}
+
+.calls-performance-line-baseline {
+  stroke: #d6e1ec;
+  stroke-width: 1.1;
+}
+
+.calls-performance-line-path {
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.calls-performance-line-path.is-contacted {
+  stroke: #4b90f1;
+}
+
+.calls-performance-line-point.is-contacted {
+  fill: #4b90f1;
+}
+
+.calls-performance-line-path.is-qualified {
+  stroke: #5ac28d;
+}
+
+.calls-performance-line-point.is-qualified {
+  fill: #5ac28d;
+}
+
+.calls-performance-line-path.is-unqualified {
+  stroke: #ef6f6c;
+}
+
+.calls-performance-line-point.is-unqualified {
+  fill: #ef6f6c;
+}
+
+.calls-performance-line-point {
+  stroke: #ffffff;
+  stroke-width: 2.2;
+}
+
+.calls-performance-line-axis {
+  display: grid;
+  gap: 6px;
+  color: #7c8da0;
+  font-size: 10px;
+  font-weight: 600;
+  padding-left: 44px;
+  padding-right: 18px;
+}
+
+.calls-performance-line-axis span {
+  text-align: center;
+}
+
+.calls-performance-line-y-label {
+  fill: #8da0b4;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.calls-performance-agent-donut-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.95fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.calls-performance-agent-list {
+  display: grid;
+  gap: 0;
+}
+
+.calls-performance-agent-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 1px solid #ebf1f6;
+  border-radius: 0;
+  background: transparent;
+}
+
+.calls-performance-agent-list-row:last-child {
+  border-bottom: 0;
+}
+
+.calls-performance-agent-list-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: #2b4560;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.calls-performance-agent-list-name span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calls-performance-agent-list-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.calls-performance-agent-list-metric,
+.calls-performance-agent-list-share {
+  color: #24425d;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.calls-performance-agent-list-share {
+  color: #7c8ea0;
+  min-width: 38px;
+  text-align: right;
+}
+
+.calls-performance-donut-card {
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  justify-items: center;
+  padding: 8px 4px;
+}
+
+.calls-performance-donut-card .task-title {
+  margin: 0;
+  text-align: center;
+}
+
+.calls-performance-donut-card.is-agent-share {
+  padding: 0;
+}
+
+.calls-performance-donut-shell {
+  display: grid;
+  place-items: center;
+}
+
+.calls-performance-donut {
+  width: 172px;
+  height: 172px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px #eef3f8;
+}
+
+.calls-performance-donut-center {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: inset 0 0 0 1px #edf2f7;
+  text-align: center;
+}
+
+.calls-performance-donut.is-agent-share {
+  width: 188px;
+  height: 188px;
+}
+
+.calls-performance-donut-center.is-agent-share {
+  width: 102px;
+  height: 102px;
+}
+
+.calls-performance-donut-center strong {
+  font-size: 26px;
+  line-height: 1;
+  color: #1f3e5b;
+  font-weight: 600;
+}
+
+.calls-performance-donut-center span {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: #72859a;
+}
+
+.calls-performance-donut-legend {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.calls-performance-table-card {
+  gap: 10px;
+}
+
+.calls-performance-table-shell {
+  margin-top: 0;
+}
+
+.calls-performance-agent-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.calls-performance-agent-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: #e8f1ff;
+  color: #3f76c6;
+  font-size: 11px;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.calls-performance-agent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.calls-performance-agent-cell-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #223f5b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.calls-performance-lead-cell-name {
+  color: #2f4a64;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.calls-performance-action-btn {
+  min-width: 34px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+}
+
+@media (max-width: 1180px) {
+  .calls-performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calls-performance-agent-donut-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .calls-performance-shell.attendance-manager-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .calls-performance-sidebar {
+    position: static;
+  }
+
+  .calls-performance-main {
+    min-width: 0;
+  }
+
+  .calls-performance-donut {
+    width: 148px;
+    height: 148px;
+  }
+
+  .calls-performance-donut-center {
+    width: 82px;
+    height: 82px;
+  }
+
+  .calls-performance-donut.is-agent-share {
+    width: 164px;
+    height: 164px;
+  }
+
+  .calls-performance-donut-center.is-agent-share {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+.calls-voicemail-workspace-card {
+  display: grid;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid #e4ebf2;
+}
+
+.calls-voicemail-workspace-card:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.calls-voicemail-workspace-copy {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calls-voicemail-workspace-copy .task-title,
+.calls-voicemail-workspace-copy .task-meta {
+  margin: 0;
+}
+
+.calls-voicemail-workspace-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calls-context {
+  border-left: 1px solid var(--line);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  background: #ffffff;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 0 1px 0 rgba(10, 30, 45, 0.06);
+}
+
+.calls-context-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.calls-context-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.calls-context-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.calls-context-block {
+  border: 0;
+  border-top: 1px solid #e4ebf2;
+  background: #fff;
+  padding: 9px;
+}
+
+.calls-context-block:first-child {
+  border-top: 0;
+}
+
+.calls-queue-list {
+  display: grid;
+  gap: 8px;
+}
+
+.calls-queue-item {
+  border: 1px solid #e1e8ef;
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calls-queue-item .task-title,
+.calls-queue-item .task-meta {
+  margin: 0;
+}
+
+.calls-voicemail-card {
+  display: grid;
+  gap: 8px;
+}
+
+.calls-voicemail-card .task-title,
+.calls-voicemail-card .task-meta {
+  margin: 0;
+}
+
+.calls-voicemail-audio {
+  width: 100%;
+}
+
+.calls-context.is-collapsed {
+  width: 56px;
+}
+
+.calls-context.is-collapsed .calls-context-body,
+.calls-context.is-collapsed .calls-context-head h3 {
+  display: none;
+}
+
+.calls-context.is-collapsed .calls-context-head {
+  border-bottom: 0;
+  justify-content: center;
+}
+
+.call-dock-layer {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 66;
+  width: min(420px, calc(100vw - 18px));
+}
+
+.call-dock-layer.is-dragging {
+  transition: none;
+}
+
+.softphone-dock {
+  border: 1px solid #cfdbe6;
+  background: linear-gradient(180deg, #ffffff, #f8fbfe);
+  box-shadow: 0 18px 40px rgba(10, 30, 45, 0.2);
+  display: grid;
+  gap: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.softphone-dock.is-minimized .softphone-body {
+  display: none;
+}
+
+.softphone-dock.is-minimized {
+  width: min(520px, calc(100vw - 18px));
+}
+
+.softphone-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid #dbe5ed;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.call-dock-layer.is-dragging .softphone-head {
+  cursor: grabbing;
+}
+
+.softphone-identity {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+}
+
+.softphone-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #d9e7f4;
+  color: #244763;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.softphone-head-main {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.softphone-contact {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a3850;
+}
+
+.softphone-meta-row {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  color: #5d7488;
+  font-size: 12px;
+}
+
+.softphone-status {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4e667c;
+  font-weight: 700;
+}
+
+.softphone-dot-sep {
+  color: #95a6b4;
+}
+
+.softphone-record-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  color: #b43b32;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.softphone-record-meta i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.softphone-tone-preview {
+  color: #36556f;
+  font-size: 11px;
+}
+
+.softphone-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.softphone-bar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.panel-toggle-btn-danger {
+  color: #b4473d;
+}
+
+.panel-toggle-btn.is-active {
+  background: #edf5fd;
+  color: #1f5b97;
+}
+
+.softphone-record-indicator {
+  border: 1px solid #d1dce6;
+  background: #f6fafd;
+  color: #5f7386;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 6px;
+}
+
+.softphone-record-indicator.is-on {
+  border-color: #efc0bc;
+  background: #fff2ef;
+  color: #9a3d36;
+}
+
+.softphone-body {
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.softphone-summary {
+  margin: 0;
+}
+
+.softphone-idle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.softphone-idle-main {
+  display: grid;
+  gap: 10px;
+}
+
+.softphone-number-wrap {
+  width: 100%;
+  border: 1px solid #cfdae6;
+  background: #fff;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.softphone-number-wrap i {
+  color: #70869a;
+  font-size: 14px;
+}
+
+.softphone-number-wrap input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #1f3d56;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 10px 0;
+  outline: none;
+}
+
+.softphone-context-pill {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  background: #f6faff;
+  border: 1px solid #dce7f1;
+  color: #4e667c;
+  font-size: 12px;
+}
+
+.softphone-context-pill strong {
+  color: #1f3d56;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.softphone-primary-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.softphone-primary-controls .mini-btn {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.softphone-primary-controls .mini-btn:disabled {
+  opacity: 0.5;
+}
+
+.softphone-primary-controls .mini-btn i {
+  font-size: 12px;
+}
+
+.softphone-primary-controls .mini-btn-danger {
+  order: 3;
+}
+
+.softphone-more-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.softphone-more-menu > summary {
+  list-style: none;
+}
+
+.softphone-more-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.softphone-more-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+}
+
+.softphone-more-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 158px;
+  border: 1px solid #d3dfe9;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(10, 30, 45, 0.14);
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  z-index: 4;
+}
+
+.softphone-more-item {
+  border: 0;
+  background: transparent;
+  color: #244257;
+  width: 100%;
+  text-align: left;
+  padding: 7px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.softphone-more-item:hover {
+  background: #eef4f9;
+}
+
+.softphone-more-item.is-active {
+  background: #e8f1f9;
+  color: #214560;
+}
+
+.softphone-more-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.softphone-keypad-panel {
+  border: 1px solid #d7e2ec;
+  background: #fbfdff;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.softphone-keypad-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.softphone-keypad-head .task-meta {
+  margin: 0;
+}
+
+.softphone-keypad-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.softphone-keypad-actions .mini-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.softphone-keypad-display {
+  min-height: 32px;
+  border: 1px solid #cfdae6;
+  background: #ffffff;
+  padding: 7px 8px;
+  color: #27445a;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.softphone-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.softphone-key-btn {
+  height: 32px;
+  border: 1px solid #cfdae5;
+  background: #fff;
+  color: #23445d;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.softphone-key-btn:hover {
+  background: #eef4f9;
+}
+
+.softphone-keypad-idle {
+  gap: 8px;
+}
+
+.softphone-key-btn-idle {
+  min-height: 56px;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+}
+
+.softphone-key-digit {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 600;
+  color: #203f58;
+}
+
+.softphone-key-letters {
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: #7b8fa2;
+}
+
+.softphone-dialer-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.softphone-dialer-actions .mini-btn,
+.softphone-start-call-btn {
+  min-height: 36px;
+}
+
+.softphone-dialer-icon-btn {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.softphone-dialer-icon-btn i {
+  font-size: 14px;
+}
+
+.softphone-start-call-btn {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.softphone-dock.is-live-call {
+  border-color: #2a2e36;
+  background: linear-gradient(180deg, #24272d, #1a1d22);
+  box-shadow: 0 22px 44px rgba(5, 8, 12, 0.42);
+  color: #f4f7fb;
+  border-radius: 5px;
+}
+
+.softphone-dock.is-live-call:not(.is-minimized) {
+  width: min(292px, calc(100vw - 18px));
+  justify-self: end;
+}
+
+.softphone-dock.is-live-call.is-minimized {
+  width: min(340px, calc(100vw - 18px));
+}
+
+.softphone-dock.is-live-call .softphone-head {
+  border-bottom-color: #303640;
+}
+
+.softphone-dock.is-live-call .softphone-contact {
+  color: #f4f7fb;
+}
+
+.softphone-dock.is-live-call .softphone-meta-row,
+.softphone-dock.is-live-call .softphone-status,
+.softphone-dock.is-live-call .softphone-record-meta,
+.softphone-dock.is-live-call .softphone-tone-preview {
+  color: #aeb8c6;
+}
+
+.softphone-dock.is-live-call .softphone-avatar {
+  background: #3b4865;
+  color: #f7faff;
+}
+
+.softphone-dock.is-live-call .panel-toggle-btn {
+  border-color: #3a404b;
+  background: rgba(255, 255, 255, 0.04);
+  color: #e7edf6;
+}
+
+.softphone-dock.is-live-call .panel-toggle-btn:hover,
+.softphone-dock.is-live-call .panel-toggle-btn.is-active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.softphone-head-active {
+  align-items: center;
+  padding: 10px 12px 6px;
+  border-bottom: 0;
+}
+
+.softphone-active-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #79b0ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.softphone-active-label::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(121, 176, 255, 0.12);
+}
+
+.softphone-dock.is-live-call .softphone-body {
+  padding: 8px 12px 12px;
+  gap: 12px;
+}
+
+.softphone-live {
+  display: grid;
+  gap: 12px;
+}
+
+.softphone-live-hero {
+  min-height: 176px;
+  border: 1px solid #323844;
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 16px 14px;
+  text-align: center;
+}
+
+.softphone-live-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  background: #485777;
+  color: #f7faff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.06);
+}
+
+.softphone-live-name,
+.softphone-live-number,
+.softphone-live-duration,
+.softphone-live-meta {
+  margin: 0;
+}
+
+.softphone-live-name {
+  color: #f7faff;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.softphone-live-number {
+  color: #c5cfdb;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.softphone-live-duration {
+  color: #f0c85a;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.softphone-live-meta {
+  color: #95a5b8;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.softphone-live-meta.is-recording {
+  color: #ff8f84;
+}
+
+.softphone-live-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.softphone-live-control {
+  min-height: 52px;
+  border: 1px solid #323844;
+  background: rgba(255, 255, 255, 0.02);
+  color: #edf2f8;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+
+.softphone-live-control i {
+  font-size: 15px;
+}
+
+.softphone-live-control span {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.softphone-live-control:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.softphone-live-control.is-active {
+  border-color: #79b0ff;
+  background: rgba(121, 176, 255, 0.12);
+}
+
+.softphone-live-control:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.softphone-live-notes {
+  border: 1px solid #323844;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px;
+}
+
+.softphone-live-notes .form-field {
+  margin: 0;
+}
+
+.softphone-live-notes textarea {
+  width: 100%;
+  min-height: 86px;
+  border: 1px solid #3b4250;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f7fb;
+  padding: 8px 9px;
+}
+
+.softphone-live-notes textarea::placeholder {
+  color: #9ba8b8;
+}
+
+.softphone-live-end-btn {
+  min-height: 46px;
+  border: 0;
+  background: linear-gradient(180deg, #ff6c58, #f25747);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.softphone-dock.is-live-call .softphone-keypad-panel {
+  border-color: #323844;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.softphone-dock.is-live-call .softphone-keypad-head .task-meta,
+.softphone-dock.is-live-call .softphone-keypad-display {
+  color: #e7edf6;
+}
+
+.softphone-dock.is-live-call .softphone-keypad-display,
+.softphone-dock.is-live-call .softphone-key-btn,
+.softphone-dock.is-live-call .softphone-keypad-actions .mini-btn {
+  border-color: #3a404b;
+  background: rgba(255, 255, 255, 0.03);
+  color: #f3f7fc;
+}
+
+.softphone-dock.is-live-call .softphone-key-btn:hover,
+.softphone-dock.is-live-call .softphone-keypad-actions .mini-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 760px) {
+}
+
+.softphone-wrapup {
+  border-top: 1px dashed #d4dee8;
+  padding-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.softphone-wrapup-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2a4761;
+}
+
+.softphone-wrapup .form-field {
+  margin: 0;
+}
+
+.softphone-wrapup select,
+.softphone-wrapup textarea {
+  width: 100%;
+  border: 1px solid #cfdbe6;
+  background: #fff;
+  padding: 7px 8px;
+}
+
+.softphone-wrapup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.inbound-call-popup-layer {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 72;
+  width: min(380px, calc(100vw - 28px));
+}
+
+.inbound-call-popup {
+  border: 1px solid #d5e2ec;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 22px 52px rgba(8, 24, 42, 0.2);
+  backdrop-filter: blur(16px);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.inbound-call-popup-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.inbound-call-popup-kicker,
+.inbound-call-popup-name,
+.inbound-call-popup-meta {
+  margin: 0;
+}
+
+.inbound-call-popup-kicker {
+  color: #5a7287;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inbound-call-popup-name {
+  color: #10283d;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.inbound-call-popup-meta {
+  color: #587084;
+  font-size: 13px;
+}
+
+.inbound-call-popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.call-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.comms-log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.comms-log-row .task-meta {
+  margin: 0;
+}
+
+.comms-log-panel {
+  border: 1px dashed #cad8e4;
+  border-radius: 10px;
+  background: #f9fcff;
+  padding: 10px;
+}
+
+.comms-compose-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.comms-compose-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.comms-compose-actions .task-meta {
+  margin: 0;
+}
+
+.comms-context {
+  border-left: 1px solid var(--line);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  transition: width 0.18s ease;
+}
+
+.comms-mode-internal .comms-context {
+  border-left: 0;
+}
+
+.comms-context-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.comms-mode-internal .comms-context-head {
+  border-bottom: 0;
+}
+
+.comms-context-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.comms-context-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.comms-context-block {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px;
+  background: #fff;
+}
+
+.comms-mode-internal .comms-context-block {
+  border: 0;
+  background: #f7fbff;
+}
+
+.comms-context-block .task-title {
+  margin-top: 2px;
+}
+
+.comms-participant-list {
+  display: grid;
+  gap: 6px;
+}
+
+.comms-participant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.participant-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e8f1f8;
+  color: #1f4d71;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.comms-activity-list {
+  display: grid;
+  gap: 8px;
+}
+
+.comms-activity-item {
+  border: 1px dashed #d8e2ea;
+  border-radius: 8px;
+  padding: 7px;
+}
+
+.comms-activity-item .task-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.comms-context.is-collapsed {
+  width: 56px;
+}
+
+.comms-context.is-collapsed .comms-context-body,
+.comms-context.is-collapsed .comms-context-head h3 {
+  display: none;
+}
+
+.comms-context.is-collapsed .comms-context-head {
+  border-bottom: 0;
+  justify-content: center;
+}
+
+.status-chip.message-type-update {
+  background: #edf4ff;
+  color: #345f8d;
+}
+
+.status-chip.message-type-question {
+  background: #edf9f2;
+  color: #2a6f4a;
+}
+
+.status-chip.message-type-blocker {
+  background: #fff1ee;
+  color: #8d4034;
+}
+
+.status-chip.message-type-announcement {
+  background: #fff7e8;
+  color: #8a5a1f;
+}
+
+.status-chip.message-important {
+  background: #ffece6;
+  color: #8d3f2b;
+}
+
+.waiting-panel {
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  border: 0;
+  border-left: 1px solid var(--line);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.waiting-head {
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--line);
+  background: #ffffff;
+}
+
+.waiting-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.waiting-head-copy {
+  min-width: 0;
+}
+
+.waiting-head h3 {
+  margin: 0;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.waiting-head p {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.waiting-filters {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.waiting-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: #eff4f9;
+  color: #395973;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+}
+
+.waiting-filter-chip small {
+  font-size: 10px;
+  color: #678096;
+}
+
+.waiting-filter-chip.is-active {
+  background: #dfeeff;
+  color: #1f5fa7;
+}
+
+.waiting-filter-chip.is-active small {
+  color: #336ea6;
+}
+
+.app-shell.is-waiting-collapsed .waiting-head {
+  padding: 10px 7px;
+  border-bottom: 0;
+}
+
+.app-shell.is-waiting-collapsed .waiting-head-row {
+  justify-content: center;
+}
+
+.app-shell.is-waiting-collapsed .waiting-head-copy,
+.app-shell.is-waiting-collapsed .waiting-filters,
+.app-shell.is-waiting-collapsed .waiting-list {
+  display: none;
+}
+
+.waiting-list {
+  padding: 4px 0 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background: #ffffff;
+}
+
+.waiting-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.waiting-item {
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  padding: 10px 12px;
+  background: transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.waiting-item + .waiting-item {
+  border-top: 1px solid #e8eff6;
+}
+
+.waiting-item:hover {
+  background: #f8fbff;
+}
+
+.waiting-item-main {
+  min-width: 0;
+}
+
+.waiting-item strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.waiting-item p {
+  margin: 3px 0 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.waiting-due-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  background: #edf3fb;
+  color: #355a7b;
+}
+
+.waiting-due-pill.is-overdue {
+  background: #ffebea;
+  color: #a43f39;
+}
+
+.waiting-due-pill.is-today {
+  background: #fff4e6;
+  color: #9a5f1e;
+}
+
+.waiting-due-pill.is-tomorrow {
+  background: #e7f0ff;
+  color: #2e5f9e;
+}
+
+.waiting-due-pill.is-upcoming {
+  background: #edf3fb;
+  color: #355a7b;
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 120;
+  min-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  padding: 4px;
+  transform-origin: top left;
+  animation: popIn var(--motion-fast) var(--ease-emphasis);
+}
+
+.context-menu[hidden] {
+  display: none !important;
+}
+
+.context-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: left;
+  padding: 8px 9px;
+  cursor: pointer;
+}
+
+.context-menu-item-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-menu-item-icon {
+  width: 14px;
+  color: #6a8398;
+  font-size: 12px;
+  text-align: center;
+}
+
+.context-menu-item:hover {
+  background: #eef4f8;
+}
+
+.context-menu-item.is-active {
+  background: #eaf3ff;
+  color: #1f4e7a;
+  font-weight: 600;
+}
+
+.context-menu-item.is-active .context-menu-item-icon {
+  color: #1f4e7a;
+}
+
+.context-menu-item.is-danger {
+  color: #8a3434;
+}
+
+.context-menu-item.is-danger:hover {
+  background: #fff2f2;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 2px;
+}
+
+@media (min-width: 1180px) {
+  .comms-layout {
+    grid-template-columns: 284px 1fr 284px;
+  }
+
+  .comms-layout.is-context-collapsed {
+    grid-template-columns: 284px 1fr 52px;
+  }
+
+  .comms-mode-email.comms-layout,
+  .comms-mode-email.comms-layout.is-context-collapsed,
+  .comms-mode-email-mailbox {
+    grid-template-columns: 284px 1fr;
+  }
+
+  .comms-rail {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .comms-rail-head {
+    padding-bottom: 6px;
+  }
+
+  .comms-mode-email .comms-rail-head {
+    gap: 7px;
+    padding-bottom: 8px;
+  }
+
+  .message-list {
+    padding: 10px;
+  }
+
+  .comms-mode-email .message-list {
+    padding: 0 10px 14px;
+  }
+
+  .email-folder-btn {
+    padding: 6px 7px;
+    border-radius: 7px;
+  }
+
+  .email-folder-left span {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .email-folder-count {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+
+  .conversation-item.is-email {
+    grid-template-columns: minmax(126px, 166px) 1fr auto;
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .conversation-email-name,
+  .conversation-email-subject {
+    font-size: 12px;
+  }
+
+  .conversation-email-preview {
+    font-size: 11px;
+  }
+
+  .conversation-email-time {
+    font-size: 10px;
+  }
+
+  .email-mailbox-row {
+    min-height: 38px;
+  }
+
+  .comms-thread-head,
+  .comms-mode-email .comms-thread-head {
+    padding: 8px 10px;
+  }
+
+  .email-reader {
+    padding: 14px 10px 0;
+  }
+
+  .email-reader-card {
+    gap: 16px;
+    padding: 16px;
+    border-radius: 9px;
+  }
+
+  .email-reader-body {
+    font-size: 13px;
+    gap: 12px;
+  }
+
+  .email-empty-thread {
+    gap: 6px;
+    padding: 14px 6px;
+  }
+
+  .call-log-item {
+    gap: 7px;
+    padding: 9px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .comms-mode-email.comms-layout,
+  .comms-mode-email.comms-layout.is-context-collapsed,
+  .comms-mode-email-mailbox {
+    grid-template-columns: 272px 1fr;
+  }
+
+  .comms-mode-email .comms-rail {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .comms-mode-email .comms-rail-head {
+    gap: 6px;
+    padding-bottom: 6px;
+  }
+
+  .comms-mode-email .comms-search {
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+
+  .email-folder-menu {
+    gap: 1px;
+  }
+
+  .email-folder-btn {
+    gap: 7px;
+    padding: 5px 7px;
+  }
+
+  .email-folder-left {
+    gap: 7px;
+  }
+
+  .email-folder-left span {
+    font-size: 11.5px;
+  }
+
+  .email-folder-count {
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    font-size: 9px;
+  }
+
+  .comms-mode-email .message-list {
+    padding: 0 8px 12px;
+  }
+
+  .comms-mode-email .comms-thread-head {
+    padding: 7px 10px;
+  }
+
+  .email-mailbox-head-copy .block-title,
+  .email-reader-head-copy .block-title,
+  .email-reader-from-copy .task-title {
+    font-size: 14px;
+  }
+
+  .email-mailbox-head-copy .task-meta,
+  .email-reader-head-copy .task-meta,
+  .email-reader-from-copy .task-meta {
+    font-size: 10.5px;
+  }
+
+  .conversation-item.is-email {
+    grid-template-columns: minmax(116px, 150px) 1fr auto;
+    gap: 8px;
+    padding: 7px 9px;
+  }
+
+  .conversation-email-name,
+  .conversation-email-subject {
+    font-size: 11.5px;
+  }
+
+  .conversation-email-subject {
+    max-width: 35%;
+  }
+
+  .conversation-email-preview {
+    font-size: 10.5px;
+  }
+
+  .conversation-email-time {
+    font-size: 9.5px;
+  }
+
+  .conversation-email-link {
+    height: 14px;
+    padding: 0 5px;
+    font-size: 9px;
+  }
+
+  .email-mailbox-row {
+    min-height: 34px;
+  }
+
+  .email-reader {
+    padding: 12px 10px 0;
+  }
+
+  .email-reader-card {
+    gap: 14px;
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .email-reader-body {
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .email-empty-thread {
+    gap: 5px;
+    padding: 12px 4px;
+  }
+
+  .call-log-item {
+    gap: 6px;
+    padding: 8px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .view-block.calls-workspace-shell {
+    gap: 10px;
+  }
+
+  .calls-subview-tabs {
+    gap: 12px;
+    padding: 0 2px;
+  }
+
+  .calls-subview-tabs .mini-btn {
+    padding: 7px 0 9px;
+    font-size: 12px;
+  }
+
+  .calls-layout {
+    grid-template-columns: 304px 1fr 284px;
+    min-height: 620px;
+  }
+
+  .calls-layout.is-context-collapsed {
+    grid-template-columns: 304px 1fr 56px;
+  }
+
+  .calls-layout.is-context-hidden {
+    grid-template-columns: 304px 1fr;
+  }
+
+  .calls-rail {
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .calls-rail-head {
+    gap: 6px;
+  }
+
+  .calls-contact-item {
+    gap: 5px;
+    padding: 6px 0;
+  }
+
+  .calls-contact-main {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    gap: 7px;
+    padding: 7px;
+  }
+
+  .calls-contact-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .calls-contact-name {
+    font-size: 12px;
+  }
+
+  .calls-outcome-pill {
+    padding: 2px 5px;
+    font-size: 9px;
+  }
+
+  .calls-contact-call {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+  }
+
+  .calls-center {
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .calls-dialer-card {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .calls-dialer-head {
+    gap: 8px;
+  }
+
+  .calls-dialer-head-actions {
+    gap: 6px;
+  }
+
+  .calls-dialer-head .task-title {
+    font-size: 14px;
+  }
+
+  .calls-agent-bar {
+    grid-template-columns: minmax(0, 1.3fr) minmax(168px, 0.92fr) auto auto;
+    gap: 8px;
+  }
+
+  .calls-agent-card {
+    gap: 6px;
+    padding: 9px 10px;
+    border-radius: 12px;
+  }
+
+  .calls-agent-card strong {
+    font-size: 13px;
+  }
+
+  .calls-inline-field {
+    gap: 5px;
+    font-size: 10.5px;
+  }
+
+  .calls-inline-field select {
+    min-width: 136px;
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: 11.5px;
+  }
+
+  .calls-toggle-field {
+    gap: 7px;
+    padding-top: 14px;
+    font-size: 11px;
+  }
+
+  .calls-toggle-field input {
+    width: 14px;
+    height: 14px;
+  }
+
+  .calls-sync-chip,
+  .calls-console-pill {
+    font-size: 10.5px;
+  }
+
+  .calls-console-strip {
+    gap: 6px;
+  }
+
+  .calls-console-pill {
+    padding: 4px 7px;
+  }
+
+  .calls-live-status {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  .calls-number-area,
+  .calls-keypad-grid,
+  .calls-dialer-actions {
+    width: min(420px, 100%);
+  }
+
+  .calls-number-area {
+    gap: 6px;
+  }
+
+  .calls-number-wrap i {
+    left: 8px;
+    font-size: 13px;
+  }
+
+  .calls-number-wrap input {
+    height: 40px;
+    padding: 0 10px 0 30px;
+    font-size: 17px;
+  }
+
+  .calls-suggested-contact {
+    gap: 7px;
+    padding: 6px 8px;
+  }
+
+  .calls-suggested-avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .calls-suggested-copy small {
+    font-size: 9px;
+  }
+
+  .calls-suggested-copy strong {
+    font-size: 12px;
+  }
+
+  .calls-suggested-copy span {
+    font-size: 10.5px;
+  }
+
+  .calls-keypad-grid,
+  .calls-dialer-actions {
+    gap: 6px;
+  }
+
+  .calls-key-btn {
+    min-height: 62px;
+  }
+
+  .calls-key-digit {
+    font-size: 20px;
+  }
+
+  .calls-key-letters {
+    font-size: 8px;
+  }
+
+  .calls-dialer-actions .mini-btn,
+  .calls-dialer-actions .btn {
+    height: 32px;
+  }
+
+  .calls-start-call-btn {
+    height: 37px;
+  }
+
+  .calls-record-check {
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+
+  .calls-note-field textarea {
+    min-height: 56px;
+  }
+
+  .calls-quick-contact-row {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .calls-quick-contact {
+    gap: 6px;
+    padding: 5px 7px;
+  }
+
+  .calls-quick-contact-avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .calls-quick-contact-copy span {
+    font-size: 11.5px;
+  }
+
+  .calls-quick-contact-copy small {
+    font-size: 9.5px;
+  }
+
+  .calls-recent-strip {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .calls-recent-row {
+    gap: 5px;
+  }
+
+  .calls-recent-pill {
+    gap: 1px;
+    padding: 5px 7px;
+  }
+
+  .calls-recent-pill span {
+    font-size: 11.5px;
+  }
+
+  .calls-recent-pill small {
+    font-size: 9.5px;
+  }
+
+  .calls-active-panel {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .calls-active-actions {
+    gap: 6px;
+  }
+
+  .calls-context {
+    border-radius: 0 8px 8px 0;
+  }
+
+  .calls-context-head {
+    padding: 8px 9px 7px;
+  }
+
+  .calls-context-body {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .calls-context-block {
+    padding: 8px;
+  }
+
+  .calls-queue-item {
+    gap: 8px;
+    padding: 9px 10px;
+    border-radius: 12px;
+  }
+
+  .call-log-item {
+    gap: 6px;
+    padding: 8px;
+    border-radius: 7px;
+  }
+
+  .call-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+  }
+
+  .calls-scheduler-shell {
+    --calls-scheduler-day-head-height: 52px;
+    min-height: 0;
+    height: 100%;
+    border-radius: 10px;
+  }
+
+  .calls-scheduler-toolbar {
+    gap: 10px;
+    padding: 10px 12px 8px;
+  }
+
+  .calls-scheduler-toolbar-left,
+  .calls-scheduler-toolbar-right {
+    gap: 7px;
+  }
+
+  .calls-scheduler-nav {
+    gap: 5px;
+  }
+
+  .calls-scheduler-nav strong {
+    font-size: 13px;
+  }
+
+  .calls-scheduler-nav .mini-btn {
+    min-height: 27px;
+    padding: 0 9px;
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-nav .panel-toggle-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .calls-scheduler-toggle {
+    gap: 3px;
+    padding: 2px;
+  }
+
+  .calls-scheduler-toggle .mini-btn {
+    min-height: 26px;
+    padding: 0 9px;
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-owner-select select {
+    min-height: 30px;
+    padding: 0 9px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+
+  .calls-scheduler-toolbar .btn {
+    min-height: 30px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  .calls-scheduler-toolbar .btn i {
+    font-size: 11px;
+  }
+
+  .calls-scheduler-main {
+    grid-template-columns: minmax(0, 1fr) 272px;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .calls-scheduler-side {
+    padding: 10px;
+  }
+
+  .calls-scheduler-side-card {
+    gap: 9px;
+    padding: 10px;
+    border-radius: 11px;
+  }
+
+  .calls-scheduler-side-head {
+    gap: 8px;
+  }
+
+  .calls-scheduler-side-head h4 {
+    font-size: 13px;
+  }
+
+  .calls-scheduler-side-head p {
+    margin-top: 2px;
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-side-head span {
+    min-width: 22px;
+    min-height: 22px;
+    font-size: 10px;
+  }
+
+  .calls-scheduler-board {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .calls-scheduler-time-row {
+    padding-right: 7px;
+    font-size: 10px;
+  }
+
+  .calls-scheduler-day-head {
+    padding: 7px 9px;
+  }
+
+  .calls-scheduler-day-head p {
+    font-size: 10px;
+  }
+
+  .calls-scheduler-day-head strong {
+    font-size: 12.5px;
+  }
+
+  .calls-scheduler-slot.drop-target-active::before {
+    left: 7px;
+    min-height: 18px;
+    padding: 0 6px;
+    font-size: 8.5px;
+  }
+
+  .calls-scheduler-event {
+    gap: 1px;
+    padding: 4px 6px 7px;
+  }
+
+  .calls-scheduler-event.is-tight {
+    padding: 4px 5px 6px;
+  }
+
+  .calls-scheduler-event.is-compact {
+    padding: 3px 5px;
+  }
+
+  .calls-scheduler-event-time {
+    font-size: 8px;
+  }
+
+  .calls-scheduler-event-title {
+    font-size: 11px;
+  }
+
+  .calls-scheduler-event-meta {
+    font-size: 9px;
+  }
+
+  .calls-scheduler-event-line {
+    padding-right: 2px;
+    font-size: 10px;
+  }
+
+  .calls-scheduler-event-owner {
+    top: 4px;
+    right: 4px;
+    width: 15px;
+    height: 15px;
+    font-size: 8px;
+  }
+
+  .calls-scheduler-event-flag {
+    left: 4px;
+    bottom: 4px;
+    padding: 2px 5px;
+    font-size: 8.5px;
+  }
+
+  .calls-scheduler-event-actions {
+    right: 4px;
+    bottom: 4px;
+    gap: 3px;
+  }
+
+  .calls-scheduler-inline-action {
+    min-height: 24px;
+    padding: 0 7px;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .calls-scheduler-inline-action.is-compact {
+    width: 18px;
+    min-width: 18px;
+    min-height: 18px;
+  }
+
+  .calls-scheduler-event-resize {
+    width: 22px;
+  }
+
+  .calls-scheduler-queue-list,
+  .calls-scheduler-load-list {
+    gap: 8px;
+  }
+
+  .calls-scheduler-load-row {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 7px;
+    padding: 9px;
+    border-radius: 11px;
+  }
+
+  .calls-scheduler-load-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+
+  .calls-scheduler-load-head strong {
+    font-size: 11.5px;
+  }
+
+  .calls-scheduler-load-copy p {
+    margin-top: 3px;
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-load-status {
+    min-height: 20px;
+    padding: 0 6px;
+    font-size: 9.5px;
+  }
+
+  .calls-scheduler-queue-card {
+    gap: 7px;
+    padding: 9px;
+    border-radius: 11px;
+  }
+
+  .calls-scheduler-queue-title {
+    font-size: 12.5px;
+  }
+
+  .calls-scheduler-queue-meta {
+    margin-top: 2px;
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-queue-actions,
+  .calls-scheduler-agenda-actions {
+    gap: 5px;
+  }
+
+  .calls-scheduler-agenda {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .calls-scheduler-agenda-day {
+    border-radius: 11px;
+  }
+
+  .calls-scheduler-agenda-head {
+    padding: 9px 10px;
+  }
+
+  .calls-scheduler-agenda-head h4 {
+    font-size: 13px;
+  }
+
+  .calls-scheduler-agenda-head span {
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-agenda-list {
+    gap: 7px;
+    padding: 8px 10px 10px;
+  }
+
+  .calls-scheduler-agenda-item {
+    grid-template-columns: 80px minmax(0, 1fr) auto;
+    gap: 9px;
+    padding: 9px;
+    border-radius: 11px;
+  }
+
+  .calls-scheduler-agenda-time strong {
+    font-size: 11.5px;
+  }
+
+  .calls-scheduler-agenda-time span {
+    margin-top: 2px;
+    font-size: 10.5px;
+  }
+
+  .calls-scheduler-agenda-title {
+    font-size: 12.5px;
+  }
+
+  .calls-scheduler-agenda-meta {
+    margin-top: 2px;
+    font-size: 10.5px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .gmail-compose-card {
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(12, 35, 58, 0.12);
+    gap: 8px;
+  }
+
+  .gmail-compose-head {
+    padding-bottom: 7px;
+  }
+
+  .gmail-compose-head-actions {
+    gap: 5px;
+  }
+
+  .gmail-compose-window-actions .message-icon-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .gmail-compose-menu-dropdown,
+  .thread-actions-dropdown,
+  .softphone-more-dropdown,
+  .context-menu {
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 10px 22px rgba(8, 28, 44, 0.12);
+  }
+
+  .gmail-compose-menu-item,
+  .context-menu-item {
+    padding: 6px 7px;
+    font-size: 11.5px;
+  }
+
+  .gmail-compose-line {
+    grid-template-columns: 56px 1fr;
+    gap: 8px;
+  }
+
+  .gmail-compose-line > span,
+  .compose-line span {
+    font-size: 11px;
+  }
+
+  .gmail-compose-line input,
+  .compose-line input,
+  .gmail-compose-body textarea,
+  .compose-body textarea {
+    font-size: 12.5px;
+  }
+
+  .gmail-compose-body textarea {
+    min-height: 220px;
+  }
+
+  .compose-sheet-head {
+    gap: 8px;
+  }
+
+  .compose-sheet-foot,
+  .gmail-compose-foot,
+  .sms-compose-foot {
+    gap: 8px;
+  }
+
+  .context-menu {
+    min-width: 168px;
+  }
+
+  .context-menu-item {
+    line-height: 1.2;
+  }
+
+  .context-menu-item-icon {
+    width: 13px;
+    font-size: 11px;
+  }
+
+  .context-menu-divider {
+    margin: 3px 2px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .comms-thread-head,
+  .comms-mode-email .comms-thread-head {
+    gap: 8px;
+    padding: 7px 9px;
+  }
+
+  .thread-head-actions,
+  .calls-filter-row,
+  .sms-filter-row {
+    gap: 6px;
+  }
+
+  .thread-menu-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+  }
+
+  .conversation-list {
+    gap: 6px;
+  }
+
+  .conversation-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .conversation-name,
+  .conversation-email-name,
+  .conversation-email-subject {
+    font-size: 11.5px;
+  }
+
+  .conversation-preview,
+  .conversation-email-preview,
+  .conversation-main .task-meta {
+    font-size: 10.5px;
+  }
+
+  .conversation-subline,
+  .conversation-time,
+  .conversation-email-time,
+  .sms-thread-status,
+  .conversation-record-badge {
+    font-size: 9.5px;
+  }
+
+  .conversation-record-badge,
+  .sms-thread-status {
+    min-height: 15px;
+    padding: 0 6px;
+  }
+
+  .message-list {
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .comms-mode-email .message-list {
+    padding: 0 8px 12px;
+  }
+
+  .email-mailbox-pane {
+    padding-bottom: 12px;
+  }
+
+  .email-mailbox-row {
+    min-height: 32px;
+  }
+
+  .email-mailbox-head-copy .block-title,
+  .email-reader-head-copy .block-title,
+  .email-reader-from-copy .task-title {
+    font-size: 13px;
+  }
+
+  .email-mailbox-head-copy .task-meta,
+  .email-reader-head-copy .task-meta,
+  .email-reader-from-copy .task-meta,
+  .email-folder-left span {
+    font-size: 10.5px;
+  }
+
+  .email-folder-btn {
+    gap: 6px;
+    padding: 5px 7px;
+  }
+
+  .email-folder-count {
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    font-size: 9px;
+  }
+
+  .email-reader,
+  .email-reader-card-head,
+  .email-reader-from,
+  .email-reader-attachments {
+    gap: 8px;
+  }
+
+  .email-reader {
+    padding: 10px 8px 0;
+  }
+
+  .email-reader-card {
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .email-reader-body {
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .email-reader-body p {
+    margin: 0 0 8px;
+  }
+
+  .email-empty-thread {
+    gap: 4px;
+    padding: 10px 4px;
+  }
+
+  .message-row {
+    gap: 6px;
+  }
+
+  .message-bubble {
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+
+  .message-meta {
+    gap: 5px;
+    font-size: 10.5px;
+  }
+
+  .message-meta strong {
+    font-size: 11px;
+  }
+
+  .email-surface,
+  .sms-surface {
+    gap: 8px;
+  }
+
+  .gmail-send-actions,
+  .sms-send-actions,
+  .sms-thread-quick-actions,
+  .comms-compose-actions {
+    gap: 6px;
+  }
+
+  .gmail-compose-line input,
+  .compose-line input,
+  .compose-body textarea,
+  .sms-recipient-field input,
+  .sms-text-field textarea {
+    font-size: 12px;
+  }
+
+  .gmail-ccbcc > summary,
+  .gmail-crm-strip > summary {
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+
+  .gmail-ccbcc-grid,
+  .gmail-crm-grid {
+    padding: 7px 9px 9px;
+    gap: 6px;
+  }
+
+  .compose-line {
+    grid-template-columns: 58px 1fr;
+    gap: 6px;
+  }
+
+  .compose-line span {
+    font-size: 10.5px;
+  }
+
+  .compose-body textarea,
+  .gmail-compose-body textarea {
+    min-height: 160px;
+  }
+
+  .sms-compose-head,
+  .sms-compose-topline,
+  .sms-text-field,
+  .sms-template-row,
+  .sms-compose-foot {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .sms-recipient-field input,
+  .sms-text-field textarea {
+    border-radius: 8px;
+  }
+
+  .sms-text-field textarea {
+    min-height: 76px;
+  }
+
+  .sms-template-row .mini-btn,
+  .sms-thread-quick-actions .mini-btn {
+    min-height: 22px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+
+  .sms-message-bubble {
+    border-radius: 12px;
+  }
+
+  .sms-status-pill {
+    min-height: 15px;
+    padding: 0 5px;
+    font-size: 9px;
+  }
+
+  .sms-empty-thread {
+    padding: 12px;
+  }
+
+  .comms-log-panel,
+  .comms-context-block,
+  .comms-activity-item {
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .comms-compose-grid {
+    gap: 6px;
+  }
+
+  .comms-context-head {
+    padding: 8px 9px 7px;
+  }
+
+  .comms-context-body {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .comms-participant {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .participant-avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .conversation-record-badge,
+  .message-pill,
+  .message-reaction-pill,
+  .calls-outcome-pill,
+  .calls-sync-chip,
+  .calls-console-pill,
+  .calls-recent-pill,
+  .softphone-context-pill,
+  .waiting-filter-chip,
+  .waiting-due-pill {
+    font-size: 9px;
+  }
+
+  .conversation-record-badge,
+  .message-pill,
+  .waiting-filter-chip,
+  .waiting-due-pill {
+    padding: 2px 6px;
+  }
+
+  .sms-empty-thread,
+  .email-mailbox-empty,
+  .email-empty-thread {
+    gap: 4px;
+    padding: 10px;
+  }
+
+  .comms-skeleton-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .comms-skeleton-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 7px;
+  }
+
+  .comms-skeleton-bar {
+    height: 9px;
+  }
+
+  .comms-skeleton-bar.is-title {
+    height: 12px;
+  }
+
+  .comms-skeleton-bar.is-preview,
+  .comms-skeleton-bar.is-subtitle {
+    height: 9px;
+  }
+
+  .comms-skeleton-input {
+    height: 32px;
+  }
+
+  .comms-skeleton-button {
+    height: 28px;
+  }
+
+  .waiting-head {
+    padding: 9px 9px 8px;
+  }
+
+  .waiting-head h3 {
+    font-size: 14px;
+  }
+
+  .waiting-head p,
+  .waiting-item p {
+    font-size: 11px;
+  }
+
+  .waiting-filters {
+    margin-top: 8px;
+    gap: 5px;
+  }
+
+  .waiting-list {
+    padding: 2px 0 6px;
+  }
+
+  .waiting-item {
+    gap: 8px;
+    padding: 8px 9px;
+  }
+
+.waiting-item strong {
+  font-size: 12px;
+}
+}
+
+:root[data-theme="dark"] .comms-access-card,
+:root[data-theme="dark"] .calls-live-lock-card {
+  background:
+    radial-gradient(circle at top right, rgba(123, 162, 255, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(38, 38, 38, 0.92), rgba(29, 29, 29, 0.88));
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .comms-access-card-icon,
+:root[data-theme="dark"] .calls-live-lock-icon {
+  background: transparent;
+  color: #a8c0ff;
+}
+
+:root[data-theme="dark"] .comms-access-card .task-title,
+:root[data-theme="dark"] .calls-live-lock-card h3 {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .comms-access-card .task-meta,
+:root[data-theme="dark"] .calls-live-lock-card p {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .comms-rail,
+:root[data-theme="dark"] .calls-rail,
+:root[data-theme="dark"] .calls-context,
+:root[data-theme="dark"] .comms-context,
+:root[data-theme="dark"] .calls-dialer-card,
+:root[data-theme="dark"] .calls-dialer-status-card,
+:root[data-theme="dark"] .calls-active-panel,
+:root[data-theme="dark"] .calls-workspace-card,
+:root[data-theme="dark"] .calls-detail-card,
+:root[data-theme="dark"] .email-reader-card,
+:root[data-theme="dark"] .gmail-compose-card,
+:root[data-theme="dark"] .email-surface,
+:root[data-theme="dark"] .sms-surface,
+:root[data-theme="dark"] .comms-log-panel,
+:root[data-theme="dark"] .comms-context-block,
+:root[data-theme="dark"] .comms-activity-item,
+:root[data-theme="dark"] .calls-scheduler-shell,
+:root[data-theme="dark"] .calls-scheduler-side-card,
+:root[data-theme="dark"] .calls-scheduler-load-row,
+:root[data-theme="dark"] .calls-scheduler-queue-card,
+:root[data-theme="dark"] .calls-scheduler-agenda-day,
+:root[data-theme="dark"] .calls-scheduler-agenda-item,
+:root[data-theme="dark"] .calls-performance-kpi-card,
+:root[data-theme="dark"] .calls-performance-card,
+:root[data-theme="dark"] .calls-performance-table-card,
+:root[data-theme="dark"] .email-empty-thread,
+:root[data-theme="dark"] .sms-empty-thread,
+:root[data-theme="dark"] .email-mailbox-empty,
+:root[data-theme="dark"] .calls-workspace-empty,
+:root[data-theme="dark"] .calls-voicemail-workspace-card,
+:root[data-theme="dark"] .call-log-item,
+:root[data-theme="dark"] .calls-queue-item {
+  background: var(--panel-bg);
+  border-color: var(--line);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] .comms-thread-head,
+:root[data-theme="dark"] .comms-mode-email .comms-thread-head,
+:root[data-theme="dark"] .comms-rail-head,
+:root[data-theme="dark"] .calls-workspace-head,
+:root[data-theme="dark"] .calls-context-head,
+:root[data-theme="dark"] .email-reader-card-head,
+:root[data-theme="dark"] .email-reader-from,
+:root[data-theme="dark"] .email-reader-attachments,
+:root[data-theme="dark"] .calls-detail-hero,
+:root[data-theme="dark"] .calls-related-row,
+:root[data-theme="dark"] .calls-workspace-row,
+:root[data-theme="dark"] .calls-scheduler-toolbar,
+:root[data-theme="dark"] .calls-scheduler-side,
+:root[data-theme="dark"] .calls-scheduler-side-head,
+:root[data-theme="dark"] .calls-scheduler-agenda-head,
+:root[data-theme="dark"] .calls-performance-agent-list-row,
+:root[data-theme="dark"] .calls-performance-card-head,
+:root[data-theme="dark"] .thread-actions-dropdown,
+:root[data-theme="dark"] .gmail-compose-menu-dropdown,
+:root[data-theme="dark"] .softphone-more-dropdown,
+:root[data-theme="dark"] .context-menu,
+:root[data-theme="dark"] .email-folder-menu {
+  border-color: #343434;
+}
+
+:root[data-theme="dark"] .comms-thread-head,
+:root[data-theme="dark"] .comms-mode-email .comms-thread-head,
+:root[data-theme="dark"] .comms-mode-email .comms-rail-head,
+:root[data-theme="dark"] .comms-rail-head,
+:root[data-theme="dark"] .calls-scheduler-time-rail-head,
+:root[data-theme="dark"] .calls-scheduler-day,
+:root[data-theme="dark"] .calls-scheduler-day-head {
+  background: #1f1f1f;
+}
+
+:root[data-theme="dark"] .calls-center,
+:root[data-theme="dark"] .calls-performance-main,
+:root[data-theme="dark"] .calls-performance-body,
+:root[data-theme="dark"] .calls-scheduler-primary,
+:root[data-theme="dark"] .calls-scheduler-main,
+:root[data-theme="dark"] .calls-scheduler-agenda,
+:root[data-theme="dark"] .comms-mode-surface,
+:root[data-theme="dark"] .message-list,
+:root[data-theme="dark"] .email-reader,
+:root[data-theme="dark"] .email-mailbox-pane {
+  background: transparent;
+}
+
+:root[data-theme="dark"] .comms-mode-surface {
+  border-color: #343434;
+  background: #242424;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] .calls-detail-hero {
+  background: #242424;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] .calls-scheduler-side,
+:root[data-theme="dark"] .calls-scheduler-board,
+:root[data-theme="dark"] .calls-scheduler-time-rail,
+:root[data-theme="dark"] .calls-scheduler-time-rail-body,
+:root[data-theme="dark"] .calls-scheduler-agenda {
+  background: #1f1f1f;
+}
+
+:root[data-theme="dark"] .calls-scheduler-day-head strong,
+:root[data-theme="dark"] .calls-scheduler-nav strong,
+:root[data-theme="dark"] .calls-scheduler-side-head h4,
+:root[data-theme="dark"] .calls-scheduler-queue-title,
+:root[data-theme="dark"] .calls-scheduler-agenda-head h4,
+:root[data-theme="dark"] .calls-scheduler-agenda-time strong,
+:root[data-theme="dark"] .calls-scheduler-agenda-title,
+:root[data-theme="dark"] .calls-scheduler-load-head strong,
+:root[data-theme="dark"] .calls-contact-name,
+:root[data-theme="dark"] .calls-suggested-copy strong,
+:root[data-theme="dark"] .calls-quick-contact-copy span,
+:root[data-theme="dark"] .calls-recent-pill span,
+:root[data-theme="dark"] .calls-nav-copy strong,
+:root[data-theme="dark"] .calls-left-row-head strong,
+:root[data-theme="dark"] .calls-workspace-row-copy strong,
+:root[data-theme="dark"] .calls-detail-hero-copy h3,
+:root[data-theme="dark"] .calls-live-overview-copy h3,
+:root[data-theme="dark"] .calls-performance-kpi-copy strong,
+:root[data-theme="dark"] .calls-performance-donut-center strong,
+:root[data-theme="dark"] .calls-performance-agent-list-name,
+:root[data-theme="dark"] .calls-performance-agent-list-metric,
+:root[data-theme="dark"] .calls-performance-agent-cell-name,
+:root[data-theme="dark"] .calls-performance-lead-cell-name,
+:root[data-theme="dark"] .email-reader-head-copy .block-title,
+:root[data-theme="dark"] .email-reader-from-copy .task-title,
+:root[data-theme="dark"] .email-mailbox-head-copy .block-title,
+:root[data-theme="dark"] .email-folder-left span,
+:root[data-theme="dark"] .thread-menu-item,
+:root[data-theme="dark"] .conversation-name,
+:root[data-theme="dark"] .conversation-email-name,
+:root[data-theme="dark"] .conversation-email-subject,
+:root[data-theme="dark"] .message-meta strong,
+:root[data-theme="dark"] .comms-context-block .task-title,
+:root[data-theme="dark"] .calls-workspace-head .task-title,
+:root[data-theme="dark"] .calls-dialer-head .task-title {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .calls-filter-note,
+:root[data-theme="dark"] .calls-scheduler-day-head span,
+:root[data-theme="dark"] .calls-scheduler-day-head p,
+:root[data-theme="dark"] .calls-scheduler-time-row,
+:root[data-theme="dark"] .calls-scheduler-queue-meta,
+:root[data-theme="dark"] .calls-scheduler-agenda-head span,
+:root[data-theme="dark"] .calls-scheduler-agenda-time span,
+:root[data-theme="dark"] .calls-scheduler-agenda-meta,
+:root[data-theme="dark"] .calls-scheduler-load-copy p,
+:root[data-theme="dark"] .calls-scheduler-side-head p,
+:root[data-theme="dark"] .calls-performance-kpi-copy span,
+:root[data-theme="dark"] .calls-performance-card-head .task-meta,
+:root[data-theme="dark"] .calls-performance-header-copy .task-meta,
+:root[data-theme="dark"] .calls-performance-legend-item,
+:root[data-theme="dark"] .calls-performance-line-axis,
+:root[data-theme="dark"] .calls-performance-agent-list-share,
+:root[data-theme="dark"] .calls-performance-donut-center span,
+:root[data-theme="dark"] .calls-dialer-status-copy .task-meta,
+:root[data-theme="dark"] .calls-dialer-status-meta .task-meta,
+:root[data-theme="dark"] .calls-live-overview-copy .task-meta,
+:root[data-theme="dark"] .calls-detail-hero-copy .task-meta,
+:root[data-theme="dark"] .calls-detail-hero-meta .task-meta,
+:root[data-theme="dark"] .calls-detail-meta-grid .task-meta,
+:root[data-theme="dark"] .calls-workspace-head .task-meta,
+:root[data-theme="dark"] .calls-nav-copy small,
+:root[data-theme="dark"] .calls-left-row-head small,
+:root[data-theme="dark"] .calls-left-row-meta,
+:root[data-theme="dark"] .calls-left-row-foot span:last-child,
+:root[data-theme="dark"] .calls-workspace-row-copy span,
+:root[data-theme="dark"] .calls-suggested-copy span,
+:root[data-theme="dark"] .calls-suggested-copy small,
+:root[data-theme="dark"] .calls-quick-contact-copy small,
+:root[data-theme="dark"] .calls-recent-pill small,
+:root[data-theme="dark"] .calls-number-wrap i,
+:root[data-theme="dark"] .email-mailbox-head-copy .task-meta,
+:root[data-theme="dark"] .email-reader-head-copy .task-meta,
+:root[data-theme="dark"] .email-reader-from-copy .task-meta,
+:root[data-theme="dark"] .conversation-preview,
+:root[data-theme="dark"] .conversation-email-preview,
+:root[data-theme="dark"] .conversation-main .task-meta,
+:root[data-theme="dark"] .conversation-time,
+:root[data-theme="dark"] .conversation-email-time,
+:root[data-theme="dark"] .sms-thread-status,
+:root[data-theme="dark"] .message-meta,
+:root[data-theme="dark"] .message-text.is-muted,
+:root[data-theme="dark"] .email-empty-thread,
+:root[data-theme="dark"] .sms-empty-thread,
+:root[data-theme="dark"] .email-mailbox-empty,
+:root[data-theme="dark"] .calls-workspace-empty,
+:root[data-theme="dark"] .calls-performance-chart-empty,
+:root[data-theme="dark"] .calls-contact-item .task-meta,
+:root[data-theme="dark"] .call-log-head .task-meta,
+:root[data-theme="dark"] .call-log-item .task-meta,
+:root[data-theme="dark"] .comms-log-row .task-meta,
+:root[data-theme="dark"] .comms-compose-actions .task-meta,
+:root[data-theme="dark"] .calls-context-head .task-meta {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .comms-search,
+:root[data-theme="dark"] .calls-inline-field select,
+:root[data-theme="dark"] .calls-number-wrap input,
+:root[data-theme="dark"] .calls-note-field textarea,
+:root[data-theme="dark"] .sms-recipient-field input,
+:root[data-theme="dark"] .sms-text-field textarea,
+:root[data-theme="dark"] .compose-line input,
+:root[data-theme="dark"] .compose-body textarea,
+:root[data-theme="dark"] .gmail-compose-line input,
+:root[data-theme="dark"] .gmail-compose-body textarea,
+:root[data-theme="dark"] .calls-scheduler-owner-select select,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-select-field,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-search {
+  border-color: var(--line);
+  background: #202020;
+  color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] .comms-search::placeholder,
+:root[data-theme="dark"] .calls-number-wrap input::placeholder,
+:root[data-theme="dark"] .calls-note-field textarea::placeholder,
+:root[data-theme="dark"] .sms-recipient-field input::placeholder,
+:root[data-theme="dark"] .sms-text-field textarea::placeholder,
+:root[data-theme="dark"] .compose-line input::placeholder,
+:root[data-theme="dark"] .compose-body textarea::placeholder,
+:root[data-theme="dark"] .gmail-compose-line input::placeholder,
+:root[data-theme="dark"] .gmail-compose-body textarea::placeholder,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-search input::placeholder {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .calls-number-wrap input:focus,
+:root[data-theme="dark"] .sms-text-field textarea:focus,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-select-field:focus-within,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-search:focus-within {
+  border-color: rgba(123, 162, 255, 0.48);
+  background: #232323;
+  box-shadow: 0 0 0 3px rgba(123, 162, 255, 0.12);
+}
+
+:root[data-theme="dark"] .calls-inline-field,
+:root[data-theme="dark"] .calls-toggle-field,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-filter-label,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-select-field i {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .calls-toggle-field input {
+  accent-color: var(--accent);
+}
+
+:root[data-theme="dark"] .calls-subview-tabs,
+:root[data-theme="dark"] .calls-workspace-head,
+:root[data-theme="dark"] .calls-context-head,
+:root[data-theme="dark"] .calls-scheduler-toolbar,
+:root[data-theme="dark"] .calls-scheduler-time-rail,
+:root[data-theme="dark"] .calls-scheduler-day,
+:root[data-theme="dark"] .calls-scheduler-day-head,
+:root[data-theme="dark"] .calls-scheduler-side,
+:root[data-theme="dark"] .calls-performance-agent-list-row,
+:root[data-theme="dark"] .email-reader-card-head,
+:root[data-theme="dark"] .email-reader-from,
+:root[data-theme="dark"] .email-reader-attachments,
+:root[data-theme="dark"] .calls-related-row,
+:root[data-theme="dark"] .calls-workspace-row,
+:root[data-theme="dark"] .email-folder-menu {
+  border-color: #343434;
+}
+
+:root[data-theme="dark"] .calls-subview-tabs .mini-btn,
+:root[data-theme="dark"] .calls-list-tabs .mini-btn,
+:root[data-theme="dark"] .email-folder-btn,
+:root[data-theme="dark"] .sms-filter-row .mini-btn {
+  color: #aaaaaa;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .calls-subview-tabs .mini-btn:hover,
+:root[data-theme="dark"] .calls-list-tabs .mini-btn:hover,
+:root[data-theme="dark"] .email-folder-btn:hover,
+:root[data-theme="dark"] .sms-filter-row .mini-btn:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+:root[data-theme="dark"] .calls-subview-tabs .mini-btn.is-active,
+:root[data-theme="dark"] .calls-list-tabs .mini-btn.is-active {
+  color: var(--text);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .calls-subview-tabs .mini-btn::after,
+:root[data-theme="dark"] .calls-list-tabs .mini-btn::after {
+  background: var(--accent);
+}
+
+:root[data-theme="dark"] .compose-sheet-foot,
+:root[data-theme="dark"] .sms-compose-foot {
+  border-top-color: #343434;
+}
+
+:root[data-theme="dark"] .email-folder-btn.is-active {
+  background: rgba(123, 162, 255, 0.14);
+  color: #dbe7ff;
+}
+
+:root[data-theme="dark"] .email-folder-count,
+:root[data-theme="dark"] .conversation-record-badge,
+:root[data-theme="dark"] .calls-outcome-pill,
+:root[data-theme="dark"] .calls-sync-chip,
+:root[data-theme="dark"] .calls-console-pill,
+:root[data-theme="dark"] .calls-recent-pill,
+:root[data-theme="dark"] .message-pill,
+:root[data-theme="dark"] .message-reaction-pill,
+:root[data-theme="dark"] .sms-status-pill,
+:root[data-theme="dark"] .sms-thread-status,
+:root[data-theme="dark"] .email-rail-status .status-chip {
+  background: rgba(255, 255, 255, 0.07);
+  color: #d0d0d0;
+  border-color: transparent;
+}
+
+:root[data-theme="dark"] .calls-outcome-pill.outcome-connected,
+:root[data-theme="dark"] .calls-outcome-pill.outcome-contact,
+:root[data-theme="dark"] .sms-status-pill.is-delivered,
+:root[data-theme="dark"] .sms-thread-status.is-sent {
+  background: rgba(70, 187, 156, 0.16);
+  color: #b9eedf;
+}
+
+:root[data-theme="dark"] .calls-outcome-pill.outcome-live,
+:root[data-theme="dark"] .calls-live-status.status-connected,
+:root[data-theme="dark"] .calls-live-status.status-available,
+:root[data-theme="dark"] .sms-status-pill.is-scheduled,
+:root[data-theme="dark"] .sms-thread-status.is-scheduled {
+  background: rgba(123, 162, 255, 0.16);
+  color: #c5d7ff;
+}
+
+:root[data-theme="dark"] .calls-outcome-pill.outcome-missed,
+:root[data-theme="dark"] .calls-live-status.status-wrapup,
+:root[data-theme="dark"] .calls-live-status.status-ringing,
+:root[data-theme="dark"] .calls-live-status.status-dialing,
+:root[data-theme="dark"] .calls-scheduler-load-status.tone-break,
+:root[data-theme="dark"] .sms-status-pill.is-sent {
+  background: rgba(214, 169, 87, 0.16);
+  color: #f1d39a;
+}
+
+:root[data-theme="dark"] .calls-outcome-pill.outcome-voicemail,
+:root[data-theme="dark"] .calls-live-status.status-idle,
+:root[data-theme="dark"] .calls-live-status.status-offline,
+:root[data-theme="dark"] .calls-scheduler-load-status.tone-off,
+:root[data-theme="dark"] .calls-scheduler-load-status.tone-inactive,
+:root[data-theme="dark"] .calls-scheduler-load-status.tone-invited {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cccccc;
+}
+
+:root[data-theme="dark"] .waiting-due-pill {
+  background: rgba(255, 255, 255, 0.035);
+  color: #c2c8d0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .waiting-due-pill.is-not-set,
+:root[data-theme="dark"] .waiting-due-pill.is-upcoming {
+  background: rgba(255, 255, 255, 0.035);
+  color: #c2c8d0;
+}
+
+:root[data-theme="dark"] .waiting-due-pill.is-not-set {
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .waiting-due-pill.is-tomorrow {
+  background: rgba(123, 162, 255, 0.12);
+  color: #bfd0ff;
+  box-shadow: inset 0 0 0 1px rgba(123, 162, 255, 0.16);
+}
+
+:root[data-theme="dark"] .waiting-due-pill.is-today {
+  background: rgba(214, 169, 87, 0.12);
+  color: #e9c987;
+  box-shadow: inset 0 0 0 1px rgba(214, 169, 87, 0.16);
+}
+
+:root[data-theme="dark"] .waiting-due-pill.is-overdue {
+  background: rgba(223, 127, 127, 0.12);
+  color: #eab4b4;
+  box-shadow: inset 0 0 0 1px rgba(223, 127, 127, 0.16);
+}
+
+:root[data-theme="dark"] .sms-status-pill.is-failed,
+:root[data-theme="dark"] .sms-thread-status.is-failed,
+:root[data-theme="dark"] .calls-live-status.status-busy {
+  background: rgba(223, 127, 127, 0.16);
+  color: #f2b6b6;
+}
+
+:root[data-theme="dark"] .calls-contact-main,
+:root[data-theme="dark"] .calls-left-row-main,
+:root[data-theme="dark"] .calls-workspace-row-main,
+:root[data-theme="dark"] .email-thread-item,
+:root[data-theme="dark"] .calls-suggested-contact,
+:root[data-theme="dark"] .calls-quick-contact,
+:root[data-theme="dark"] .calls-nav-item,
+:root[data-theme="dark"] .thread-menu-toggle,
+:root[data-theme="dark"] .message-icon-btn,
+:root[data-theme="dark"] .calls-contact-call,
+:root[data-theme="dark"] .calls-workspace-row-action,
+:root[data-theme="dark"] .calls-dialer-icon-btn,
+:root[data-theme="dark"] .calls-scheduler-inline-action,
+:root[data-theme="dark"] .sms-template-row .mini-btn,
+:root[data-theme="dark"] .sms-thread-quick-actions .mini-btn {
+  background: #202020;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .calls-contact-main:hover,
+:root[data-theme="dark"] .calls-left-row-main:hover,
+:root[data-theme="dark"] .calls-workspace-row-main:hover,
+:root[data-theme="dark"] .email-thread-item:hover,
+:root[data-theme="dark"] .calls-suggested-contact:hover,
+:root[data-theme="dark"] .calls-quick-contact:hover,
+:root[data-theme="dark"] .calls-nav-item:hover,
+:root[data-theme="dark"] .thread-menu-toggle:hover,
+:root[data-theme="dark"] .message-icon-btn:hover,
+:root[data-theme="dark"] .calls-contact-call:hover,
+:root[data-theme="dark"] .calls-workspace-row-action:hover,
+:root[data-theme="dark"] .calls-dialer-icon-btn:hover,
+:root[data-theme="dark"] .calls-scheduler-inline-action:hover,
+:root[data-theme="dark"] .sms-template-row .mini-btn:hover,
+:root[data-theme="dark"] .sms-thread-quick-actions .mini-btn:hover {
+  background: #2a2a2a;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .calls-contact-main.is-active,
+:root[data-theme="dark"] .calls-left-row.is-selected .calls-left-row-main,
+:root[data-theme="dark"] .calls-workspace-row.is-current .calls-workspace-row-main,
+:root[data-theme="dark"] .calls-nav-item.is-active {
+  background: rgba(123, 162, 255, 0.14);
+  border-color: rgba(123, 162, 255, 0.24);
+}
+
+:root[data-theme="dark"] .calls-contact-main:disabled,
+:root[data-theme="dark"] .calls-workspace-row-main:disabled,
+:root[data-theme="dark"] .calls-contact-call:disabled,
+:root[data-theme="dark"] .calls-quick-contact:disabled,
+:root[data-theme="dark"] .thread-menu-item:disabled {
+  color: #707070;
+  background: #1d1d1d;
+}
+
+:root[data-theme="dark"] .calls-contact-avatar,
+:root[data-theme="dark"] .calls-suggested-avatar,
+:root[data-theme="dark"] .calls-quick-contact-avatar,
+:root[data-theme="dark"] .calls-performance-agent-avatar,
+:root[data-theme="dark"] .calls-scheduler-load-avatar,
+:root[data-theme="dark"] .email-thread-avatar,
+:root[data-theme="dark"] .calls-left-avatar,
+:root[data-theme="dark"] .calls-nav-icon {
+  background: rgba(123, 162, 255, 0.16);
+  color: #d4e1ff;
+}
+
+:root[data-theme="dark"] .message-row.is-self .message-bubble,
+:root[data-theme="dark"] .sms-message-bubble.is-outbound {
+  background: rgba(123, 162, 255, 0.16);
+  color: #edf2ff;
+}
+
+:root[data-theme="dark"] .message-row.is-peer .message-bubble,
+:root[data-theme="dark"] .sms-message-bubble.is-inbound {
+  background: #242424;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .message-bubble.is-deleted {
+  border-color: var(--line);
+}
+
+:root[data-theme="dark"] .message-attachment-pill,
+:root[data-theme="dark"] .composer-attachment-pill {
+  background: #202020;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .message-attachment-pill:hover,
+:root[data-theme="dark"] .message-attachment-pill:focus-visible {
+  background: #2a2a2a;
+}
+
+:root[data-theme="dark"] .calls-key-btn {
+  background: #202020;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .calls-key-btn:hover {
+  background: #2a2a2a;
+}
+
+:root[data-theme="dark"] .calls-key-btn:active {
+  background: #313131;
+}
+
+:root[data-theme="dark"] .calls-start-call-btn {
+  background: linear-gradient(180deg, #4f7ef4 0%, #3167e8 100%);
+  border-color: #5d86f6;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .calls-record-check {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--line);
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .calls-performance-line-frame {
+  fill: #222222;
+  stroke: #343434;
+}
+
+:root[data-theme="dark"] .calls-performance-line-gridline {
+  stroke: #343434;
+}
+
+:root[data-theme="dark"] .calls-performance-line-baseline {
+  stroke: #424242;
+}
+
+:root[data-theme="dark"] .calls-performance-line-point {
+  stroke: #222222;
+}
+
+:root[data-theme="dark"] .calls-performance-line-y-label {
+  fill: #a0a0a0;
+}
+
+:root[data-theme="dark"] .calls-performance-donut {
+  box-shadow: inset 0 0 0 1px #343434;
+}
+
+:root[data-theme="dark"] .calls-performance-donut-center {
+  background: #222222;
+  box-shadow: inset 0 0 0 1px #343434;
+}
+
+:root[data-theme="dark"] .calls-scheduler-slot:hover {
+  background: rgba(123, 162, 255, 0.07);
+}
+
+:root[data-theme="dark"] .calls-scheduler-slot.drop-target-active {
+  background: rgba(123, 162, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(123, 162, 255, 0.28);
+}
+
+:root[data-theme="dark"] .calls-scheduler-slot.drop-target-active::before,
+:root[data-theme="dark"] .calls-scheduler-slot.drop-target-active::after {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .calls-scheduler-day-grid {
+  background-image: linear-gradient(to bottom, rgba(58, 58, 58, 0.92) 1px, transparent 1px);
+}
+
+:root[data-theme="dark"] .calls-scheduler-event.tone-call {
+  background: linear-gradient(180deg, #3e6fda, #2e58b1);
+}
+
+:root[data-theme="dark"] .calls-scheduler-event.tone-callback {
+  background: linear-gradient(180deg, #6f5ad8, #5543ad);
+}
+
+:root[data-theme="dark"] .calls-scheduler-event .calls-scheduler-inline-action {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .calls-scheduler-event .calls-scheduler-inline-action:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+:root[data-theme="dark"] .calls-scheduler-event-resize {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+:root[data-theme="dark"] .calls-scheduler-agenda-item.is-conflict {
+  border-color: rgba(214, 169, 87, 0.26);
+  background: rgba(214, 169, 87, 0.08);
+}
+
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-search input,
+:root[data-theme="dark"] .calls-performance-sidebar .attendance-manager-select-field select {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .thread-actions-dropdown,
+:root[data-theme="dark"] .gmail-compose-menu-dropdown,
+:root[data-theme="dark"] .softphone-more-dropdown,
+:root[data-theme="dark"] .context-menu {
+  background: #262626;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) {
+  border-color: #343434;
+  background: linear-gradient(180deg, #262626, #1f1f1f);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-head {
+  border-bottom-color: #343434;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-avatar {
+  background: #364355;
+  color: #edf3fb;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-contact,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-key-digit,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-wrapup-title {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-meta-row,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-status,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-tone-preview,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-dot-sep,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-key-letters {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-head .panel-toggle-btn {
+  border-color: #3a3a3a;
+  background: rgba(255, 255, 255, 0.04);
+  color: #dfe5ec;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-head .panel-toggle-btn:hover,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-head .panel-toggle-btn.is-active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-record-indicator {
+  border-color: #3a3a3a;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-record-indicator.is-on {
+  border-color: rgba(239, 108, 88, 0.35);
+  background: rgba(239, 108, 88, 0.12);
+  color: #ffaea4;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-number-wrap,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-keypad-display,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-wrapup select,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-wrapup textarea {
+  border-color: #3a3a3a;
+  background: #242424;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-number-wrap i {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-number-wrap input {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-context-pill {
+  background: #242424;
+  border-color: #363636;
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-context-pill strong {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-more-item {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-more-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-more-item.is-active {
+  background: rgba(123, 162, 255, 0.14);
+  color: #dbe7ff;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-keypad-panel {
+  border-color: #343434;
+  background: #202020;
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-keypad-head .task-meta {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-key-btn,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-keypad-actions .mini-btn,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-dialer-actions .mini-btn {
+  border-color: #3a3a3a;
+  background: #252525;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-key-btn:hover,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-keypad-actions .mini-btn:hover,
+:root[data-theme="dark"] .softphone-dock:not(.is-live-call) .softphone-dialer-actions .mini-btn:hover {
+  background: #2d2d2d;
+}
+
+:root[data-theme="dark"] .thread-menu-item:hover,
+:root[data-theme="dark"] .context-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .context-menu-item.is-active {
+  background: rgba(123, 162, 255, 0.14);
+  color: #dbe7ff;
+}
+
+:root[data-theme="dark"] .context-menu-item.is-active .context-menu-item-icon {
+  color: #dbe7ff;
+}
+
+:root[data-theme="dark"] .context-menu-item.is-danger,
+:root[data-theme="dark"] .message-icon-btn.is-danger {
+  color: #f2b6b6;
+}
+
+:root[data-theme="dark"] .context-menu-item.is-danger:hover,
+:root[data-theme="dark"] .message-icon-btn.is-danger:hover {
+  background: rgba(223, 127, 127, 0.14);
+}
+
+:root[data-theme="dark"] .comms-skeleton-avatar,
+:root[data-theme="dark"] .comms-skeleton-icon,
+:root[data-theme="dark"] .comms-skeleton-bar,
+:root[data-theme="dark"] .comms-skeleton-input,
+:root[data-theme="dark"] .comms-skeleton-button {
+  background: linear-gradient(90deg, #2a2a2a 0%, #343434 48%, #2a2a2a 100%);
+  background-size: 220% 100%;
+}
+
+:root[data-theme="dark"] .calls-performance-kpi-card,
+:root[data-theme="dark"] .calls-performance-card,
+:root[data-theme="dark"] .calls-performance-table-card,
+:root[data-theme="dark"] .calls-scheduler-shell,
+:root[data-theme="dark"] .calls-scheduler-side-card,
+:root[data-theme="dark"] .calls-scheduler-queue-card,
+:root[data-theme="dark"] .calls-scheduler-agenda-item {
+  background: linear-gradient(180deg, rgba(34, 34, 34, 0.98), rgba(28, 28, 28, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 12px 24px rgba(0, 0, 0, 0.16);
+}
+
+:root[data-theme="dark"] .calls-performance-line-frame {
+  fill: #1e1e1e;
+  stroke: #2e2e2e;
+}
+
+:root[data-theme="dark"] .calls-performance-line-gridline {
+  stroke: #2a2a2a;
+}
+
+:root[data-theme="dark"] .calls-performance-line-baseline {
+  stroke: #383838;
+}
+
+:root[data-theme="dark"] .calls-performance-line-point {
+  stroke: #1d1d1d;
+}
+
+:root[data-theme="dark"] .calls-performance-line-y-label {
+  fill: #9d9d9d;
+}
+
+:root[data-theme="dark"] .calls-performance-donut {
+  box-shadow: inset 0 0 0 1px #303030;
+}
+
+:root[data-theme="dark"] .calls-performance-donut-center {
+  background: #1f1f1f;
+  box-shadow: inset 0 0 0 1px #303030;
+}
+
+:root[data-theme="dark"] .calls-scheduler-slot:hover {
+  background: rgba(123, 162, 255, 0.05);
+}
+
+:root[data-theme="dark"] .calls-scheduler-slot.drop-target-active {
+  background: rgba(123, 162, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(123, 162, 255, 0.22);
+}
+
+:root[data-theme="dark"] .calls-scheduler-day-grid {
+  background-image: linear-gradient(to bottom, rgba(50, 50, 50, 0.9) 1px, transparent 1px);
+}
+
+:root[data-theme="dark"] .calls-scheduler-event.tone-call {
+  background: linear-gradient(180deg, #436fcb, #355ba4);
+}
+
+:root[data-theme="dark"] .calls-scheduler-event.tone-callback {
+  background: linear-gradient(180deg, #695fc4, #544aa0);
+}
+
+:root[data-theme="dark"] .calls-scheduler-agenda-item.is-conflict {
+  border-color: rgba(205, 164, 90, 0.22);
+  background: rgba(205, 164, 90, 0.06);
+}
+
+:root[data-theme="dark"] .context-menu-item.is-active {
+  background: rgba(123, 162, 255, 0.1);
+  color: #dbe7ff;
+}
