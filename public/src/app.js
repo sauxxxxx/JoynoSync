@@ -10223,6 +10223,130 @@ async function openUnqualifiedLeadExportConfirm() {
   });
 }
 
+function getLeadExportLabel(exportType) {
+  return String(exportType || "").trim() === "duplicates" ? "duplicate leads" : "unqualified leads";
+}
+
+function openLeadExportModal(exportType = "unqualified") {
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalForm = document.getElementById("modalForm");
+  const modalCard = document.querySelector(".modal-card");
+  if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
+    return;
+  }
+  const normalizedType = String(exportType || "").trim() === "duplicates" ? "duplicates" : "unqualified";
+  const label = getLeadExportLabel(normalizedType);
+  closeOpenMenus();
+  modalTitle.textContent = normalizedType === "duplicates" ? "Export Duplicates" : "Export Unqualified Leads";
+  modalForm.dataset.mode = "lead-export";
+  modalForm.dataset.exportType = normalizedType;
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide");
+  modalForm.innerHTML = `
+    <div class="modal-body">
+      <p class="task-meta">Choose which ${escapeModalText(label)} to export.</p>
+      <div class="lead-import-soft-section">
+        <label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>
+        <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" /> ${normalizedType === "duplicates" ? "Duplicates detected" : "Unqualified leads"} in date range</label>
+        <div class="inline-grid two" data-lead-export-date-range hidden>
+          <label>From date<input type="date" name="leadExportFrom" /></label>
+          <label>To date<input type="date" name="leadExportTo" /></label>
+        </div>
+        <label class="profile-check"><input type="radio" name="leadExportScope" value="all" /> All matching ${escapeModalText(label)}</label>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+      <button type="submit" class="btn btn-accent" data-submit-busy-label="Exporting...">Export</button>
+    </div>
+  `;
+  modalOverlay.hidden = false;
+  requestAnimationFrame(() => modalOverlay.classList.add("show"));
+}
+
+function mapLeadExportRowsToCsv(rows = []) {
+  const headers = ["Name", "Company", "Email", "Phone", "Secondary Phone", "Source", "Status", "Interest", "Owner", "Created", "Updated"];
+  const lines = [headers.map(csvEscape).join(",")];
+  rows.forEach((row) => {
+    lines.push(
+      [
+        row.name,
+        row.company_name,
+        row.email,
+        row.phone,
+        row.secondary_phone,
+        row.source,
+        row.status,
+        row.interest,
+        row.owner,
+        row.created_at,
+        row.updated_at
+      ].map((value) => csvEscape(String(value || ""))).join(",")
+    );
+  });
+  return lines;
+}
+
+async function submitLeadExportModal(form, submitter) {
+  const exportType = String(form.dataset.exportType || "unqualified").trim() === "duplicates" ? "duplicates" : "unqualified";
+  const scope = String(form.querySelector("input[name='leadExportScope']:checked")?.value || "new").trim() || "new";
+  const fromValue = String(form.querySelector("input[name='leadExportFrom']")?.value || "").trim();
+  const toValue = String(form.querySelector("input[name='leadExportTo']")?.value || "").trim();
+  if (scope === "date-range" && (!fromValue || !toValue)) {
+    window.alert("Choose a from date and to date before exporting.");
+    return;
+  }
+  if (scope === "date-range" && fromValue > toValue) {
+    window.alert("The export from date must be before the to date.");
+    return;
+  }
+  const submitButton = submitter instanceof HTMLButtonElement ? submitter : form.querySelector("button[type='submit']");
+  const defaultSubmitLabel = submitButton ? String(submitButton.textContent || "Export").trim() || "Export" : "Export";
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = String(submitButton.dataset.submitBusyLabel || "Exporting...");
+  }
+  form.dataset.submitting = "1";
+  try {
+    const client = getSupabaseClient();
+    const { data, error } = await client.rpc("get_lead_export_rows", {
+      p_export_type: exportType,
+      p_scope: scope,
+      p_date_from: fromValue || null,
+      p_date_to: toValue || null
+    });
+    if (error) {
+      throw error;
+    }
+    const rows = Array.isArray(data?.rows) ? data.rows : [];
+    if (!rows.length) {
+      window.alert("No leads match this export scope.");
+      return;
+    }
+    downloadCsvFile(mapLeadExportRowsToCsv(rows), `leads-${exportType}-${scope}`);
+    await client.rpc("record_lead_export", {
+      p_export_type: exportType,
+      p_scope: scope,
+      p_date_from: fromValue || null,
+      p_date_to: toValue || null,
+      p_items: rows.map((row) => ({
+        exportKey: String(row.export_key || row.id || "").trim(),
+        leadId: String(row.id || "").trim()
+      }))
+    });
+    closeModal();
+  } catch (error) {
+    console.error("Lead export failed:", error);
+    window.alert(`Export failed: ${String(error?.message || error || "Unknown error")}`);
+  } finally {
+    form.dataset.submitting = "0";
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = defaultSubmitLabel;
+    }
+  }
+}
+
 function exportAttendanceManagerTable(options = {}) {
   const table = document.querySelector("[data-attendance-export-table]");
   if (!(table instanceof HTMLTableElement)) {
@@ -31281,7 +31405,12 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-export-unqualified") {
-    void openUnqualifiedLeadExportConfirm();
+    openLeadExportModal("unqualified");
+    return;
+  }
+
+  if (action === "lead-export-duplicates") {
+    openLeadExportModal("duplicates");
     return;
   }
 
@@ -38292,6 +38421,15 @@ function onChange(event) {
   }
 
   const modalForm = event.target.closest("#modalForm");
+  if (modalForm instanceof HTMLFormElement && modalForm.dataset.mode === "lead-export") {
+    if (event.target.matches("input[name='leadExportScope']")) {
+      const dateRange = modalForm.querySelector("[data-lead-export-date-range]");
+      if (dateRange instanceof HTMLElement) {
+        dateRange.hidden = String(event.target.value || "") !== "date-range";
+      }
+      return;
+    }
+  }
   if (modalForm instanceof HTMLFormElement && modalForm.dataset.mode === "attendance-manual-compose") {
     syncAttendanceManualEntryUi(modalForm);
     return;
@@ -38763,6 +38901,10 @@ async function onSubmit(event) {
     }
     if (event.target.dataset.mode === "new-group-chat") {
       await submitNewGroupChatForm(event.target);
+      return;
+    }
+    if (event.target.dataset.mode === "lead-export") {
+      await submitLeadExportModal(event.target, event.submitter);
       return;
     }
     if (event.target.dataset.mode === "lead-followup") {

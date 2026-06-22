@@ -2239,6 +2239,7 @@ export function renderLeads(data, context) {
               ${showReserveLeadMeter ? `<span class="crm-lead-reserve-meter" title="Reserve leads available for refill"><span>Reserve</span><strong>${escapeHtml(reserveCountLabel)}</strong></span>` : ""}
               ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn crm-lead-import-btn" data-action="lead-import-open" data-id="open" aria-label="Import leads" title="Import leads"><i class="bi bi-upload" aria-hidden="true"></i></button>` : ""}
               ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn crm-lead-export-btn" data-action="lead-export-unqualified" data-id="unqualified" aria-label="Export unqualified leads" title="Export unqualified leads"><i class="bi bi-download" aria-hidden="true"></i></button>` : ""}
+              ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn crm-lead-export-btn" data-action="lead-export-duplicates" data-id="duplicates" aria-label="Export duplicate leads" title="Export duplicate leads"><i class="bi bi-files" aria-hidden="true"></i></button>` : ""}
               <button class="table-ops-columns-btn" type="button" data-action="view-add-record" data-id="create">
                 <i class="bi bi-plus-lg" aria-hidden="true"></i>
                 <span>New Lead</span>
