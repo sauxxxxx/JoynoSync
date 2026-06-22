@@ -10237,7 +10237,6 @@ function openLeadExportModal(exportType = "unqualified") {
   }
   const normalizedType = String(exportType || "").trim() === "duplicates" ? "duplicates" : "unqualified";
   const label = getLeadExportLabel(normalizedType);
-  closeOpenMenus();
   modalTitle.textContent = normalizedType === "duplicates" ? "Export Duplicates" : "Export Unqualified Leads";
   modalForm.dataset.mode = "lead-export";
   modalForm.dataset.exportType = normalizedType;
