@@ -21331,6 +21331,12 @@ function createEmptyLeadImportDraft() {
     openMapField: "",
     openDuplicateMode: false,
     openDuplicateColumns: false,
+    duplicateExportScope: "new",
+    duplicateExportFrom: "",
+    duplicateExportTo: "",
+    duplicateExportBusy: false,
+    duplicateExportError: "",
+    duplicateExportLastBatch: null,
     dragOver: false
   };
 }
@@ -21863,16 +21869,119 @@ function downloadLeadImportIssuesCsv(draft, review) {
   downloadCsvFile(lines, buildLeadImportExportFileName(draft?.fileName, "issues"));
 }
 
-function downloadLeadImportDuplicatesCsv(draft, review) {
+function getLeadImportDuplicateFingerprint(row) {
+  const values = row && row.values && typeof row.values === "object" ? row.values : {};
+  return [
+    String(row?.duplicateLeadId || "").trim(),
+    String(values.email || "").trim().toLowerCase(),
+    phoneDigitsOnly(values.phone || ""),
+    phoneDigitsOnly(values.secondaryPhone || ""),
+    String(values.name || "").trim().toLowerCase(),
+    String(values.company || "").trim().toLowerCase()
+  ].join("|");
+}
+
+function getLeadImportRowDetectedDate(row) {
+  const values = row && row.values && typeof row.values === "object" ? row.values : {};
+  const candidates = [values.createdAt, values.created_at, values.importedAt, values.imported_at, row?.createdAt, row?.created_at];
+  for (const candidate of candidates) {
+    const parsed = parseIsoDateLocal(candidate);
+    if (parsed) {
+      return formatLocalIsoDate(parsed);
+    }
+  }
+  return formatLocalIsoDate(new Date());
+}
+
+function isLeadImportDuplicateInDateRange(row, fromValue, toValue) {
+  const detectedDate = getLeadImportRowDetectedDate(row);
+  if (fromValue && detectedDate < fromValue) {
+    return false;
+  }
+  if (toValue && detectedDate > toValue) {
+    return false;
+  }
+  return true;
+}
+
+async function fetchLeadDuplicateExportState(fingerprints) {
+  if (!state.supabaseConfigured || !Array.isArray(fingerprints) || !fingerprints.length) {
+    return { exportedFingerprints: [], lastBatch: null };
+  }
+  const client = getSupabaseClient();
+  const { data, error } = await client.rpc("get_lead_duplicate_export_state", {
+    p_fingerprints: fingerprints
+  });
+  if (error) {
+    throw error;
+  }
+  return {
+    exportedFingerprints: Array.isArray(data?.exportedFingerprints) ? data.exportedFingerprints : [],
+    lastBatch: data?.lastBatch || null
+  };
+}
+
+async function recordLeadDuplicateExport(scope, fromValue, toValue, rows) {
+  if (!state.supabaseConfigured || !Array.isArray(rows) || !rows.length) {
+    return null;
+  }
+  const client = getSupabaseClient();
+  const { data, error } = await client.rpc("record_lead_duplicate_export", {
+    p_scope: scope,
+    p_date_from: fromValue || null,
+    p_date_to: toValue || null,
+    p_filter_snapshot: {
+      duplicateMode: state.leadImportDraft?.duplicateMode || "skip",
+      duplicateColumns: state.leadImportDraft?.duplicateColumns || []
+    },
+    p_items: rows.map((row) => ({
+      fingerprint: getLeadImportDuplicateFingerprint(row),
+      duplicateLeadId: String(row?.duplicateLeadId || "").trim(),
+      rowNumber: Number(row?.rowNumber || 0)
+    }))
+  });
+  if (error) {
+    throw error;
+  }
+  return data || null;
+}
+
+async function downloadLeadImportDuplicatesCsv(draft, review) {
   const headers = Array.isArray(draft?.headers) ? draft.headers.map((header) => String(header || "").trim()) : [];
   const sourceRows = Array.isArray(draft?.rows) ? draft.rows : [];
   const duplicateRows = (review?.rows || []).filter((row) => Boolean(row?.isDuplicateMatch));
+  const scope = String(draft?.duplicateExportScope || "new").trim() || "new";
+  const fromValue = String(draft?.duplicateExportFrom || "").trim();
+  const toValue = String(draft?.duplicateExportTo || "").trim();
   if (!headers.length || !duplicateRows.length) {
+    return;
+  }
+  if (scope === "date-range" && (!fromValue || !toValue)) {
+    throw new Error("Choose a from date and to date before exporting duplicates by date range.");
+  }
+  if (scope === "date-range" && fromValue > toValue) {
+    throw new Error("The duplicate export from date must be before the to date.");
+  }
+  const fingerprints = duplicateRows.map(getLeadImportDuplicateFingerprint).filter(Boolean);
+  const exportState = await fetchLeadDuplicateExportState(fingerprints);
+  const exportedSet = new Set(exportState.exportedFingerprints || []);
+  const scopedRows = duplicateRows.filter((row) => {
+    const fingerprint = getLeadImportDuplicateFingerprint(row);
+    if (scope === "new" && exportedSet.has(fingerprint)) {
+      return false;
+    }
+    if (scope === "date-range") {
+      return isLeadImportDuplicateInDateRange(row, fromValue, toValue);
+    }
+    return true;
+  });
+  if (!scopedRows.length) {
+    window.alert("No duplicate leads match this export scope.");
     return;
   }
   const lines = [
     [...headers, "Result"].map(csvEscape).join(","),
-    ...duplicateRows.map((row) => {
+    ...scopedRows.map((row) => {
       const rowIndex = Math.max(0, Number(row?.rowNumber || 0) - 2);
       const sourceRow = Array.isArray(sourceRows[rowIndex]) ? sourceRows[rowIndex] : [];
       const exportRow = headers.map((_, index) => String(sourceRow[index] ?? "").trim());
@@ -21880,6 +21989,7 @@ function downloadLeadImportDuplicatesCsv(draft, review) {
     })
   ];
   downloadCsvFile(lines, buildLeadImportExportFileName(draft?.fileName, "duplicates"));
+  await recordLeadDuplicateExport(scope, fromValue, toValue, scopedRows);
 }
 
 function renderLeadImportModal() {
@@ -22248,10 +22358,27 @@ function renderLeadImportModal() {
                           <p class="lead-import-section-subtitle">Only rows with warnings or duplicates are shown here.</p>
                         </div>
                         <div class="lead-import-inline-actions">
-                          ${duplicateRows.length ? `<button type="button" class="mini-btn" data-action="lead-import-download-duplicates">Export duplicates</button>` : ""}
+                          ${duplicateRows.length ? `<button type="button" class="mini-btn" data-action="lead-import-download-duplicates" ${draft.duplicateExportBusy ? "disabled" : ""}>${draft.duplicateExportBusy ? "Exporting..." : "Export duplicates"}</button>` : ""}
                           ${reviewOnlyRows.length ? `<button type="button" class="mini-btn" data-action="lead-import-download-issues">Export issues</button>` : ""}
                         </div>
                       </div>
+                      ${
+                        duplicateRows.length
+                          ? `
+                            <div class="lead-import-soft-section">
+                              <p class="lead-import-section-title">Duplicate export scope</p>
+                              <label class="profile-check"><input type="radio" name="duplicateExportScope" value="new" ${draft.duplicateExportScope !== "date-range" && draft.duplicateExportScope !== "all" ? "checked" : ""} data-action="lead-import-duplicate-export-scope" /> New duplicates only</label>
+                              <label class="profile-check"><input type="radio" name="duplicateExportScope" value="date-range" ${draft.duplicateExportScope === "date-range" ? "checked" : ""} data-action="lead-import-duplicate-export-scope" /> Duplicates detected in date range</label>
+                              <div class="inline-grid two" ${draft.duplicateExportScope === "date-range" ? "" : "hidden"}>
+                                <label>From date<input type="date" name="duplicateExportFrom" value="${escapeModalText(draft.duplicateExportFrom || "")}" /></label>
+                                <label>To date<input type="date" name="duplicateExportTo" value="${escapeModalText(draft.duplicateExportTo || "")}" /></label>
+                              </div>
+                              <label class="profile-check"><input type="radio" name="duplicateExportScope" value="all" ${draft.duplicateExportScope === "all" ? "checked" : ""} data-action="lead-import-duplicate-export-scope" /> All matching duplicates</label>
+                              ${draft.duplicateExportError ? `<p class="lead-import-soft-note lead-import-soft-note-error">${escapeModalText(draft.duplicateExportError)}</p>` : ""}
+                            </div>
+                          `
+                          : ""
+                      }
                       <div class="lead-import-review-list">
                         ${issuePreviewRows}
                       </div>
@@ -31383,7 +31510,27 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-import-download-duplicates") {
-    downloadLeadImportDuplicatesCsv(state.leadImportDraft, state.leadImportDraft?.review);
+    state.leadImportDraft = {
+      ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+      duplicateExportBusy: true,
+      duplicateExportError: ""
+    };
+    renderLeadImportModal();
+    try {
+      await downloadLeadImportDuplicatesCsv(state.leadImportDraft, state.leadImportDraft?.review);
+      state.leadImportDraft = {
+        ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+        duplicateExportBusy: false,
+        duplicateExportError: ""
+      };
+    } catch (error) {
+      state.leadImportDraft = {
+        ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+        duplicateExportBusy: false,
+        duplicateExportError: error instanceof Error ? error.message : "Duplicate export failed."
+      };
+    }
+    renderLeadImportModal();
     return;
   }
 
@@ -38343,6 +38490,24 @@ function onChange(event) {
         return;
       }
       state.leadImportDraft = nextDraft;
+      return;
+    }
+    if (event.target.matches("input[name='duplicateExportScope']")) {
+      state.leadImportDraft = {
+        ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+        duplicateExportScope: String(event.target.value || "new").trim() || "new",
+        duplicateExportError: ""
+      };
+      renderLeadImportModal();
+      return;
+    }
+    if (event.target.matches("input[name='duplicateExportFrom'], input[name='duplicateExportTo']")) {
+      state.leadImportDraft = {
+        ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+        duplicateExportFrom: String(importModalForm.querySelector("input[name='duplicateExportFrom']")?.value || "").trim(),
+        duplicateExportTo: String(importModalForm.querySelector("input[name='duplicateExportTo']")?.value || "").trim(),
+        duplicateExportError: ""
+      };
       return;
     }
     if (event.target.matches("input[name='leadImportDistributionMode']")) {
