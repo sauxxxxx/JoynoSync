@@ -1504,6 +1504,68 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
       .range((page - 1) * pageSize, page * pageSize - 1);
   }
 
+  if (!includeMeta && !requestedCursor) {
+    const { data: rpcData, error: rpcError } = await client.rpc("get_leads_page", {
+      p_scope: scope,
+      p_current_user_id: currentUserId || null,
+      p_status_filter: statusFilter || "all",
+      p_date_filter: dateFilter || "all",
+      p_source_filter: sourceFilter || "all",
+      p_timezone_filter:
+        timezoneFilter && timezoneFilter !== "all" ? mapLeadTimezoneFilterToStoredValue(timezoneFilter) : "all",
+      p_owner_filter: ownerFilter || "all",
+      p_search_term: searchTerm || "",
+      p_page: page,
+      p_page_size: pageSize,
+      p_sort_key: sortKey || "name",
+      p_sort_dir: sortDir === "desc" ? "desc" : "asc"
+    });
+
+    if (!rpcError && rpcData && typeof rpcData === "object") {
+      const sharedContext = {
+        memberNameMap,
+        accountNameById: new Map(),
+        contactNameById: new Map(),
+        primaryContactByAccountId: new Map(),
+        openDealCountByAccountId: new Map()
+      };
+      const rpcRows = Array.isArray(rpcData.rows) ? rpcData.rows : [];
+      const pageRows = rpcRows.slice(0, pageSize);
+      const rows = pageRows.map((row) => mapLeadRow(row, sharedContext));
+      const hasNextPage = Boolean(rpcData.hasMore) || rpcRows.length > pageSize;
+      const hasPreviousPage = page > 1;
+      const pageStartCursor = buildLeadPageCursorFromRow(pageRows[0], sortKey);
+      const pageEndCursor = buildLeadPageCursorFromRow(pageRows[pageRows.length - 1], sortKey);
+
+      return {
+        rows,
+        scope,
+        statusFilter,
+        dateFilter,
+        ownerFilter,
+        sourceFilter,
+        timezoneFilter,
+        searchTerm,
+        page,
+        pageSize,
+        sortKey,
+        sortDir,
+        hasMore: hasNextPage,
+        hasPrevious: hasPreviousPage,
+        hasNextPage,
+        hasPreviousPage,
+        pageStartCursor,
+        pageEndCursor,
+        pendingUnqualifiedCount: 0,
+        dueUnqualifiedCount: 0
+      };
+    }
+
+    if (rpcError && !String(rpcError?.message || "").includes("Could not find the function")) {
+      console.warn("Supabase leads page RPC failed; falling back to table query:", rpcError);
+    }
+  }
+
   const rowsResult = await rowsQuery;
   if (rowsResult.error) {
     throw rowsResult.error;
