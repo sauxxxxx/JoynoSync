@@ -6521,6 +6521,7 @@ async function prefetchSupabaseLeadsPageData(requestOptions = {}, pageOverride =
     await fetchAndCacheQuery(queryKey, () =>
       fetchSupabaseLeadsPage(workspaceId, {
         ...prefetchOptions,
+        includeMeta: false,
         ...(cursorState
           ? {
               cursor: cursorState.cursor,
