@@ -10227,6 +10227,152 @@ function getLeadExportLabel(exportType) {
   return String(exportType || "").trim() === "duplicates" ? "duplicate leads" : "unqualified leads";
 }
 
+function parseLeadExportDateValue(value) {
+  const normalized = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+    return null;
+  }
+  const [year, month, day] = normalized.split("-").map((part) => Number(part));
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+  return date;
+}
+
+function formatLeadExportDateValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatLeadExportDateDisplay(value) {
+  const date = parseLeadExportDateValue(value);
+  if (!date) {
+    return "Select date";
+  }
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function getLeadExportVisibleMonth(control) {
+  const visibleValue = String(control.dataset.visibleMonth || "").trim();
+  const selectedDate = parseLeadExportDateValue(control.querySelector("input")?.value);
+  const baseDate = parseLeadExportDateValue(`${visibleValue}-01`) || selectedDate || new Date();
+  return new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+}
+
+function renderLeadExportDatePicker(control) {
+  const input = control.querySelector("input");
+  const trigger = control.querySelector("[data-lead-export-date-toggle]");
+  const panel = control.querySelector("[data-lead-export-date-panel]");
+  if (!input || !trigger || !panel) {
+    return;
+  }
+  const selectedDate = parseLeadExportDateValue(input.value);
+  const monthDate = getLeadExportVisibleMonth(control);
+  control.dataset.visibleMonth = formatLeadExportDateValue(monthDate).slice(0, 7);
+  trigger.textContent = formatLeadExportDateDisplay(input.value);
+  trigger.classList.toggle("is-empty", !selectedDate);
+
+  const firstDayIndex = monthDate.getDay();
+  const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+  const previousMonthDays = new Date(monthDate.getFullYear(), monthDate.getMonth(), 0).getDate();
+  const cells = [];
+  for (let index = 0; index < 42; index += 1) {
+    const dayNumber = index - firstDayIndex + 1;
+    const isCurrentMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
+    const displayDay = isCurrentMonth
+      ? dayNumber
+      : dayNumber < 1
+        ? previousMonthDays + dayNumber
+        : dayNumber - daysInMonth;
+    const cellDate = new Date(
+      monthDate.getFullYear(),
+      monthDate.getMonth() + (isCurrentMonth ? 0 : dayNumber < 1 ? -1 : 1),
+      displayDay
+    );
+    const iso = formatLeadExportDateValue(cellDate);
+    const isSelected = selectedDate && iso === formatLeadExportDateValue(selectedDate);
+    cells.push(
+      `<button type="button" class="lead-export-calendar-day${isCurrentMonth ? "" : " is-muted"}${isSelected ? " is-selected" : ""}" data-lead-export-date-day="${iso}">${displayDay}</button>`
+    );
+  }
+
+  panel.innerHTML = `
+    <div class="lead-export-calendar-head">
+      <button type="button" class="icon-btn" data-lead-export-date-shift="-1" aria-label="Previous month"><i class="bi bi-chevron-left"></i></button>
+      <strong>${monthDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</strong>
+      <button type="button" class="icon-btn" data-lead-export-date-shift="1" aria-label="Next month"><i class="bi bi-chevron-right"></i></button>
+    </div>
+    <div class="lead-export-calendar-weekdays">
+      <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+    </div>
+    <div class="lead-export-calendar-grid">${cells.join("")}</div>
+    <div class="lead-export-calendar-foot">
+      <button type="button" class="mini-btn" data-lead-export-date-clear>Clear</button>
+      <button type="button" class="mini-btn" data-lead-export-date-today>Today</button>
+    </div>
+  `;
+}
+
+function setupLeadExportDatePickers(container) {
+  const controls = Array.from(container.querySelectorAll("[data-lead-export-date-control]"));
+  const closePanels = (exceptControl = null) => {
+    controls.forEach((control) => {
+      if (control !== exceptControl) {
+        control.classList.remove("is-open");
+      }
+    });
+  };
+  controls.forEach((control) => renderLeadExportDatePicker(control));
+  if (container.leadExportDatePickerHandler) {
+    container.removeEventListener("click", container.leadExportDatePickerHandler);
+  }
+  container.leadExportDatePickerHandler = (event) => {
+    const control = event.target.closest("[data-lead-export-date-control]");
+    if (!control) {
+      closePanels();
+      return;
+    }
+    const input = control.querySelector("input");
+    if (event.target.closest("[data-lead-export-date-toggle]")) {
+      closePanels(control);
+      control.classList.toggle("is-open");
+      renderLeadExportDatePicker(control);
+      return;
+    }
+    const shiftButton = event.target.closest("[data-lead-export-date-shift]");
+    if (shiftButton) {
+      const monthDate = getLeadExportVisibleMonth(control);
+      monthDate.setMonth(monthDate.getMonth() + Number(shiftButton.dataset.leadExportDateShift || 0));
+      control.dataset.visibleMonth = formatLeadExportDateValue(monthDate).slice(0, 7);
+      renderLeadExportDatePicker(control);
+      return;
+    }
+    const dayButton = event.target.closest("[data-lead-export-date-day]");
+    if (dayButton && input) {
+      input.value = String(dayButton.dataset.leadExportDateDay || "");
+      control.dataset.visibleMonth = input.value.slice(0, 7);
+      control.classList.remove("is-open");
+      renderLeadExportDatePicker(control);
+      return;
+    }
+    if (event.target.closest("[data-lead-export-date-clear]") && input) {
+      input.value = "";
+      renderLeadExportDatePicker(control);
+      return;
+    }
+    if (event.target.closest("[data-lead-export-date-today]") && input) {
+      input.value = formatLeadExportDateValue(new Date());
+      control.dataset.visibleMonth = input.value.slice(0, 7);
+      control.classList.remove("is-open");
+      renderLeadExportDatePicker(control);
+    }
+  };
+  container.addEventListener("click", container.leadExportDatePickerHandler);
+}
+
 function openLeadExportModal(exportType = "unqualified") {
   const modalOverlay = document.getElementById("modalOverlay");
   const modalTitle = document.getElementById("modalTitle");
@@ -10247,9 +10393,19 @@ function openLeadExportModal(exportType = "unqualified") {
       <div class="lead-import-soft-section">
         <label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>
         <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" /> ${normalizedType === "duplicates" ? "Duplicates detected" : "Unqualified leads"} in date range</label>
-        <div class="inline-grid two" data-lead-export-date-range hidden>
-          <label>From date<input type="date" name="leadExportFrom" /></label>
-          <label>To date<input type="date" name="leadExportTo" /></label>
+        <div class="lead-export-date-row" data-lead-export-date-range hidden>
+          <div class="lead-export-date-control" data-lead-export-date-control>
+            <span>From date</span>
+            <input type="hidden" name="leadExportFrom" />
+            <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
+            <div class="lead-export-calendar" data-lead-export-date-panel></div>
+          </div>
+          <div class="lead-export-date-control" data-lead-export-date-control>
+            <span>To date</span>
+            <input type="hidden" name="leadExportTo" />
+            <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
+            <div class="lead-export-calendar" data-lead-export-date-panel></div>
+          </div>
         </div>
         <label class="profile-check"><input type="radio" name="leadExportScope" value="all" /> All matching ${escapeModalText(label)}</label>
       </div>
@@ -19560,6 +19716,7 @@ function openLeadBulkAttemptModal() {
       <button type="submit" class="btn btn-accent" data-submit-busy-label="Logging...">Log Attempts</button>
     </div>
   `;
+  setupLeadExportDatePickers(modalForm);
   modalOverlay.hidden = false;
 }
 
