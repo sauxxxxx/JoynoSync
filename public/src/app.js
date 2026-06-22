@@ -10415,6 +10415,7 @@ function openLeadExportModal(exportType = "unqualified") {
       <button type="submit" class="btn btn-accent" data-submit-busy-label="Exporting...">Export</button>
     </div>
   `;
+  setupLeadExportDatePickers(modalForm);
   modalOverlay.hidden = false;
   requestAnimationFrame(() => modalOverlay.classList.add("show"));
 }

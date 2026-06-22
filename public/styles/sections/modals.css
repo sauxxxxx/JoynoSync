@@ -1678,6 +1678,10 @@
   align-items: start;
 }
 
+.lead-export-date-row[hidden] {
+  display: none;
+}
+
 .lead-export-date-control {
   position: relative;
   display: grid;
