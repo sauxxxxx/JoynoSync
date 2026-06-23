@@ -10400,6 +10400,21 @@ function setupLeadExportDatePickers(container) {
   container.addEventListener("click", container.leadExportDatePickerHandler);
 }
 
+function syncLeadExportAttemptFilter(form) {
+  const field = form?.querySelector?.("[data-lead-export-attempt-field]");
+  if (!(field instanceof HTMLElement)) {
+    return;
+  }
+  const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim();
+  field.hidden = statusValue !== "Contacted";
+  if (field.hidden) {
+    const input = field.querySelector("[name='leadExportAttemptFilter']");
+    if (input) {
+      input.value = "all";
+    }
+  }
+}
+
 function openLeadExportModal(exportType = "leads") {
   const modalOverlay = document.getElementById("modalOverlay");
   const modalTitle = document.getElementById("modalTitle");
@@ -10444,6 +10459,15 @@ function openLeadExportModal(exportType = "leads") {
             <option value="all">Active + archived</option>
           </select>
         </label>
+        <label class="lead-export-field" data-lead-export-attempt-field hidden>
+          <span>Attempt filter</span>
+          <select name="leadExportAttemptFilter">
+            <option value="all">All attempts</option>
+            <option value="1">1/3 only</option>
+            <option value="2">2/3 only</option>
+            <option value="3">3/3 only</option>
+          </select>
+        </label>
         ` : ""}
         ${normalizedType === "leads" ? "" : `<label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>`}
         <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" ${normalizedType === "leads" ? "checked" : ""} /> ${normalizedType === "duplicates" ? "Duplicates detected" : normalizedType === "unqualified" ? "Unqualified leads" : "Leads created"} in date range</label>
@@ -10470,6 +10494,7 @@ function openLeadExportModal(exportType = "leads") {
     </div>
   `;
   setupLeadExportDatePickers(modalForm);
+  syncLeadExportAttemptFilter(modalForm);
   modalOverlay.hidden = false;
   requestAnimationFrame(() => modalOverlay.classList.add("show"));
 }
@@ -10505,6 +10530,7 @@ async function submitLeadExportModal(form, submitter) {
   const toValue = String(form.querySelector("input[name='leadExportTo']")?.value || "").trim();
   const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim() || "all";
   const archiveScope = String(form.querySelector("[name='leadExportArchiveScope']")?.value || "active").trim() || "active";
+  const attemptFilter = String(form.querySelector("[name='leadExportAttemptFilter']")?.value || "all").trim() || "all";
   if (scope === "date-range" && (!fromValue || !toValue)) {
     window.alert("Choose a from date and to date before exporting.");
     return;
@@ -10528,7 +10554,8 @@ async function submitLeadExportModal(form, submitter) {
       p_date_from: fromValue || null,
       p_date_to: toValue || null,
       p_status: statusValue,
-      p_archive_scope: archiveScope
+      p_archive_scope: archiveScope,
+      p_attempt_filter: attemptFilter
     });
     if (error) {
       throw error;
@@ -38739,6 +38766,10 @@ function onChange(event) {
       if (dateRange instanceof HTMLElement) {
         dateRange.hidden = String(event.target.value || "") !== "date-range";
       }
+      return;
+    }
+    if (event.target.matches("[name='leadExportStatus']")) {
+      syncLeadExportAttemptFilter(modalForm);
       return;
     }
   }
