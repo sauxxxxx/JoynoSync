@@ -10424,6 +10424,14 @@ function openLeadExportModal(exportType = "leads") {
             <option value="Converted">Converted</option>
           </select>
         </label>
+        <label class="lead-export-field">
+          <span>Archive scope</span>
+          <select name="leadExportArchiveScope">
+            <option value="active">Active leads only</option>
+            <option value="archived">Archived leads only</option>
+            <option value="all">Active + archived</option>
+          </select>
+        </label>
         ` : ""}
         ${normalizedType === "leads" ? "" : `<label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>`}
         <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" ${normalizedType === "leads" ? "checked" : ""} /> ${normalizedType === "duplicates" ? "Duplicates detected" : normalizedType === "unqualified" ? "Unqualified leads" : "Leads created"} in date range</label>
@@ -10484,6 +10492,7 @@ async function submitLeadExportModal(form, submitter) {
   const fromValue = String(form.querySelector("input[name='leadExportFrom']")?.value || "").trim();
   const toValue = String(form.querySelector("input[name='leadExportTo']")?.value || "").trim();
   const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim() || "all";
+  const archiveScope = String(form.querySelector("[name='leadExportArchiveScope']")?.value || "active").trim() || "active";
   if (scope === "date-range" && (!fromValue || !toValue)) {
     window.alert("Choose a from date and to date before exporting.");
     return;
@@ -10506,7 +10515,8 @@ async function submitLeadExportModal(form, submitter) {
       p_scope: scope,
       p_date_from: fromValue || null,
       p_date_to: toValue || null,
-      p_status: statusValue
+      p_status: statusValue,
+      p_archive_scope: archiveScope
     });
     if (error) {
       throw error;
