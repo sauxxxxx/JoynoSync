@@ -141,6 +141,7 @@ import {
   fetchSupabaseLeadImportJob,
   fetchSupabaseLeadProfileBundle,
   fetchSupabaseLeadStatusEvents,
+  fetchSupabaseLeadActivityEvents,
   fetchSupabaseContactProfileBundle,
   fetchSupabaseContactsSnapshot,
   fetchSupabaseAccountsSnapshot,
@@ -6736,6 +6737,17 @@ async function refreshSupabaseCrmData(options = {}) {
       }
     );
     applySupabaseCrmSnapshot(snapshot);
+    try {
+      state.data.leadActivityEvents = await fetchSupabaseLeadActivityEvents(workspaceId, {
+        teamMembers: state.data.teamMembers,
+        limit: 500
+      });
+    } catch (activityError) {
+      console.warn("Lead activity audit sync failed:", activityError);
+      if (!Array.isArray(state.data.leadActivityEvents)) {
+        state.data.leadActivityEvents = [];
+      }
+    }
     clearQueryCache({ preservePersistent: true });
     invalidateDashboardCaches(workspaceId);
     if (syncDashboard) {
@@ -10102,7 +10114,7 @@ function formatLeadExportNextFollowUp(value) {
 }
 
 function getLeadExportLastTouchValue(lead) {
-  return String(lead?._lastTouchAt || lead?.updatedAt || lead?.createdAt || "").trim();
+  return String(lead?._lastTouchAt || "").trim();
 }
 
 function getLeadExportOwner(lead) {
@@ -20351,6 +20363,97 @@ async function submitLeadReassignForm(form) {
 
 function resolveTaskComposerAssigneeId(ownerId = "", ownerName = "") {
   return String(ownerId || resolveTeamMemberIdByName(ownerName) || state.data.currentUser.id || "").trim();
+}
+
+function openLeadBulkReassignModal() {
+  const selectedIds = Array.from(state.selectedLeadIds || []).filter(Boolean);
+  if (!selectedIds.length) {
+    window.alert("Select at least one lead to reassign.");
+    return;
+  }
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalForm = document.getElementById("modalForm");
+  const modalCard = document.querySelector(".modal-card");
+  if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
+    return;
+  }
+  const assignableMembers = getLeadAssignableTeamMembers();
+  if (!assignableMembers.length) {
+    window.alert("No active team members are available for reassignment.");
+    return;
+  }
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide");
+  modalTitle.textContent = "Reassign selected leads";
+  modalForm.dataset.mode = "lead-bulk-reassign";
+  modalForm.innerHTML = `
+    <div class="modal-body">
+      <p class="task-meta">Choose a new owner for ${escapeModalText(String(selectedIds.length))} selected lead${selectedIds.length === 1 ? "" : "s"}.</p>
+      <input type="hidden" name="leadIds" value="${escapeModalText(selectedIds.join("|"))}" />
+      <label class="lead-export-field">
+        <span>New assignee</span>
+        <select name="ownerMemberId" required>
+          <option value="">Choose assignee</option>
+          ${assignableMembers
+            .map((member) => `<option value="${escapeModalText(member.id)}">${escapeModalText(member.name || member.email || "Team member")}</option>`)
+            .join("")}
+        </select>
+      </label>
+      <p class="lead-profile-list-meta">This changes ownership only. It does not count as a sales touch.</p>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+      <button type="submit" class="btn btn-accent" data-submit-busy-label="Reassigning...">Reassign</button>
+    </div>
+  `;
+  modalOverlay.hidden = false;
+  requestAnimationFrame(() => modalOverlay.classList.add("show"));
+}
+
+async function submitLeadBulkReassignForm(form, submitter) {
+  const leadIds = String(form.querySelector("input[name='leadIds']")?.value || "")
+    .split("|")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  const ownerMemberId = String(form.querySelector("[name='ownerMemberId']")?.value || "").trim();
+  if (!leadIds.length) {
+    window.alert("No selected leads were found.");
+    return;
+  }
+  if (!ownerMemberId) {
+    window.alert("Choose an assignee.");
+    return;
+  }
+  const submitButton = submitter instanceof HTMLButtonElement ? submitter : form.querySelector("button[type='submit']");
+  const defaultSubmitLabel = submitButton ? String(submitButton.textContent || "Reassign").trim() || "Reassign" : "Reassign";
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = String(submitButton.dataset.submitBusyLabel || "Reassigning...");
+  }
+  form.dataset.submitting = "1";
+  try {
+    const client = getSupabaseClient();
+    const { error } = await client.rpc("bulk_reassign_leads", {
+      p_lead_ids: leadIds,
+      p_owner_member_id: ownerMemberId
+    });
+    if (error) {
+      throw error;
+    }
+    clearLeadSelection();
+    closeModal();
+    await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
+    renderRoute();
+  } catch (error) {
+    console.error("Bulk reassign failed:", error);
+    window.alert(`Bulk reassign failed: ${String(error?.message || error || "Unknown error")}`);
+  } finally {
+    form.dataset.submitting = "0";
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = defaultSubmitLabel;
+    }
+  }
 }
 
 function buildTaskComposerPrefill(values = {}) {
@@ -34303,6 +34406,11 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-bulk-reassign") {
+    openLeadBulkReassignModal();
+    return;
+  }
+
   if (action === "lead-bulk-status-apply") {
     const nextStatus = String(id || "").trim();
     state.leadBulkStatusOpen = false;
@@ -39117,6 +39225,10 @@ async function onSubmit(event) {
     }
     if (event.target.dataset.mode === "lead-reassign") {
       await submitLeadReassignForm(event.target);
+      return;
+    }
+    if (event.target.dataset.mode === "lead-bulk-reassign") {
+      await submitLeadBulkReassignForm(event.target, event.submitter);
       return;
     }
     if (event.target.dataset.mode === "lead-compose") {

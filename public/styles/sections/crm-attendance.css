@@ -1577,6 +1577,11 @@
   background: #f9fbfe;
 }
 
+.lead-record-page .lead-profile-timeline-item.is-audit {
+  background: #f8fafc;
+  border-style: dashed;
+}
+
 .lead-record-page .lead-record-section-subtitle {
   margin-top: 2px;
   font-size: 10px;

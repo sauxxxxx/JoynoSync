@@ -1111,8 +1111,8 @@ function compareLeadRowsByWorkflowStatus(left, right) {
     return statusCompare;
   }
   const lastTouchCompare = compareDateIso(
-    String(right?._lastTouchAt || right?.updatedAt || right?.createdAt || ""),
-    String(left?._lastTouchAt || left?.updatedAt || left?.createdAt || "")
+    String(right?._lastTouchAt || ""),
+    String(left?._lastTouchAt || "")
   );
   if (lastTouchCompare !== 0) {
     return lastTouchCompare;
@@ -2038,7 +2038,7 @@ export function renderLeads(data, context) {
       return {
         ...lead,
         _ownerDisplay: resolveOwnerDisplayName(data, lead.owner, lead.ownerId),
-        _lastTouchAt: leadContext.activity[0]?.createdAt || lead.updatedAt || lead.createdAt || ""
+        _lastTouchAt: leadContext.activity[0]?.createdAt || ""
       };
     });
     const sortedRows = sortCrmRows(leadsWithContext, displaySort.key, displaySort.dir, LEAD_SORTERS);
@@ -2326,6 +2326,16 @@ export function renderLeads(data, context) {
                   >
                     <i class="bi bi-check2-circle" aria-hidden="true"></i>
                     <span>${selectedCount === 1 ? "Log attempt" : "Log attempts"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="crm-lead-bulk-trigger"
+                    data-action="lead-bulk-reassign"
+                    data-id="reassign"
+                    ${controlsBusy ? "disabled" : ""}
+                  >
+                    <i class="bi bi-person-plus" aria-hidden="true"></i>
+                    <span>Reassign</span>
                   </button>
                   <button
                     type="button"
@@ -2749,6 +2759,26 @@ export function renderLeadProfile(data, context) {
         .join("")
     : "<p class='lead-profile-empty'>No activity yet.</p>";
 
+  const auditRows = leadContext.audit?.length
+    ? leadContext.audit
+        .map(
+          (item) => `
+            <article class="lead-profile-timeline-item is-audit">
+              <div class="lead-profile-list-head">
+                <p class="lead-profile-list-title">
+                  <i class="bi bi-shield-check" aria-hidden="true"></i>
+                  ${escapeHtml(item.label)}
+                </p>
+                <span class="lead-profile-list-side">${escapeHtml(formatLeadProfileDateTime(item.createdAt))}</span>
+              </div>
+              <p class="lead-profile-list-meta">${leadProfileIconText("bi-person-gear", item.actor || "System", "lead-profile-inline-meta-item")}</p>
+              <p class="lead-profile-list-body">${escapeHtml(item.text)}</p>
+            </article>
+          `
+        )
+        .join("")
+    : "<p class='lead-profile-empty'>No audit history yet.</p>";
+
   const leadAttemptHistoryEntries = [];
   const leadAttemptHistorySeen = new Set();
   const matchesLeadAttemptHistoryEntry = (entry) => {
@@ -3095,6 +3125,16 @@ export function renderLeadProfile(data, context) {
                     </div>
                   </div>
                   <div class="lead-profile-timeline">${activityRows}</div>
+                </section>
+
+                <section class="lead-record-block">
+                  <div class="lead-record-section-head">
+                    <div>
+                      <p class="lead-profile-section-title">Audit History</p>
+                      <p class="lead-record-section-subtitle">Administrative changes that do not count as sales touch.</p>
+                    </div>
+                  </div>
+                  <div class="lead-profile-timeline lead-profile-audit-timeline">${auditRows}</div>
                 </section>
 
                 <section class="lead-record-block">

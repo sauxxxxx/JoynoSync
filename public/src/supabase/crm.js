@@ -2365,6 +2365,95 @@ export async function fetchSupabaseLeadStatusEvents(workspaceId, options = {}) {
   };
 }
 
+function formatLeadActivityValue(value) {
+  if (value === null || value === undefined || value === "") {
+    return "empty";
+  }
+  if (Array.isArray(value)) {
+    return value.length ? value.join(", ") : "empty";
+  }
+  return String(value);
+}
+
+function formatLeadActivityFieldName(key) {
+  return String(key || "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^./, (char) => char.toUpperCase());
+}
+
+function mapLeadActivityEventRow(row, teamMemberById = new Map()) {
+  const eventType = normalizeText(row?.event_type);
+  const oldValue = row?.old_value && typeof row.old_value === "object" ? row.old_value : {};
+  const newValue = row?.new_value && typeof row.new_value === "object" ? row.new_value : {};
+  const metadata = row?.metadata && typeof row.metadata === "object" ? row.metadata : {};
+  const actorId = normalizeText(row?.actor_member_id);
+  const actor = normalizeText(teamMemberById.get(actorId)?.name) || "System";
+  const fields = Array.isArray(metadata.fields) ? metadata.fields : Object.keys(newValue);
+  const base = {
+    id: normalizeText(row?.id),
+    leadId: normalizeText(row?.lead_id),
+    type: eventType || "field_changed",
+    actor,
+    createdAt: normalizeText(row?.created_at)
+  };
+
+  if (eventType === "owner_changed") {
+    const previousOwner = normalizeText(teamMemberById.get(normalizeText(oldValue.ownerMemberId))?.name) || "Unassigned";
+    const nextOwner = normalizeText(teamMemberById.get(normalizeText(newValue.ownerMemberId))?.name) || "Unassigned";
+    return { ...base, label: "Owner changed", text: `Owner changed from ${previousOwner} to ${nextOwner}.` };
+  }
+  if (eventType === "archived") {
+    return { ...base, label: "Lead archived", text: "Lead moved to archive." };
+  }
+  if (eventType === "unarchived") {
+    return { ...base, label: "Lead restored", text: "Lead restored from archive." };
+  }
+  if (eventType === "bulk_reassigned") {
+    return { ...base, label: "Bulk reassigned", text: "Owner changed by bulk reassignment." };
+  }
+
+  const fieldSummary = fields
+    .map((field) => {
+      const key = String(field || "").trim();
+      if (!key) {
+        return "";
+      }
+      return `${formatLeadActivityFieldName(key)}: ${formatLeadActivityValue(oldValue[key])} -> ${formatLeadActivityValue(newValue[key])}`;
+    })
+    .filter(Boolean)
+    .join("; ");
+  return { ...base, label: "Fields changed", text: fieldSummary || "Lead details were updated." };
+}
+
+export async function fetchSupabaseLeadActivityEvents(workspaceId, options = {}) {
+  const normalizedWorkspaceId = normalizeText(workspaceId);
+  if (!normalizedWorkspaceId) {
+    return [];
+  }
+  const client = getClient();
+  const teamMemberById = new Map(
+    (Array.isArray(options.teamMembers) ? options.teamMembers : [])
+      .map((member) => [normalizeText(member.id), member])
+      .filter(([id]) => id)
+  );
+  const limit = Math.min(Math.max(Number(options.limit) || 300, 1), 1000);
+  const { data, error } = await client
+    .from("lead_activity_events")
+    .select("id, workspace_id, lead_id, event_type, actor_member_id, old_value, new_value, metadata, is_sales_touch, created_at")
+    .eq("workspace_id", normalizedWorkspaceId)
+    .order("created_at", { ascending: false, nullsFirst: false })
+    .limit(limit);
+  if (error) {
+    const code = normalizeText(error?.code).toUpperCase();
+    const message = normalizeText(error?.message).toLowerCase();
+    if (code === "42P01" || message.includes("lead_activity_events")) {
+      return [];
+    }
+    throw error;
+  }
+  return (Array.isArray(data) ? data : []).map((row) => mapLeadActivityEventRow(row, teamMemberById));
+}
+
 async function insertCrmRow(table, payload) {
   const client = getClient();
   const { data, error } = await client.from(table).insert(payload).select("*").single();

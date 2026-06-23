@@ -101,7 +101,18 @@ export function getLeadContext(data, lead, normalizeForMatch) {
       };
     });
 
-  return { account, contacts, deals, linkedTasks, activity };
+  const audit = (data.leadActivityEvents || [])
+    .filter((entry) => String(entry.leadId || "").trim() === String(lead.id || "").trim())
+    .sort((a, b) => Date.parse(String(b.createdAt || "")) - Date.parse(String(a.createdAt || "")))
+    .slice(0, 12)
+    .map((entry) => ({
+      label: String(entry.label || "").trim() || "Lead updated",
+      text: String(entry.text || "").trim() || "Administrative change recorded.",
+      createdAt: entry.createdAt,
+      actor: entry.actor || ""
+    }));
+
+  return { account, contacts, deals, linkedTasks, activity, audit };
 }
 
 export function getPrimaryLeadContact(lead, context = null, getLeadContextFn = null) {
