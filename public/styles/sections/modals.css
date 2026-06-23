@@ -1682,6 +1682,29 @@
   display: none;
 }
 
+.lead-export-field {
+  display: grid;
+  gap: 6px;
+}
+
+.lead-export-field > span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #49647c;
+}
+
+.lead-export-field select {
+  min-height: 38px;
+  border: 1px solid #d6e2ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17324a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 11px;
+}
+
 .lead-export-date-control {
   position: relative;
   display: grid;
@@ -7626,6 +7649,7 @@
 }
 
 :root[data-theme="dark"] .lead-export-date-control > span,
+:root[data-theme="dark"] .lead-export-field > span,
 :root[data-theme="dark"] .lead-export-calendar-weekdays span,
 :root[data-theme="dark"] .lead-export-date-trigger.is-empty,
 :root[data-theme="dark"] .lead-export-calendar-day.is-muted {
@@ -7633,6 +7657,7 @@
 }
 
 :root[data-theme="dark"] .lead-export-date-trigger,
+:root[data-theme="dark"] .lead-export-field select,
 :root[data-theme="dark"] .lead-export-calendar {
   background: var(--surface-raised);
   border-color: var(--border-strong);

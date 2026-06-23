@@ -10224,7 +10224,14 @@ async function openUnqualifiedLeadExportConfirm() {
 }
 
 function getLeadExportLabel(exportType) {
-  return String(exportType || "").trim() === "duplicates" ? "duplicate leads" : "unqualified leads";
+  const normalizedType = String(exportType || "").trim();
+  if (normalizedType === "duplicates") {
+    return "duplicate leads";
+  }
+  if (normalizedType === "leads") {
+    return "leads";
+  }
+  return "unqualified leads";
 }
 
 function getSupabaseClient() {
@@ -10381,7 +10388,7 @@ function setupLeadExportDatePickers(container) {
   container.addEventListener("click", container.leadExportDatePickerHandler);
 }
 
-function openLeadExportModal(exportType = "unqualified") {
+function openLeadExportModal(exportType = "leads") {
   const modalOverlay = document.getElementById("modalOverlay");
   const modalTitle = document.getElementById("modalTitle");
   const modalForm = document.getElementById("modalForm");
@@ -10389,9 +10396,15 @@ function openLeadExportModal(exportType = "unqualified") {
   if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
     return;
   }
-  const normalizedType = String(exportType || "").trim() === "duplicates" ? "duplicates" : "unqualified";
+  const requestedType = String(exportType || "").trim();
+  const normalizedType = requestedType === "duplicates" || requestedType === "unqualified" ? requestedType : "leads";
   const label = getLeadExportLabel(normalizedType);
-  modalTitle.textContent = normalizedType === "duplicates" ? "Export Duplicates" : "Export Unqualified Leads";
+  modalTitle.textContent =
+    normalizedType === "duplicates"
+      ? "Export Duplicates"
+      : normalizedType === "unqualified"
+        ? "Export Unqualified Leads"
+        : "Export Leads";
   modalForm.dataset.mode = "lead-export";
   modalForm.dataset.exportType = normalizedType;
   modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide");
@@ -10399,9 +10412,22 @@ function openLeadExportModal(exportType = "unqualified") {
     <div class="modal-body">
       <p class="task-meta">Choose which ${escapeModalText(label)} to export.</p>
       <div class="lead-import-soft-section">
-        <label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>
-        <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" /> ${normalizedType === "duplicates" ? "Duplicates detected" : "Unqualified leads"} in date range</label>
-        <div class="lead-export-date-row" data-lead-export-date-range hidden>
+        ${normalizedType === "leads" ? `
+        <label class="lead-export-field">
+          <span>Status</span>
+          <select name="leadExportStatus">
+            <option value="all">All statuses</option>
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Qualified">Qualified</option>
+            <option value="Unqualified">Unqualified</option>
+            <option value="Converted">Converted</option>
+          </select>
+        </label>
+        ` : ""}
+        ${normalizedType === "leads" ? "" : `<label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>`}
+        <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" ${normalizedType === "leads" ? "checked" : ""} /> ${normalizedType === "duplicates" ? "Duplicates detected" : normalizedType === "unqualified" ? "Unqualified leads" : "Leads created"} in date range</label>
+        <div class="lead-export-date-row" data-lead-export-date-range ${normalizedType === "leads" ? "" : "hidden"}>
           <div class="lead-export-date-control" data-lead-export-date-control>
             <span>From date</span>
             <input type="hidden" name="leadExportFrom" />
@@ -10452,10 +10478,12 @@ function mapLeadExportRowsToCsv(rows = []) {
 }
 
 async function submitLeadExportModal(form, submitter) {
-  const exportType = String(form.dataset.exportType || "unqualified").trim() === "duplicates" ? "duplicates" : "unqualified";
+  const requestedType = String(form.dataset.exportType || "leads").trim();
+  const exportType = requestedType === "duplicates" || requestedType === "unqualified" ? requestedType : "leads";
   const scope = String(form.querySelector("input[name='leadExportScope']:checked")?.value || "new").trim() || "new";
   const fromValue = String(form.querySelector("input[name='leadExportFrom']")?.value || "").trim();
   const toValue = String(form.querySelector("input[name='leadExportTo']")?.value || "").trim();
+  const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim() || "all";
   if (scope === "date-range" && (!fromValue || !toValue)) {
     window.alert("Choose a from date and to date before exporting.");
     return;
@@ -10477,7 +10505,8 @@ async function submitLeadExportModal(form, submitter) {
       p_export_type: exportType,
       p_scope: scope,
       p_date_from: fromValue || null,
-      p_date_to: toValue || null
+      p_date_to: toValue || null,
+      p_status: statusValue
     });
     if (error) {
       throw error;
@@ -31569,8 +31598,8 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "lead-export-unqualified") {
-    openLeadExportModal("unqualified");
+  if (action === "lead-export-leads" || action === "lead-export-unqualified") {
+    openLeadExportModal(action === "lead-export-unqualified" ? "unqualified" : "leads");
     return;
   }
 
