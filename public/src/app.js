@@ -10408,9 +10408,9 @@ function syncLeadExportAttemptFilter(form) {
   const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim();
   field.hidden = statusValue !== "Contacted";
   if (field.hidden) {
-    const input = field.querySelector("[name='leadExportAttemptFilter']");
-    if (input) {
-      input.value = "all";
+    const defaultInput = field.querySelector("input[name='leadExportAttemptFilter'][value='all']");
+    if (defaultInput instanceof HTMLInputElement) {
+      defaultInput.checked = true;
     }
   }
 }
@@ -10434,58 +10434,78 @@ function openLeadExportModal(exportType = "leads") {
         : "Export Leads";
   modalForm.dataset.mode = "lead-export";
   modalForm.dataset.exportType = normalizedType;
-  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide");
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide", "is-lead-export");
+  modalCard.classList.add("is-lead-export");
   modalForm.innerHTML = `
-    <div class="modal-body">
-      <p class="task-meta">Choose which ${escapeModalText(label)} to export.</p>
-      <div class="lead-import-soft-section">
+    <div class="modal-body lead-export-modal">
+      <p class="lead-export-modal__intro">Choose filters and scope for this export.</p>
+      <div class="lead-export-modal__panel">
         ${normalizedType === "leads" ? `
-        <label class="lead-export-field">
-          <span>Status</span>
-          <select name="leadExportStatus">
-            <option value="all">All statuses</option>
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Qualified">Qualified</option>
-            <option value="Unqualified">Unqualified</option>
-            <option value="Converted">Converted</option>
-          </select>
-        </label>
-        <label class="lead-export-field">
-          <span>Archive scope</span>
-          <select name="leadExportArchiveScope">
-            <option value="active">Active leads only</option>
-            <option value="archived">Archived leads only</option>
-            <option value="all">Active + archived</option>
-          </select>
-        </label>
-        <label class="lead-export-field" data-lead-export-attempt-field hidden>
-          <span>Attempt filter</span>
-          <select name="leadExportAttemptFilter">
-            <option value="all">All attempts</option>
-            <option value="1">1/3 only</option>
-            <option value="2">2/3 only</option>
-            <option value="3">3/3 only</option>
-          </select>
-        </label>
+        <section class="lead-export-modal__section" aria-label="Lead filters">
+          <div class="lead-export-modal__section-head">
+            <span>Lead filters</span>
+            <small>Status and archive visibility</small>
+          </div>
+          <div class="lead-export-modal__grid">
+            <label class="lead-export-field">
+              <span>Status</span>
+              <select name="leadExportStatus">
+                <option value="all">All statuses</option>
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Qualified">Qualified</option>
+                <option value="Unqualified">Unqualified</option>
+                <option value="Converted">Converted</option>
+              </select>
+            </label>
+            <label class="lead-export-field">
+              <span>Archive scope</span>
+              <select name="leadExportArchiveScope">
+                <option value="active">Active leads only</option>
+                <option value="archived">Archived leads only</option>
+                <option value="all">Active + archived</option>
+              </select>
+            </label>
+          </div>
+          <fieldset class="lead-export-attempts" data-lead-export-attempt-field hidden>
+            <legend>Contact attempt</legend>
+            <div class="lead-export-attempts__options">
+              <label><input type="radio" name="leadExportAttemptFilter" value="all" checked /> <span>All</span></label>
+              <label><input type="radio" name="leadExportAttemptFilter" value="1" /> <span>1/3</span></label>
+              <label><input type="radio" name="leadExportAttemptFilter" value="2" /> <span>2/3</span></label>
+              <label><input type="radio" name="leadExportAttemptFilter" value="3" /> <span>3/3</span></label>
+            </div>
+          </fieldset>
+        </section>
         ` : ""}
-        ${normalizedType === "leads" ? "" : `<label class="profile-check"><input type="radio" name="leadExportScope" value="new" checked /> New ${escapeModalText(label)} only</label>`}
-        <label class="profile-check"><input type="radio" name="leadExportScope" value="date-range" ${normalizedType === "leads" ? "checked" : ""} /> ${normalizedType === "duplicates" ? "Duplicates detected" : normalizedType === "unqualified" ? "Unqualified leads" : "Leads created"} in date range</label>
-        <div class="lead-export-date-row" data-lead-export-date-range ${normalizedType === "leads" ? "" : "hidden"}>
-          <div class="lead-export-date-control" data-lead-export-date-control>
-            <span>From date</span>
-            <input type="hidden" name="leadExportFrom" />
-            <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
-            <div class="lead-export-calendar" data-lead-export-date-panel></div>
+        <section class="lead-export-modal__section" aria-label="Export scope">
+          <div class="lead-export-modal__section-head">
+            <span>Export scope</span>
+            <small>Choose the records included in the file</small>
           </div>
-          <div class="lead-export-date-control" data-lead-export-date-control>
-            <span>To date</span>
-            <input type="hidden" name="leadExportTo" />
-            <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
-            <div class="lead-export-calendar" data-lead-export-date-panel></div>
+          <div class="lead-export-scope-list">
+            ${normalizedType === "leads" ? "" : `<label class="lead-export-scope-card"><input type="radio" name="leadExportScope" value="new" checked /> <span>New ${escapeModalText(label)} only</span></label>`}
+            <label class="lead-export-scope-card">
+              <input type="radio" name="leadExportScope" value="date-range" ${normalizedType === "leads" ? "checked" : ""} />
+              <span>${normalizedType === "duplicates" ? "Duplicates detected" : normalizedType === "unqualified" ? "Unqualified leads" : "Leads created"} in date range</span>
+            </label>
+            <div class="lead-export-date-row" data-lead-export-date-range ${normalizedType === "leads" ? "" : "hidden"}>
+              <div class="lead-export-date-control" data-lead-export-date-control>
+                <span>From date</span>
+                <input type="hidden" name="leadExportFrom" />
+                <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
+                <div class="lead-export-calendar" data-lead-export-date-panel></div>
+              </div>
+              <div class="lead-export-date-control" data-lead-export-date-control>
+                <span>To date</span>
+                <input type="hidden" name="leadExportTo" />
+                <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
+                <div class="lead-export-calendar" data-lead-export-date-panel></div>
+              </div>
+            </div>
+            <label class="lead-export-scope-card"><input type="radio" name="leadExportScope" value="all" /> <span>All matching ${escapeModalText(label)}</span></label>
           </div>
-        </div>
-        <label class="profile-check"><input type="radio" name="leadExportScope" value="all" /> All matching ${escapeModalText(label)}</label>
+        </section>
       </div>
     </div>
     <div class="form-actions">
@@ -10530,7 +10550,7 @@ async function submitLeadExportModal(form, submitter) {
   const toValue = String(form.querySelector("input[name='leadExportTo']")?.value || "").trim();
   const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim() || "all";
   const archiveScope = String(form.querySelector("[name='leadExportArchiveScope']")?.value || "active").trim() || "active";
-  const attemptFilter = String(form.querySelector("[name='leadExportAttemptFilter']")?.value || "all").trim() || "all";
+  const attemptFilter = String(form.querySelector("input[name='leadExportAttemptFilter']:checked")?.value || "all").trim() || "all";
   if (scope === "date-range" && (!fromValue || !toValue)) {
     window.alert("Choose a from date and to date before exporting.");
     return;
@@ -20437,6 +20457,233 @@ function openLeadBulkReassignModal() {
   requestAnimationFrame(() => modalOverlay.classList.add("show"));
 }
 
+function canManageLeadOwnership(data = state.data) {
+  return currentUserHasPermission("leads", "edit", data);
+}
+
+function openLeadOwnershipManagerModal(sourceOwnerId = "") {
+  if (!canManageLeadOwnership()) {
+    window.alert("You do not have permission to manage lead ownership.");
+    return;
+  }
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalForm = document.getElementById("modalForm");
+  const modalCard = document.querySelector(".modal-card");
+  if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
+    return;
+  }
+  const members = Array.isArray(state.data.teamMembers) ? state.data.teamMembers : [];
+  const ownerMembers = members.filter((member) => String(member?.id || "").trim());
+  const activeMembers = getLeadAssignableTeamMembers();
+  const selectedSourceId = String(sourceOwnerId || "").trim();
+  if (!ownerMembers.length) {
+    window.alert("No team members are available for ownership management.");
+    return;
+  }
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide", "is-lead-export", "is-lead-ownership");
+  modalCard.classList.add("is-lead-ownership");
+  modalTitle.textContent = "Manage Lead Ownership";
+  modalForm.dataset.mode = "lead-ownership-manager";
+  modalForm.innerHTML = `
+    <div class="modal-body lead-ownership-modal">
+      <p class="lead-export-modal__intro">Move or unassign leads by owner without selecting rows one by one.</p>
+      <section class="lead-ownership-step">
+        <label class="lead-export-field">
+          <span>Current owner</span>
+          <select name="sourceOwnerMemberId" required>
+            <option value="">Choose owner</option>
+            ${ownerMembers
+              .map((member) => `<option value="${escapeModalText(member.id)}" ${String(member.id) === selectedSourceId ? "selected" : ""}>${escapeModalText(member.name || member.email || "Team member")}</option>`)
+              .join("")}
+          </select>
+        </label>
+      </section>
+      <section class="lead-ownership-step">
+        <span class="lead-ownership-step-label">Action</span>
+        <div class="lead-ownership-radio-row">
+          <label class="lead-ownership-radio">
+            <input type="radio" name="ownershipAction" value="transfer" checked />
+            <span>Transfer leads</span>
+          </label>
+          <label class="lead-ownership-radio">
+            <input type="radio" name="ownershipAction" value="unassign" />
+            <span>Unassign leads</span>
+          </label>
+        </div>
+        <label class="lead-export-field" data-lead-ownership-destination-field>
+          <span>New owner</span>
+          <select name="destinationOwnerMemberId">
+            <option value="">Choose new owner</option>
+            ${activeMembers
+              .map((member) => `<option value="${escapeModalText(member.id)}">${escapeModalText(member.name || member.email || "Team member")}</option>`)
+              .join("")}
+          </select>
+        </label>
+      </section>
+      <section class="lead-ownership-step">
+        <span class="lead-ownership-step-label">Scope</span>
+        <div class="lead-ownership-advanced">
+          <div class="lead-export-modal__grid">
+          <label class="lead-export-field">
+            <span>Status</span>
+            <select name="leadStatus">
+              <option value="all">All statuses</option>
+              ${LEAD_STATUS_TABLE_OPTIONS.map((status) => `<option value="${escapeModalText(status)}">${escapeModalText(status)}</option>`).join("")}
+              <option value="Converted">Converted</option>
+            </select>
+          </label>
+          <label class="lead-export-field">
+            <span>Archive scope</span>
+            <select name="archiveScope">
+              <option value="active">Active leads only</option>
+              <option value="archived">Archived leads only</option>
+              <option value="all">Active + archived</option>
+            </select>
+          </label>
+        </div>
+        <div class="lead-ownership-amount-grid">
+          <label class="lead-export-scope-card">
+            <input type="radio" name="amountMode" value="all" checked />
+            <span>All matching leads</span>
+          </label>
+          <label class="lead-export-scope-card">
+            <input type="radio" name="amountMode" value="limited" />
+            <span>First</span>
+            <input class="lead-ownership-limit-input" type="number" name="leadLimit" min="1" max="50000" step="1" value="500" inputmode="numeric" />
+            <span>matching leads</span>
+          </label>
+        </div>
+        <label class="lead-export-field">
+          <span>Order</span>
+          <select name="leadOrder">
+            <option value="oldest_updated">Oldest updated first</option>
+            <option value="newest_updated">Newest updated first</option>
+            <option value="oldest_created">Oldest created first</option>
+            <option value="newest_created">Newest created first</option>
+            <option value="random">Random</option>
+          </select>
+        </label>
+        </div>
+        <p class="lead-profile-list-meta">Preview shows the exact number before anything changes.</p>
+      </section>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+      <button type="submit" class="btn btn-accent" data-submit-busy-label="Previewing...">Preview</button>
+    </div>
+  `;
+  syncLeadOwnershipManagerModal(modalForm);
+  modalOverlay.hidden = false;
+  requestAnimationFrame(() => modalOverlay.classList.add("show"));
+}
+
+function syncLeadOwnershipManagerModal(form) {
+  const action = String(form?.querySelector?.("input[name='ownershipAction']:checked")?.value || "transfer").trim();
+  const field = form?.querySelector?.("[data-lead-ownership-destination-field]");
+  if (field instanceof HTMLElement) {
+    field.hidden = action === "unassign";
+    const destination = field.querySelector("[name='destinationOwnerMemberId']");
+    if (field.hidden && destination instanceof HTMLSelectElement) {
+      destination.value = "";
+    }
+  }
+}
+
+function getLeadOwnershipManagerPayload(form, dryRun) {
+  const amountMode = String(form.querySelector("input[name='amountMode']:checked")?.value || "all").trim();
+  const limitValue = Math.max(0, Math.min(50000, Number(form.querySelector("[name='leadLimit']")?.value || 0) || 0));
+  return {
+    p_source_owner_member_id: String(form.querySelector("[name='sourceOwnerMemberId']")?.value || "").trim() || null,
+    p_action: String(form.querySelector("input[name='ownershipAction']:checked")?.value || "transfer").trim() || "transfer",
+    p_destination_owner_member_id: String(form.querySelector("[name='destinationOwnerMemberId']")?.value || "").trim() || null,
+    p_status: String(form.querySelector("[name='leadStatus']")?.value || "all").trim() || "all",
+    p_archive_scope: String(form.querySelector("[name='archiveScope']")?.value || "active").trim() || "active",
+    p_limit: amountMode === "limited" ? limitValue : null,
+    p_order: String(form.querySelector("[name='leadOrder']")?.value || "oldest_updated").trim() || "oldest_updated",
+    p_dry_run: Boolean(dryRun)
+  };
+}
+
+async function submitLeadOwnershipManagerForm(form, submitter) {
+  const payload = getLeadOwnershipManagerPayload(form, true);
+  if (!payload.p_source_owner_member_id) {
+    window.alert("Choose the current owner.");
+    return;
+  }
+  if (payload.p_action === "transfer" && !payload.p_destination_owner_member_id) {
+    window.alert("Choose the new owner.");
+    return;
+  }
+  if (payload.p_action === "transfer" && payload.p_source_owner_member_id === payload.p_destination_owner_member_id) {
+    window.alert("Choose a different new owner.");
+    return;
+  }
+  const submitButton = submitter instanceof HTMLButtonElement ? submitter : form.querySelector("button[type='submit']");
+  const defaultSubmitLabel = submitButton ? String(submitButton.textContent || "Preview").trim() || "Preview" : "Preview";
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = String(submitButton.dataset.submitBusyLabel || "Previewing...");
+  }
+  form.dataset.submitting = "1";
+  try {
+    const client = getSupabaseClient();
+    const { data: preview, error: previewError } = await client.rpc("manage_lead_ownership", payload);
+    if (previewError) {
+      throw previewError;
+    }
+    const affectedCount = Number(preview?.affectedCount || 0) || 0;
+    const matchingCount = Number(preview?.matchingCount || 0) || 0;
+    if (!affectedCount) {
+      window.alert("No leads match this ownership scope.");
+      return;
+    }
+    const sourceName = findTeamMemberById(payload.p_source_owner_member_id)?.name || "selected owner";
+    const destinationName = payload.p_action === "transfer"
+      ? findTeamMemberById(payload.p_destination_owner_member_id)?.name || "the new owner"
+      : "Unassigned";
+    const actionText = payload.p_action === "transfer" ? `transfer to ${destinationName}` : "unassign";
+    const limitedText = matchingCount !== affectedCount ? ` ${affectedCount} of ${matchingCount}` : ` ${affectedCount}`;
+    openConfirmModal({
+      title: "Apply ownership changes?",
+      message: `This will ${actionText}${limitedText} lead${affectedCount === 1 ? "" : "s"} from ${sourceName}.`,
+      confirmLabel: "Apply changes",
+      cancelLabel: "Cancel",
+      danger: false,
+      onConfirm: async () => {
+        try {
+          const { data: result, error } = await client.rpc("manage_lead_ownership", {
+            ...payload,
+            p_dry_run: false
+          });
+          if (error) {
+            throw error;
+          }
+          const updatedCount = Number(result?.affectedCount || 0) || 0;
+          await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
+          await refreshSupabaseTeamWorkspace({ alertOnDeny: false });
+          renderRoute();
+          showToast(`${updatedCount} lead${updatedCount === 1 ? "" : "s"} updated.`, { tone: "success" });
+          return true;
+        } catch (error) {
+          console.error("Lead ownership apply failed:", error);
+          window.alert(`Lead ownership update failed: ${String(error?.message || error || "Unknown error")}`);
+          return false;
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Lead ownership manager failed:", error);
+    window.alert(`Lead ownership update failed: ${String(error?.message || error || "Unknown error")}`);
+  } finally {
+    form.dataset.submitting = "0";
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = defaultSubmitLabel;
+    }
+  }
+}
+
 async function submitLeadBulkReassignForm(form, submitter) {
   const leadIds = String(form.querySelector("input[name='leadIds']")?.value || "")
     .split("|")
@@ -29290,6 +29537,8 @@ function closeModal(options = {}) {
   modalCard?.classList.remove("is-attendance-policy");
   modalCard?.classList.remove("is-attendance-manual");
   modalCard?.classList.remove("is-lead-import");
+  modalCard?.classList.remove("is-lead-export");
+  modalCard?.classList.remove("is-lead-ownership");
   modalCard?.classList.remove("is-file-preview");
   modalCard?.classList.remove("is-new-direct-chat");
   modalCard?.classList.remove("is-workspace-logo");
@@ -34438,6 +34687,11 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-ownership-manager") {
+    openLeadOwnershipManagerModal(id);
+    return;
+  }
+
   if (action === "lead-bulk-status-apply") {
     const nextStatus = String(id || "").trim();
     state.leadBulkStatusOpen = false;
@@ -38236,6 +38490,14 @@ function onInput(event) {
     clearFormFeedback(feedbackForm);
   }
 
+  const ownershipForm = event.target.closest("#modalForm");
+  if (ownershipForm instanceof HTMLFormElement && ownershipForm.dataset.mode === "lead-ownership-manager") {
+    if (event.target.matches("[name='leadLimit']")) {
+      syncLeadOwnershipManagerModal(ownershipForm);
+      return;
+    }
+  }
+
   if (event.target.matches("[data-login-email-input]")) {
     state.loginEmailDraft = String(event.target.value || "").trim().toLowerCase();
     state.loginOtpSentTo = "";
@@ -38773,6 +39035,12 @@ function onChange(event) {
       return;
     }
   }
+  if (modalForm instanceof HTMLFormElement && modalForm.dataset.mode === "lead-ownership-manager") {
+    if (event.target.matches("[name='ownershipAction'], [name='leadStatus'], [name='archiveScope'], [name='amountMode'], [name='leadLimit']")) {
+      syncLeadOwnershipManagerModal(modalForm);
+      return;
+    }
+  }
   if (modalForm instanceof HTMLFormElement && modalForm.dataset.mode === "attendance-manual-compose") {
     syncAttendanceManualEntryUi(modalForm);
     return;
@@ -39260,6 +39528,10 @@ async function onSubmit(event) {
     }
     if (event.target.dataset.mode === "lead-bulk-reassign") {
       await submitLeadBulkReassignForm(event.target, event.submitter);
+      return;
+    }
+    if (event.target.dataset.mode === "lead-ownership-manager") {
+      await submitLeadOwnershipManagerForm(event.target, event.submitter);
       return;
     }
     if (event.target.dataset.mode === "lead-compose") {

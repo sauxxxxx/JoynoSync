@@ -2759,6 +2759,11 @@ export function renderTeamMemberProfile(data, context) {
                 }
                 ${
                   canManageTeam
+                    ? `<button class="btn btn-light" type="button" data-action="lead-ownership-manager" data-id="${escapeHtml(member.id)}">Manage Leads</button>`
+                    : ""
+                }
+                ${
+                  canManageTeam
                     ? `<button class="btn btn-light" type="button" data-action="team-member-profile-tab" data-id="settings">Edit Settings</button>`
                     : ""
                 }

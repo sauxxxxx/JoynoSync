@@ -4845,6 +4845,7 @@ function teamActionMenuItems(member, canManageTeam) {
   if (!canManageTeam) {
     return items;
   }
+  items.push({ action: "lead-ownership-manager", id: member.id, label: "Manage Leads" });
   items.push({ action: "team-edit", id: member.id, label: "Edit" });
   if (status === "Pending Invite") {
     items.push({ action: "team-resend-invite", id: member.id, label: "Resend Invite" });
