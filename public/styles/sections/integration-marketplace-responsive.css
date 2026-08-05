@@ -1,0 +1,133 @@
+:root[data-theme="dark"] .integrations-page {
+  background: var(--page-bg);
+}
+
+:root[data-theme="dark"] .integration-market-card:hover {
+  border-color: #4a5565;
+}
+
+:root[data-theme="dark"] .integration-market-icon.is-slack {
+  color: #d69bd8;
+}
+
+@media (max-width: 1180px) {
+  .integration-featured-card {
+    grid-template-columns: minmax(340px, 1fr) minmax(380px, 1.1fr);
+  }
+
+  .integration-featured-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 0 28px 24px;
+  }
+
+  .integration-featured-actions .btn {
+    width: 180px;
+  }
+
+  .integration-marketplace-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .integrations-page {
+    padding: 2px;
+  }
+
+  .integration-featured-card {
+    grid-template-columns: 1fr;
+  }
+
+  .integration-featured-summary {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .integration-featured-features {
+    padding-bottom: 20px;
+  }
+
+  .integration-marketplace-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .integration-marketplace-filters {
+    width: 100%;
+  }
+
+  .integration-marketplace-search {
+    flex: 1;
+    width: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .integrations-page {
+    gap: 22px;
+    padding: 0;
+  }
+
+  .integration-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .integration-featured-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px 22px;
+  }
+
+  .integration-featured-logo {
+    width: 88px;
+    height: 88px;
+    flex-basis: 88px;
+  }
+
+  .integration-featured-features,
+  .integration-marketplace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .integration-featured-features {
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .integration-featured-actions {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 0 22px 22px;
+  }
+
+  .integration-featured-actions .btn {
+    width: 100%;
+  }
+
+  .integration-marketplace-filters,
+  .integration-request-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .integration-marketplace-search,
+  .integration-marketplace-category,
+  .integration-request-banner .btn {
+    width: 100%;
+  }
+
+  .integration-market-card {
+    min-height: 248px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .integration-market-card {
+    transition: none;
+  }
+}

@@ -1,0 +1,119 @@
+:root[data-theme="dark"] .integration-card-metric.is-success strong,
+:root[data-theme="dark"] .integration-connection-fact.is-success strong,
+:root[data-theme="dark"] .integration-inline-success,
+:root[data-theme="dark"] .integration-mapping-status.is-ready,
+:root[data-theme="dark"] .integration-workflow-feature i {
+  color: #74d9b8;
+}
+
+:root[data-theme="dark"] .integration-setup-step.is-active,
+:root[data-theme="dark"] .integration-device-explainer,
+:root[data-theme="dark"] .integration-policy-choice.is-selected,
+:root[data-theme="dark"] .integration-policy-choice:has(input:checked) {
+  color: #9ec1ff;
+  border-color: #365681;
+  background: #172235;
+}
+
+:root[data-theme="dark"] .integration-device-explainer > i {
+  color: #b9d1ff;
+  background: #223758;
+}
+
+:root[data-theme="dark"] .integration-mapping-agent > span {
+  color: #b9d1ff;
+  background: #20324e;
+}
+
+@media (max-width: 760px) {
+  .integration-setup-modal {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+  }
+
+  .integration-setup-steps {
+    padding: 8px 12px;
+  }
+
+  .integration-setup-step {
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .integration-setup-step > span:first-child {
+    width: 24px;
+    height: 24px;
+  }
+
+  .integration-setup-step small {
+    display: none;
+  }
+
+  .integration-connection-grid,
+  .integration-workflow-grid,
+  .integration-policy-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .integration-connection-fact,
+  .integration-connection-fact:nth-child(2n) {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .integration-connection-fact:last-child {
+    border-bottom: 0;
+  }
+
+  .integration-mapping-header {
+    display: none;
+  }
+
+  .integration-mapping-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .integration-mapping-row > label {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .integration-mapping-extension {
+    grid-column: 1;
+  }
+
+  .integration-mapping-status {
+    grid-column: 2;
+  }
+
+  .integration-mapping-actions {
+    grid-column: 1 / -1;
+  }
+
+  .integration-wizard-foot {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .integration-wizard-foot > div,
+  .integration-wizard-foot .btn {
+    width: 100%;
+  }
+
+  .integration-advanced > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .integration-advanced > div > span {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .integration-setup-step,
+  .integration-policy-choice {
+    transition: none;
+  }
+}

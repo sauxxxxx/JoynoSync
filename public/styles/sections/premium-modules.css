@@ -1,0 +1,310 @@
+/* Feature-level refinements built on premium-system.css. */
+.dashboard-hero,
+.dashboard-command-hero {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.11), transparent 34%),
+    var(--panel-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-kpi-card {
+  min-height: 176px;
+  padding: 18px;
+  border-radius: 12px;
+}
+
+.dashboard-kpi-card strong,
+.dashboard-kpi-card-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+}
+
+.projects-workspace {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.projects-list-card,
+.project-detail-card,
+.kanban-card,
+.calendar-event-card {
+  border-color: var(--line);
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.045);
+}
+
+.projects-list-card:hover,
+.kanban-card:hover,
+.calendar-event-card:hover {
+  border-color: #b8c9e6;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.table-ops-head,
+.crm-section-head,
+.team-head,
+.projects-head {
+  min-height: 58px;
+  padding: 10px 14px;
+  border-bottom-color: var(--line);
+  background: var(--panel-bg);
+}
+
+.table-ops-head h2,
+.crm-section-head h2,
+.team-head h2,
+.projects-head h2 {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.data-table-shell,
+.table-ops-wrap {
+  border-color: var(--line);
+  border-radius: 11px;
+  background: var(--panel-bg);
+}
+
+.data-table thead {
+  background: var(--premium-surface-subtle);
+}
+
+.data-table th {
+  height: 42px;
+}
+
+.data-table td {
+  min-height: 48px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+.crm-name-stack strong,
+.crm-owner-text,
+.team-member-name {
+  font-weight: 700;
+}
+
+.messenger-layout,
+.comms-workspace,
+.sms-workspace {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.message-composer,
+.messenger-composer {
+  min-height: 52px;
+  border-color: var(--line);
+  border-radius: 12px;
+  background: var(--premium-surface-subtle);
+}
+
+.conversation-row-item {
+  min-height: 64px;
+  border-radius: 9px;
+}
+
+.conversation-row-item.is-active {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.attendance-v2 .attendance-panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.attendance-v2 .attendance-panel-head {
+  min-height: 58px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--premium-surface-subtle);
+}
+
+.attendance-v2 .attendance-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px;
+}
+
+.attendance-v2 .attendance-policy-grid p {
+  min-height: 86px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--premium-surface-subtle);
+}
+
+.attendance-v2 .attendance-break-plan {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.attendance-v2 .attendance-break-plan > * {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-bg);
+}
+
+.attendance-v2 .attendance-panel:has(.attendance-request-actions) {
+  min-height: 320px;
+}
+
+.team-member-card,
+.team-card {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel-bg);
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
+}
+
+.profile-hub-hero {
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(14, 31, 66, 0.18);
+}
+
+.settings-flat-section,
+.profile-hub-panel,
+.settings-view-card {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel-bg);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 1024px) {
+  .messenger-view.is-info-open,
+  .messenger-view {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .messenger-info-pane {
+    display: none;
+  }
+
+  .profile-hub-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .team-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-v2 .attendance-policy-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-v2 .attendance-break-plan {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-kpi-card {
+    min-height: 168px;
+  }
+
+  .data-table:has(.crm-col-lead) {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .table-ops-wrap:has(.crm-col-lead) {
+    overflow-x: hidden;
+  }
+
+  .data-table:has(.crm-col-lead) .crm-col-phone,
+  .data-table:has(.crm-col-lead) .crm-phone-cell-col,
+  .data-table:has(.crm-col-lead) .crm-col-timezone,
+  .data-table:has(.crm-col-lead) .crm-timezone-cell,
+  .data-table:has(.crm-col-lead) .crm-col-interest,
+  .data-table:has(.crm-col-lead) .crm-interest-cell,
+  .data-table:has(.crm-col-lead) .crm-col-owner,
+  .data-table:has(.crm-col-lead) .crm-owner-cell,
+  .data-table:has(.crm-col-lead) .crm-col-last-touch,
+  .data-table:has(.crm-col-lead) .crm-last-touch-cell {
+    display: none;
+  }
+
+  .data-table:has(.crm-col-lead) th:first-child,
+  .data-table:has(.crm-col-lead) td:first-child,
+  .data-table:has(.crm-col-lead) .crm-col-lead,
+  .data-table:has(.crm-col-lead) .lead-name-cell {
+    position: static;
+    box-shadow: none;
+  }
+
+  .data-table:has(.crm-col-lead) th:first-child,
+  .data-table:has(.crm-col-lead) td:first-child {
+    width: 40px;
+  }
+
+  .data-table:has(.crm-col-lead) .crm-col-lead,
+  .data-table:has(.crm-col-lead) .lead-name-cell {
+    width: 45%;
+    min-width: 0;
+  }
+
+  .data-table:has(.crm-col-lead) .crm-col-status,
+  .data-table:has(.crm-col-lead) .crm-status-cell {
+    width: 27%;
+  }
+
+  .data-table:has(.crm-col-lead) .crm-col-next-followup,
+  .data-table:has(.crm-col-lead) .crm-next-followup-cell {
+    width: 28%;
+  }
+
+  .attendance-v2 .attendance-policy-grid {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .attendance-v2 .attendance-break-plan {
+    padding: 0 12px 12px;
+  }
+
+  .messenger-layout,
+  .comms-workspace,
+  .sms-workspace {
+    border-radius: 10px;
+  }
+
+  .messenger-view.is-info-open,
+  .messenger-view {
+    grid-template-columns: 1fr;
+  }
+
+  .team-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.lead-import-panel > .lead-import-choice-list .lead-import-choice[type="button"] {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--line);
+  color: var(--text);
+  text-align: left;
+}
+
+.lead-import-panel > .lead-import-choice-list .lead-import-choice[type="button"]:focus-visible {
+  outline: none;
+  box-shadow: var(--premium-focus);
+}

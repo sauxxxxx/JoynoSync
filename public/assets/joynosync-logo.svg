@@ -1,0 +1,71 @@
+<svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="joynosyncShield" x1="64" y1="26" x2="255" y2="285" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#33C5FF"/>
+      <stop offset="0.52" stop-color="#1173E6"/>
+      <stop offset="1" stop-color="#0A2E8A"/>
+    </linearGradient>
+    <linearGradient id="joynosyncGlow" x1="89" y1="53" x2="247" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67D7FF"/>
+      <stop offset="1" stop-color="#2A6CFF"/>
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M160 20C132 40 102 53 68 61V132C68 191 104 245 160 300C216 245 252 191 252 132V61C218 53 188 40 160 20Z"
+    fill="url(#joynosyncShield)"
+  />
+  <path
+    d="M160 42C137 57 111 68 83 75V129C83 178 114 223 160 270C206 223 237 178 237 129V75C209 68 183 57 160 42Z"
+    fill="rgba(255,255,255,0.06)"
+  />
+
+  <path
+    d="M99 188C110 140 151 110 202 107C179 99 150 98 125 108C94 120 71 149 65 184C60 215 73 242 95 257C82 236 80 212 99 188Z"
+    fill="url(#joynosyncGlow)"
+  />
+  <path
+    d="M216 66C236 90 241 120 231 154C222 185 203 212 176 236C209 220 235 191 246 157C257 121 249 86 224 60L216 66Z"
+    fill="url(#joynosyncGlow)"
+  />
+  <path
+    d="M112 90V126C136 103 164 90 196 88L189 61C162 65 136 74 112 90Z"
+    fill="#A4EBFF"
+    fill-opacity="0.88"
+  />
+  <path
+    d="M158 104L195 141H178V196H138V141H121L158 104Z"
+    fill="#7DE7FF"
+  />
+  <path
+    d="M101 210C111 190 129 177 148 173C133 168 114 171 98 181C77 194 65 216 65 238C65 253 72 267 84 278C77 261 79 234 101 210Z"
+    fill="#0A2E8A"
+    fill-opacity="0.48"
+  />
+
+  <path
+    d="M86 168C102 139 134 122 169 122"
+    stroke="#7DE7FF"
+    stroke-width="12"
+    stroke-linecap="round"
+  />
+  <path
+    d="M96 208C112 177 143 160 178 160"
+    stroke="#4DB2FF"
+    stroke-width="11"
+    stroke-linecap="round"
+  />
+  <path
+    d="M130 195C123 177 126 157 138 143"
+    stroke="#7DE7FF"
+    stroke-width="9"
+    stroke-linecap="round"
+  />
+
+  <circle cx="85" cy="196" r="7" fill="#39C9FF"/>
+  <circle cx="101" cy="178" r="6" fill="#46C1FF"/>
+  <circle cx="118" cy="164" r="5.5" fill="#58B8FF"/>
+  <circle cx="203" cy="259" r="6.5" fill="#49C6FF"/>
+  <circle cx="219" cy="244" r="5.5" fill="#5AB8FF"/>
+  <circle cx="233" cy="229" r="5" fill="#79AFFF"/>
+</svg>

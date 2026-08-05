@@ -1,0 +1,59 @@
+/* Responsive extensions for the premium UI system. */
+@media (max-width: 1024px) {
+  .app-shell,
+  .app-shell.no-waiting { display: block; }
+  .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; min-height: 64px; padding: 10px 14px; }
+  .mobile-nav-toggle { display: inline-flex; flex: 0 0 42px; background: var(--premium-surface-subtle); color: var(--text); }
+  .toolbar { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+  .topbar-search-wrap { flex: 1 1 auto; width: auto; max-width: none; }
+  .topbar-actions { width: auto; flex-wrap: nowrap; }
+  .topbar-attendance-copy small { display: none; }
+  .view-content { padding: 16px; }
+  .alert-banner.is-visible { max-width: calc(100% - 28px); margin: 10px 14px 0; }
+  .attendance-policy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .attendance-break-plan { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .topbar { min-height: 60px; padding: 8px 12px; }
+  .topbar-search-wrap { flex: 0 0 42px; }
+  .topbar-search-shell { width: 42px; min-height: 42px; justify-content: center; padding: 0; }
+  .topbar-search-shell .search { display: none; }
+  .topbar-attendance-btn { width: 42px; min-width: 42px; padding: 0; justify-content: center; }
+  .topbar-attendance-copy { display: none; }
+  .topbar-actions,
+  .topbar-tools { gap: 4px; }
+  .topbar-icon-btn,
+  .topbar-avatar-btn,
+  .mobile-nav-toggle { width: 42px; min-width: 42px; height: 42px; }
+  .alert-banner.is-visible { max-width: calc(100% - 24px); margin: 8px 12px 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .view-content { padding: 12px; }
+  .btn,
+  .mini-btn,
+  .ghost-btn,
+  .table-ops-columns-btn,
+  .icon-btn { min-height: 44px; }
+  .crm-leads-table-wrap,
+  .table-scroll,
+  .table-wrap { overflow-x: auto; scrollbar-color: #aab6c7 transparent; }
+  .data-table:has(.crm-col-lead) { min-width: 900px; }
+  .data-table:has(.crm-col-lead) th,
+  .data-table:has(.crm-col-lead) td { white-space: nowrap; }
+  .data-table:has(.crm-col-lead) th:first-child,
+  .data-table:has(.crm-col-lead) td:first-child,
+  .data-table:has(.crm-col-lead) .crm-col-lead,
+  .data-table:has(.crm-col-lead) .lead-name-cell { position: sticky; z-index: 2; background: var(--panel-bg); }
+  .data-table:has(.crm-col-lead) th:first-child,
+  .data-table:has(.crm-col-lead) td:first-child { left: 0; width: 44px; min-width: 44px; }
+  .data-table:has(.crm-col-lead) .crm-col-lead,
+  .data-table:has(.crm-col-lead) .lead-name-cell { left: 44px; width: 240px; min-width: 240px; box-shadow: 8px 0 14px rgba(15, 23, 42, 0.06); }
+  .attendance-nav,
+  .profile-hub-tabs,
+  .settings-profile-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .attendance-nav::-webkit-scrollbar,
+  .profile-hub-tabs::-webkit-scrollbar,
+  .settings-profile-tabs::-webkit-scrollbar { display: none; }
+  .attendance-policy-grid { grid-template-columns: 1fr; padding: 12px; }
+  .attendance-break-plan { padding: 0 12px 12px; }
+}

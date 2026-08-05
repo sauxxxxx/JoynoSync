@@ -1,0 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+@import url("./sections/layout.css");
+@import url("./sections/dashboard-work.css");
+@import url("./sections/crm-attendance.css");
+@import url("./sections/comms.css");
+@import url("./sections/messenger.css");
+@import url("./sections/modals.css");
+@import url("./sections/responsive.css");
+@import url("./sections/premium-system.css");
+@import url("./sections/premium-responsive.css");
+@import url("./sections/premium-modules.css");
+@import url("./sections/lead-compose.css");
+@import url("./sections/lead-compose-adaptive.css");
+@import url("./sections/lead-import.css");
+@import url("./sections/call-workflow.css");
+@import url("./sections/integrations.css");
+@import url("./sections/ringcentral-setup.css");
+@import url("./sections/ringcentral-setup-responsive.css");
+@import url("./sections/integration-marketplace.css");
+@import url("./sections/integration-marketplace-responsive.css");

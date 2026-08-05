@@ -1,0 +1,524 @@
+/* Guided lead import workflow. Loaded last to isolate the legacy modal primitives. */
+.modal-card.is-lead-import {
+  width: min(800px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d7e0ea;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 24px 64px rgba(15, 30, 50, 0.2);
+}
+
+.modal-card.is-lead-import .modal-head {
+  min-height: 70px;
+  margin: 0;
+  padding: 16px 20px 15px 24px;
+  border-bottom: 1px solid #e1e7ef;
+  background: #ffffff;
+}
+
+.modal-card.is-lead-import .modal-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #12233c;
+  font: 700 19px/1.3 "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.modal-card.is-lead-import .modal-head h3::before {
+  width: 4px;
+  height: 24px;
+  border-radius: 4px;
+  background: #1769e8;
+  content: "";
+}
+
+.modal-card.is-lead-import .modal-head .icon-btn {
+  width: 38px;
+  height: 38px;
+  border-color: #d7e0ea;
+  border-radius: 9px;
+  color: #354861;
+  font-size: 0;
+}
+
+.modal-card.is-lead-import .modal-head .icon-btn::after {
+  font-size: 19px;
+  line-height: 1;
+  content: "×";
+}
+
+.modal-card.is-lead-import .modal-form {
+  display: block;
+  max-height: calc(100vh - 104px);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.modal-card.is-lead-import .lead-import-shell {
+  display: grid;
+  gap: 0;
+}
+
+.modal-card.is-lead-import .lead-import-stepper {
+  display: grid;
+  grid-template-columns: auto minmax(32px, 96px) auto minmax(32px, 96px) auto;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 70px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e6ebf2;
+  background: #f8fafc;
+}
+
+.modal-card.is-lead-import .lead-import-step {
+  display: flex;
+  align-items: center;
+  justify-items: initial;
+  gap: 8px;
+  color: #7b899c;
+}
+
+.modal-card.is-lead-import .lead-import-step-line {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  background: #d9e1eb;
+}
+
+.modal-card.is-lead-import .lead-import-step-line.is-complete {
+  background: #7ba4df;
+}
+
+.modal-card.is-lead-import .lead-import-step-node {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid #c8d2df;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #74849a;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.modal-card.is-lead-import .lead-import-step.is-active {
+  color: #183c70;
+}
+
+.modal-card.is-lead-import .lead-import-step.is-active .lead-import-step-node {
+  border-color: #1769e8;
+  background: #1769e8;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(23, 105, 232, 0.11);
+}
+
+.modal-card.is-lead-import .lead-import-step.is-complete {
+  color: #3f5f88;
+}
+
+.modal-card.is-lead-import .lead-import-step.is-complete .lead-import-step-node {
+  border-color: #5d8fd5;
+  background: #eaf2fe;
+  color: #1769e8;
+}
+
+.modal-card.is-lead-import .lead-import-step-label {
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.modal-card.is-lead-import .lead-import-panel {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.modal-card.is-lead-import .lead-import-section-title {
+  color: #152840;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+
+.modal-card.is-lead-import .lead-import-section-subtitle {
+  max-width: 620px;
+  margin-top: 5px;
+  color: #697b92;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 20px;
+  min-height: 96px;
+  align-items: center;
+  gap: 11px;
+  padding: 14px;
+  overflow: hidden;
+  border: 1px solid #d5dee9;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1d314c;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice:hover {
+  border-color: #b4c5d8;
+  background: #f9fbfd;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice.is-active {
+  border-color: #79a7e8;
+  background: #f1f6fd;
+  box-shadow: inset 0 0 0 1px rgba(23, 105, 232, 0.06);
+}
+
+.lead-import-choice-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 9px;
+  background: #f1f4f8;
+  color: #60758f;
+  font-size: 15px;
+}
+
+.lead-import-choice.is-active .lead-import-choice-icon {
+  background: #deebfd;
+  color: #1769e8;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice-copy {
+  gap: 4px;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice-copy strong {
+  color: #1b304c;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice-copy small {
+  color: #6f8096;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.lead-import-choice-state {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid #bdc9d7;
+  border-radius: 50%;
+  color: transparent;
+  font-size: 10px;
+}
+
+.lead-import-choice.is-active .lead-import-choice-state {
+  border-color: #1769e8;
+  background: #1769e8;
+  color: #ffffff;
+}
+
+.modal-card.is-lead-import .lead-import-mode-options .lead-import-choice:focus-visible {
+  outline: 0;
+  border-color: #1769e8;
+  box-shadow: 0 0 0 3px rgba(23, 105, 232, 0.14);
+}
+
+.modal-card.is-lead-import .lead-import-dropzone {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  min-height: 106px;
+  align-items: center;
+  place-items: initial;
+  gap: 14px;
+  padding: 18px;
+  border: 1px dashed #b9c9dc;
+  border-radius: 11px;
+  background: #fafcff;
+  color: #203650;
+  text-align: left;
+}
+
+.modal-card.is-lead-import .lead-import-dropzone:hover,
+.modal-card.is-lead-import .lead-import-dropzone.is-drag-over {
+  border-color: #1769e8;
+  background: #f4f8fe;
+}
+
+.lead-import-dropzone-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 11px;
+  background: #e8f1fd;
+  color: #1769e8;
+}
+
+.modal-card.is-lead-import .lead-import-dropzone .lead-import-dropzone-icon i {
+  color: inherit;
+  font-size: 20px;
+}
+
+.lead-import-dropzone-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.modal-card.is-lead-import .lead-import-dropzone .lead-import-dropzone-copy strong {
+  color: #182d49;
+  font-size: 13px;
+}
+
+.modal-card.is-lead-import .lead-import-dropzone .lead-import-dropzone-copy span {
+  max-width: 460px;
+  color: #708198;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.modal-card.is-lead-import .lead-import-dropzone-chip {
+  min-width: 96px;
+  height: 36px;
+  border: 1px solid #1769e8;
+  border-radius: 8px;
+  background: #1769e8;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lead-import-upload-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px 18px;
+  flex-wrap: wrap;
+  color: #728198;
+  font-size: 10.5px;
+}
+
+.lead-import-upload-meta > span,
+.lead-import-upload-meta > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lead-import-upload-meta i {
+  color: #5d7592;
+  font-size: 12px;
+}
+
+.modal-card.is-lead-import .lead-import-inline-link {
+  margin-left: auto;
+  color: #1769e8;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.modal-card.is-lead-import .lead-import-inline-link:hover {
+  text-decoration: underline;
+}
+
+.modal-card.is-lead-import .lead-import-meta-strip {
+  gap: 8px;
+  padding: 0;
+}
+
+.modal-card.is-lead-import .lead-import-meta-item {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #e0e6ee;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.modal-card.is-lead-import .lead-import-soft-section {
+  border: 1px solid #e0e6ee;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.modal-card.is-lead-import .lead-import-actions {
+  min-height: 66px;
+  margin: 0;
+  padding: 12px 24px;
+  border-top: 1px solid #e1e7ef;
+  background: #ffffff;
+}
+
+.modal-card.is-lead-import .lead-import-footer-action {
+  min-height: 36px;
+  padding: 0 4px;
+  color: #53667f;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.lead-import-safe-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #6e7f95;
+  font-size: 10.5px;
+}
+
+.lead-import-safe-note i {
+  color: #47719f;
+  font-size: 14px;
+}
+
+.modal-card.is-lead-import .lead-import-primary-btn {
+  min-height: 40px;
+  padding: 0 15px;
+  border-radius: 8px;
+  background: #1769e8;
+  box-shadow: 0 6px 14px rgba(23, 105, 232, 0.18);
+}
+
+@media (max-width: 680px) {
+  .modal-overlay:has(.modal-card.is-lead-import) {
+    padding: 0;
+  }
+
+  .modal-card.is-lead-import {
+    width: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .modal-card.is-lead-import .modal-form {
+    max-height: calc(100dvh - 70px);
+  }
+
+  .modal-card.is-lead-import .lead-import-stepper {
+    grid-template-columns: auto minmax(12px, 1fr) auto minmax(12px, 1fr) auto;
+    gap: 6px;
+    min-height: 62px;
+    padding: 10px 16px;
+  }
+
+  .modal-card.is-lead-import .lead-import-step-label {
+    display: none;
+  }
+
+  .modal-card.is-lead-import .lead-import-panel {
+    padding: 20px 16px;
+  }
+
+  .modal-card.is-lead-import .lead-import-mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-card.is-lead-import .lead-import-mode-options .lead-import-choice {
+    min-height: 86px;
+  }
+
+  .modal-card.is-lead-import .lead-import-dropzone {
+    grid-template-columns: 42px minmax(0, 1fr);
+    padding: 15px;
+  }
+
+  .lead-import-dropzone-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .modal-card.is-lead-import .lead-import-dropzone-chip {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .lead-import-upload-meta {
+    display: grid;
+  }
+
+  .modal-card.is-lead-import .lead-import-inline-link {
+    margin-left: 0;
+  }
+
+  .modal-card.is-lead-import .lead-import-actions {
+    padding: 10px 16px;
+  }
+
+  .lead-import-safe-note {
+    display: none;
+  }
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import,
+:root[data-theme="dark"] .modal-card.is-lead-import .modal-head,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-panel,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-actions {
+  border-color: #3a3a3a;
+  background: #202020;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-stepper,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-soft-section,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-meta-item {
+  border-color: #3b3b3b;
+  background: #242424;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .modal-head h3,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-section-title,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-mode-options .lead-import-choice-copy strong,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-dropzone .lead-import-dropzone-copy strong {
+  color: #f2f2f2;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-section-subtitle,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-mode-options .lead-import-choice-copy small,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-dropzone .lead-import-dropzone-copy span,
+:root[data-theme="dark"] .lead-import-upload-meta,
+:root[data-theme="dark"] .lead-import-safe-note {
+  color: #a7a7a7;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-mode-options .lead-import-choice,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-dropzone {
+  border-color: #494949;
+  background: #292929;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-mode-options .lead-import-choice.is-active {
+  border-color: #527fbd;
+  background: #26364d;
+}
+
+:root[data-theme="dark"] .lead-import-choice-icon,
+:root[data-theme="dark"] .lead-import-dropzone-icon {
+  background: #303b49;
+  color: #8eb9ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-card.is-lead-import * {
+    transition-duration: 0.01ms !important;
+  }
+}
