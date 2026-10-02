@@ -1,0 +1,345 @@
+.crm-leads-list .lead-filter-shell .lead-filter-popover {
+  width: min(430px, calc(100vw - 32px));
+  padding: 16px;
+  border: 0;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(15, 15, 15, 0.12);
+}
+
+.crm-leads-list .lead-filter-shell .lead-filter-popover::before {
+  border: 0;
+  background: #fff;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-head {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-copy h4 {
+  color: #20201e;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-copy p {
+  color: #787774;
+  font-size: 11px;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px 12px;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-field {
+  min-width: 0;
+  gap: 6px;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-field > span {
+  color: #5f5e5b;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-search input {
+  min-height: 38px;
+  padding-left: 34px;
+  border: 0;
+  border-radius: 5px;
+  background: #f5f5f3;
+  color: #292826;
+  box-shadow: none;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-search input:focus {
+  box-shadow: 0 0 0 2px rgba(32, 32, 30, 0.16);
+  outline: 0;
+}
+
+.lead-filter-dropdown {
+  position: relative;
+  min-width: 0;
+}
+
+.lead-filter-dropdown > summary {
+  list-style: none;
+}
+
+.lead-filter-dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lead-filter-dropdown-trigger {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: hidden;
+  background: #f5f5f3;
+  color: #292826;
+  cursor: pointer;
+  font-size: 11px;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.lead-filter-dropdown-trigger:hover {
+  background: #eeeeec;
+}
+
+.lead-filter-dropdown-trigger:focus-visible {
+  box-shadow: 0 0 0 2px rgba(32, 32, 30, 0.16);
+  outline: 0;
+}
+
+.lead-filter-dropdown-trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lead-filter-dropdown-trigger > i {
+  flex: 0 0 auto;
+  color: #8a8986;
+  font-size: 10px;
+  transition: transform 160ms ease;
+}
+
+.lead-filter-dropdown[open] > .lead-filter-dropdown-trigger > i {
+  transform: rotate(180deg);
+}
+
+.lead-filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 60;
+  width: max(100%, 190px);
+  padding: 5px;
+  border: 0;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 9px 24px rgba(15, 15, 15, 0.14);
+}
+
+.lead-filter-dropdown.is-owner .lead-filter-dropdown-menu {
+  right: 0;
+  left: auto;
+  width: 260px;
+}
+
+.lead-filter-dropdown-options {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.lead-filter-dropdown-option {
+  width: 100%;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #373633;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+}
+
+.lead-filter-dropdown-option[hidden] {
+  display: none;
+}
+
+.lead-filter-dropdown.is-owner .lead-filter-dropdown-option {
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
+}
+
+.lead-filter-dropdown-option:hover,
+.lead-filter-dropdown-option:focus-visible {
+  background: #f3f3f1;
+  outline: 0;
+}
+
+.lead-filter-dropdown-option.is-selected {
+  background: #eeeeec;
+  color: #20201e;
+  font-weight: 600;
+}
+
+.lead-filter-dropdown-check {
+  visibility: hidden;
+  color: #484744;
+  font-size: 11px;
+}
+
+.lead-filter-dropdown-option.is-selected .lead-filter-dropdown-check {
+  visibility: visible;
+}
+
+.lead-filter-owner-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: hsl(var(--lead-filter-avatar-hue, 210) 48% 91%);
+  color: hsl(var(--lead-filter-avatar-hue, 210) 38% 33%);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.lead-filter-owner-avatar.is-system {
+  background: #eeeeec;
+  color: #6f6e6b;
+  font-size: 11px;
+}
+
+.lead-filter-dropdown-search {
+  position: relative;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.lead-filter-dropdown-search > i {
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  color: #8a8986;
+  font-size: 11px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.lead-filter-dropdown-search input {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 9px 0 29px;
+  border: 0;
+  border-radius: 4px;
+  background: #f5f5f3;
+  color: #292826;
+  font: inherit;
+  font-size: 11px;
+}
+
+.lead-filter-dropdown-search input:focus {
+  outline: 2px solid rgba(32, 32, 30, 0.16);
+  outline-offset: 0;
+}
+
+.lead-filter-dropdown-empty {
+  margin: 0;
+  padding: 12px 8px;
+  color: #8a8986;
+  font-size: 10px;
+  text-align: center;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-actions {
+  margin-top: 16px;
+  padding-top: 4px;
+  border-top: 0;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-actions button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-head > .mini-btn,
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-actions .ghost-btn {
+  border: 0;
+  background: transparent;
+  color: #5f5e5b;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-head > .mini-btn:hover,
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-actions .ghost-btn:hover {
+  background: #f1f1ef;
+  color: #20201e;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-actions .btn-accent {
+  border: 0;
+  background: #2f2f2d;
+  color: #fff;
+}
+
+.crm-leads-list .lead-filter-popover .kanban-filter-popover-actions .btn-accent:hover {
+  background: #1f1f1e;
+}
+
+:root[data-theme="dark"] .crm-leads-list .lead-filter-shell .lead-filter-popover,
+:root[data-theme="dark"] .lead-filter-dropdown-menu {
+  background: #242423;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+}
+
+:root[data-theme="dark"] .crm-leads-list .lead-filter-shell .lead-filter-popover::before {
+  border: 0;
+  background: #242423;
+}
+
+:root[data-theme="dark"] .crm-leads-list .lead-filter-popover .kanban-filter-popover-copy h4,
+:root[data-theme="dark"] .lead-filter-dropdown-trigger,
+:root[data-theme="dark"] .lead-filter-dropdown-option,
+:root[data-theme="dark"] .lead-filter-dropdown-search input {
+  color: #ececeb;
+}
+
+:root[data-theme="dark"] .lead-filter-dropdown-trigger,
+:root[data-theme="dark"] .lead-filter-dropdown-search input,
+:root[data-theme="dark"] .crm-leads-list .lead-filter-popover .kanban-filter-search input {
+  background: #2b2b2a;
+}
+
+:root[data-theme="dark"] .crm-leads-list .lead-filter-popover .kanban-filter-popover-head > .mini-btn,
+:root[data-theme="dark"] .crm-leads-list .lead-filter-popover .kanban-filter-popover-actions .ghost-btn {
+  border: 0;
+  background: transparent;
+  color: #c4c3bf;
+}
+
+:root[data-theme="dark"] .crm-leads-list .lead-filter-popover .kanban-filter-popover-actions .btn-accent {
+  border: 0;
+  background: #ececeb;
+  color: #20201e;
+}
+
+:root[data-theme="dark"] .lead-filter-dropdown-trigger:hover,
+:root[data-theme="dark"] .lead-filter-dropdown-option:hover,
+:root[data-theme="dark"] .lead-filter-dropdown-option:focus-visible,
+:root[data-theme="dark"] .lead-filter-dropdown-option.is-selected {
+  background: #353533;
+}
+
+:root[data-theme="dark"] .lead-filter-owner-avatar.is-system {
+  background: #3b3b39;
+  color: #c4c3bf;
+}
+
+@media (max-width: 720px) {
+  .crm-leads-list .lead-filter-popover .kanban-filter-popover-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-filter-dropdown.is-owner .lead-filter-dropdown-menu {
+    right: auto;
+    left: 0;
+    width: 100%;
+  }
+}

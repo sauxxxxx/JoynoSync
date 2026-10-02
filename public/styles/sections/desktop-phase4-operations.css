@@ -1,0 +1,359 @@
+/* Phase 4: desktop Calendar,
+Kanban,
+Task Table,
+Calls,
+and non-Lead CRM profiles. */
+@media (min-width: 1025px) {
+  /* Calendar: quiet planner grid with light structural separators. */
+  #appShell .calendar-hybrid {
+    min-height: 620px;
+    padding: 0;
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-surface);
+    box-shadow: none;
+  }
+
+  #appShell .calendar-mini-panel {
+    width: 236px;
+    padding: var(--ui-space-4);
+    background: var(--ui-color-surface-subtle);
+    border-right: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .calendar-main-pane {
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .calendar-main-head {
+    min-height: 74px;
+    padding: var(--ui-space-4) var(--ui-space-5);
+    background: transparent;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .calendar-mode-toggle {
+    padding: 2px;
+    background: var(--ui-color-surface-subtle);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-control);
+  }
+
+  #appShell .calendar-mode-toggle button {
+    border-radius: 3px;
+  }
+
+  #appShell .calendar-week-grid {
+    gap: 0;
+  }
+
+  #appShell .calendar-week-column {
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell .calendar-week-column:last-child {
+    border-right: 0;
+  }
+
+  #appShell .calendar-week-column.is-selected {
+    background: var(--ui-color-primary-soft);
+    box-shadow: none;
+  }
+
+  #appShell .calendar-week-column-head {
+    min-height: 52px;
+    padding: var(--ui-space-2) var(--ui-space-3);
+    background: transparent;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .calendar-week-task {
+    margin: 0;
+    padding: var(--ui-space-3);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .calendar-week-task:hover {
+    transform: none;
+    background: var(--ui-color-surface-hover);
+    box-shadow: none;
+  }
+
+  #appShell .calendar-agenda-section {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  /* Kanban: retain spatial workflow while removing floating-card decoration. */
+  #appShell .kanban-board-v2 {
+    min-height: 620px;
+    padding: 0;
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-surface);
+    box-shadow: none;
+  }
+
+  #appShell .kanban-board-v2 > .view-section-head,
+  #appShell .kanban-board-head {
+    min-height: 74px;
+    padding: var(--ui-space-4) var(--ui-space-5);
+    background: transparent;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .kanban-board-grid {
+    gap: 0;
+  }
+
+  #appShell .kanban-column {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell .kanban-column:last-child {
+    border-right: 0;
+  }
+
+  #appShell .kanban-column-head {
+    min-height: 42px;
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .kanban-card {
+    margin: 0;
+    padding: var(--ui-space-3);
+    background: var(--ui-color-surface);
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .kanban-card:hover {
+    transform: none;
+    background: var(--ui-color-surface-hover);
+    box-shadow: none;
+  }
+
+  #appShell .kanban-column-body {
+    padding: 0;
+  }
+
+  /* Shared table pagination control. */
+
+  #appShell .table-ops-page-size select {
+    min-height: 38px;
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border-strong);
+    border-radius: var(--ui-radius-control);
+  }
+
+  /* Calls: three functional panes, separated by rules instead of cards. */
+  #appShell .calls-workspace-shell {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .calls-subview-tabs {
+    gap: var(--ui-space-5);
+    min-height: 43px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .calls-subview-tabs button {
+    min-height: 43px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+  }
+
+  #appShell .calls-subview-tabs button.is-active,
+  #appShell .calls-subview-tabs button[aria-selected="true"] {
+    color: var(--ui-color-text);
+    border-bottom-color: var(--ui-color-primary);
+  }
+
+  #appShell .calls-live-shell,
+  #appShell .calls-workspace-body {
+    gap: 0;
+    margin-top: var(--ui-space-3);
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-surface);
+    overflow: hidden;
+  }
+
+  #appShell .calls-live-rail,
+  #appShell .calls-workspace-column,
+  #appShell .calls-dialer-card,
+  #appShell .call-surface {
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .calls-live-shell > :last-child,
+  #appShell .calls-workspace-body > :last-child {
+    border-right: 0;
+  }
+
+  #appShell .calls-workspace-card-head,
+  #appShell .calls-workspace-head {
+    min-height: 64px;
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .calls-live-filter,
+  #appShell .calls-live-tab {
+    border-radius: var(--ui-radius-control);
+  }
+
+  #appShell .calls-dial-pad {
+    gap: 1px;
+    background: var(--ui-color-border);
+  }
+
+  #appShell .calls-dial-key {
+    min-height: 58px;
+    background: var(--ui-color-surface-subtle);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .calls-dial-key:hover {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .calls-performance-card,
+  #appShell .calls-scheduler-side-card,
+  #appShell .calls-scheduler-queue-card {
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-surface);
+    box-shadow: none;
+  }
+
+  /* Account and Deal profiles only. Lead profile remains protected. */
+  #appShell :is(.account-profile-view, .deal-profile-view) {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-profile-page-toolbar {
+    padding-bottom: var(--ui-space-4);
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-profile-page-shell {
+    gap: 0;
+    margin-top: var(--ui-space-4);
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-hero {
+    padding: var(--ui-space-5) 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--ui-radius-control);
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-summary-strip {
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    background: var(--ui-color-surface);
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-summary-item {
+    min-height: 86px;
+    padding: var(--ui-space-4) var(--ui-space-5);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-summary-item:last-child {
+    border-right: 0;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-layout {
+    gap: var(--ui-space-8);
+    padding-top: var(--ui-space-6);
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-surface {
+    padding: 0 0 var(--ui-space-6);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-section-head {
+    padding: 0 0 var(--ui-space-3);
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-profile-list-row,
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-profile-timeline-item {
+    padding: var(--ui-space-3) 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell :is(.account-profile-view, .deal-profile-view) .lead-record-detail {
+    padding: var(--ui-space-3) 0;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .deal-profile-view .deal-value-callout {
+    margin: var(--ui-space-4) 0 0;
+    background: var(--ui-color-warning-soft);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-control);
+    box-shadow: none;
+  }
+}

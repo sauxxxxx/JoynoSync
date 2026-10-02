@@ -1,0 +1,404 @@
+/* Public authentication: a quiet, focused entry into the workspace. */
+.app-shell.is-standalone-public,
+.app-shell.is-standalone-public .view-content {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #ffffff;
+}
+
+body.is-login-route,
+body.is-login-route .app-shell.is-standalone-public .view-content {
+  background: #ffffff;
+}
+
+body.is-login-route #appShell.app-shell.is-standalone-public .view-content {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 0;
+  background: #ffffff;
+  overflow: auto;
+}
+
+.auth-login-view {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 48px 24px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+}
+
+.auth-login-shell {
+  width: min(400px, 100%);
+  height: auto;
+}
+
+.auth-login-view.is-bootstrapping {
+  padding: 24px;
+}
+
+.auth-login-bootstrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: #787774;
+}
+
+.auth-login-bootstrap-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 1.5px solid #dedede;
+  border-top-color: #787774;
+  border-radius: 50%;
+  animation: auth-login-bootstrap-spin 700ms linear infinite;
+}
+
+@keyframes auth-login-bootstrap-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-login-card,
+.auth-login-card.is-signup-mode {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  display: block;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.auth-login-form-panel,
+.auth-login-card.is-signup-mode .auth-login-form-panel {
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: transparent;
+}
+
+.auth-login-form-panel > * {
+  width: 100%;
+  max-width: none;
+  transform: none;
+}
+
+.auth-login-identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.auth-login-identity img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.auth-login-identity strong {
+  color: #202124;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: -0.02em;
+}
+
+.auth-login-card-head {
+  margin-top: 42px;
+  display: grid;
+  justify-items: start;
+  gap: 7px;
+  text-align: left;
+}
+
+.auth-login-card-head h3 {
+  margin: 0;
+  color: #202124;
+  font-size: 25px;
+  font-weight: 650;
+  line-height: 32px;
+  letter-spacing: -0.03em;
+}
+
+.auth-login-card-head p,
+.auth-login-note p {
+  margin: 0;
+  color: #6f7378;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.auth-login-actions {
+  margin-top: 30px;
+  display: grid;
+  gap: 18px;
+}
+
+.auth-login-google,
+.auth-login-magic {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+#appShell .auth-login-google.btn.btn-accent {
+  color: #202124;
+  border: 1px solid #dedede;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+#appShell .auth-login-google.btn.btn-accent:hover {
+  color: #202124;
+  border-color: #c9c9c7;
+  background: #f7f7f5;
+  box-shadow: none;
+  transform: none;
+}
+
+.auth-google-mark {
+  font-size: 16px;
+}
+
+.auth-login-divider {
+  margin: 0;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  color: #9b9a97;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.auth-login-divider span {
+  background: #ececea;
+}
+
+.auth-login-divider small {
+  font-size: 11px;
+}
+
+.auth-login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-login-field,
+.auth-login-field + .auth-login-field {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.auth-login-field > span {
+  color: #37352f;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.auth-login-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 11px;
+  color: #202124;
+  border: 1px solid #dedede;
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: none;
+  font-size: 13px;
+  line-height: 20px;
+  caret-color: #202124;
+}
+
+.auth-login-input::placeholder {
+  color: #8d9095;
+  opacity: 1;
+}
+
+.auth-login-input:focus {
+  outline: none;
+  color: #202124;
+  border-color: #9b9a97;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(55, 53, 47, 0.12);
+}
+
+.auth-login-input.has-password-toggle {
+  padding-right: 44px;
+}
+
+.auth-password-toggle {
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  color: #787774;
+  border-radius: 5px;
+}
+
+.auth-password-toggle:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+.auth-password-toggle:focus-visible,
+.auth-login-link:focus-visible,
+.auth-login-google:focus-visible,
+.auth-login-magic:focus-visible {
+  outline: 2px solid #37352f;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.auth-login-options {
+  margin-top: -2px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.auth-login-link {
+  padding: 0;
+  color: #50545a;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.auth-login-link:hover {
+  color: #202124;
+  text-decoration-color: currentColor;
+}
+
+#appShell .auth-login-magic.btn.btn-light {
+  margin-top: 4px;
+  color: #ffffff;
+  border: 1px solid #202124;
+  background: #202124;
+  box-shadow: none;
+}
+
+#appShell .auth-login-magic.btn.btn-light:hover {
+  color: #ffffff;
+  border-color: #343538;
+  background: #343538;
+  box-shadow: none;
+  transform: none;
+}
+
+.auth-login-google:disabled,
+.auth-login-magic:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+#appShell .auth-login-google.btn.btn-accent:disabled {
+  color: #50545a;
+  background: #f7f7f5;
+}
+
+#appShell .auth-login-magic.btn.btn-light:disabled {
+  color: #ffffff;
+  background: #202124;
+}
+
+.auth-login-secondary-row {
+  margin-top: 22px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.auth-login-actions > .auth-login-secondary-row {
+  margin-top: 0;
+}
+
+.auth-login-switch-copy {
+  margin: 0;
+  color: #787774;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.auth-login-note {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.auth-login-status,
+.auth-login-account {
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+.auth-login-support {
+  width: 100%;
+  max-width: none;
+  margin-top: 40px;
+  padding-top: 18px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 9px;
+  color: #787774;
+  border-top: 1px solid #ececea;
+}
+
+.auth-login-support > i {
+  margin-top: 1px;
+  color: #787774;
+  font-size: 14px;
+}
+
+.auth-login-support strong,
+.auth-login-support span,
+.auth-login-support button {
+  color: #787774;
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.auth-login-support strong {
+  color: #50545a;
+  font-weight: 600;
+}
+
+.auth-login-support button {
+  color: #50545a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .auth-login-view {
+    padding: 32px 20px;
+    place-items: start center;
+  }
+
+  .auth-login-card-head {
+    margin-top: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-login-bootstrap-spinner {
+    animation-duration: 1.8s;
+  }
+}

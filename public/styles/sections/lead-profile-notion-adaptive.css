@@ -1,0 +1,163 @@
+/* Attempt composer, responsive behavior, and dark theme for the lead drawer. */
+.modal-card.is-lead-attempt {
+  width: min(460px, calc(100vw - 24px));
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+}
+
+.modal-card.is-lead-attempt .modal-head {
+  margin: 0;
+  padding: 18px 20px 12px;
+  border: 0;
+}
+
+.modal-card.is-lead-attempt .modal-head h3 {
+  color: #191919;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-card.is-lead-attempt .modal-form {
+  gap: 12px;
+  padding: 0 20px 18px;
+}
+
+.modal-card.is-lead-attempt .lead-attempt-shell {
+  gap: 12px;
+}
+
+.modal-card.is-lead-attempt .lead-attempt-summary {
+  gap: 5px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #f7f7f5;
+}
+
+.modal-card.is-lead-attempt .form-field {
+  gap: 5px;
+}
+
+.modal-card.is-lead-attempt .form-field > span {
+  color: #5f5e5b;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-attempt select,
+.modal-card.is-lead-attempt textarea {
+  border: 0;
+  border-radius: 5px;
+  background: #f7f7f5;
+  box-shadow: none;
+  color: #242424;
+  font-size: 12px;
+}
+
+.modal-card.is-lead-attempt select:focus,
+.modal-card.is-lead-attempt textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px #b9b9b5;
+}
+
+.modal-card.is-lead-attempt .form-actions {
+  padding-top: 4px;
+  border: 0;
+}
+
+.modal-card.is-lead-attempt .btn-light {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.modal-card.is-lead-attempt .btn-accent {
+  border: 0;
+  border-radius: 5px;
+  background: #252525;
+  box-shadow: none;
+}
+
+@media (max-width: 680px) {
+  .modal-card.is-lead-drawer {
+    width: 100vw;
+  }
+
+  .modal-card.is-lead-drawer .modal-head,
+  .lead-notion-drawer {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .lead-notion-detail-grid,
+  .lead-notion-attempt-grid,
+  .lead-notion-related-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-notion-section-body {
+    padding-left: 4px;
+  }
+
+  .lead-notion-next-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .lead-notion-next-row .lead-notion-primary-action {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-drawer,
+:root[data-theme="dark"] .modal-card.is-lead-drawer .modal-head,
+:root[data-theme="dark"] .lead-notion-drawer,
+:root[data-theme="dark"] .modal-card.is-lead-attempt {
+  background: #202020;
+  color: #e7e7e5;
+}
+
+:root[data-theme="dark"] .lead-notion-hero,
+:root[data-theme="dark"] .lead-notion-next-step,
+:root[data-theme="dark"] .lead-notion-section,
+:root[data-theme="dark"] .modal-card.is-lead-drawer .modal-head {
+  border-color: #373737;
+}
+
+:root[data-theme="dark"] .lead-notion-identity-copy h4,
+:root[data-theme="dark"] .lead-notion-section > summary,
+:root[data-theme="dark"] .lead-notion-next-copy strong,
+:root[data-theme="dark"] .lead-notion-section-label,
+:root[data-theme="dark"] .lead-notion-subsection-title,
+:root[data-theme="dark"] .lead-notion-drawer .lead-record-detail-value,
+:root[data-theme="dark"] .lead-notion-attempt-head strong,
+:root[data-theme="dark"] .modal-card.is-lead-attempt .modal-head h3 {
+  color: #e7e7e5;
+}
+
+:root[data-theme="dark"] .lead-notion-next-row,
+:root[data-theme="dark"] .lead-notion-attempt-head,
+:root[data-theme="dark"] .lead-notion-drawer .mini-btn,
+:root[data-theme="dark"] .lead-notion-drawer .lead-profile-actions-menu > summary,
+:root[data-theme="dark"] .modal-card.is-lead-attempt .lead-attempt-summary,
+:root[data-theme="dark"] .modal-card.is-lead-attempt select,
+:root[data-theme="dark"] .modal-card.is-lead-attempt textarea {
+  background: #2a2a2a;
+  color: #e7e7e5;
+}
+
+:root[data-theme="dark"] .lead-notion-section > summary:hover,
+:root[data-theme="dark"] .lead-notion-linked-task:hover,
+:root[data-theme="dark"] .lead-notion-text-action:hover,
+:root[data-theme="dark"] .lead-notion-drawer .lead-record-copy-btn:hover {
+  background: #2f2f2f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lead-notion-chevron {
+    transition: none;
+  }
+}

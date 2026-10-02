@@ -1,0 +1,210 @@
+/* Notion-style lead import assignment properties. */
+.modal-card.is-lead-import .lead-import-final-section {
+  gap: 10px;
+}
+
+.modal-card.is-lead-import .lead-import-final-section > .lead-import-assignment-modes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+}
+
+.modal-card.is-lead-import .lead-import-final-section .lead-import-assignment-mode {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.modal-card.is-lead-import .lead-import-final-section .lead-import-assignment-mode:hover {
+  background: #f4f5f6;
+}
+
+.modal-card.is-lead-import .lead-import-final-section .lead-import-assignment-mode:focus-within {
+  outline: 2px solid rgba(35, 106, 220, 0.22);
+  outline-offset: 1px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-mode input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.lead-import-assignment-mode-check {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border-radius: 4px;
+  color: transparent;
+  font-size: 12px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.lead-import-assignment-mode.is-active .lead-import-assignment-mode-check {
+  background: #2383e2;
+  color: #fff;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-mode .lead-import-choice-copy {
+  display: grid;
+  gap: 1px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-mode .lead-import-choice-copy strong {
+  color: #202124;
+  font-size: 10.5px;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-mode .lead-import-choice-copy small {
+  color: #787c82;
+  font-size: 9.5px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-picker,
+.modal-card.is-lead-import .lead-import-assignment-picker.needs-selection {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto minmax(0, 1fr) 16px;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary:hover,
+.modal-card.is-lead-import .lead-import-assignment-summary[aria-expanded="true"] {
+  background: #f4f5f6;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary:focus-visible {
+  outline: 2px solid rgba(35, 106, 220, 0.22);
+  outline-offset: 1px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary-copy {
+  display: grid;
+  grid-template-columns: minmax(86px, 0.45fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 12px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary-copy .lead-import-assignment-property-name {
+  grid-row: 1 / span 2;
+  color: #777b80;
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary-copy strong {
+  color: #202124;
+  font-size: 10.5px;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-summary-copy > span:last-child {
+  color: #8a8e94;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.lead-import-assignment-summary-chevron {
+  color: #8a8e94;
+  font-size: 10px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-avatars {
+  min-width: 34px;
+  padding-left: 4px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-avatar {
+  width: 24px;
+  height: 24px;
+  border-color: #fff;
+  font-size: 7.5px;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-editor {
+  margin: 3px 8px 0;
+  padding: 10px 0 0;
+  border-top: 1px solid #ececef;
+  background: transparent;
+}
+
+.modal-card.is-lead-import .lead-import-soft-note,
+.modal-card.is-lead-import .lead-import-report-note {
+  padding-left: 8px;
+}
+
+@media (max-width: 680px) {
+  .modal-card.is-lead-import .lead-import-assignment-summary-copy {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-card.is-lead-import .lead-import-assignment-summary-copy .lead-import-assignment-property-name {
+    grid-row: auto;
+  }
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-mode:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-summary:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-summary[aria-expanded="true"] {
+  background: #2b2b2b;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-mode .lead-import-choice-copy strong,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-summary-copy strong {
+  color: #ededed;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-mode .lead-import-choice-copy small,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-summary-copy .lead-import-assignment-property-name,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-summary-copy > span:last-child,
+:root[data-theme="dark"] .lead-import-assignment-summary-chevron {
+  color: #a5a5a5;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-avatar {
+  border-color: #202020;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-editor {
+  border-color: #3a3a3a;
+  background: transparent;
+}

@@ -1,0 +1,235 @@
+#appShell .topbar {
+  z-index: 50;
+}
+
+#appShell .topbar-notif-dropdown {
+  width: min(380px, calc(100vw - 24px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  overflow: hidden;
+  border-radius: 7px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
+}
+
+.notification-popover {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  max-height: calc(100vh - 66px);
+  min-height: 176px;
+  color: var(--notification-text);
+  background: var(--ui-color-surface);
+}
+
+.notification-popover-header,
+.notification-popover-footer {
+  position: relative;
+  z-index: 1;
+  background: var(--ui-color-surface);
+}
+
+.notification-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--notification-border);
+}
+
+.notification-popover-header > span {
+  display: grid;
+  gap: 1px;
+}
+
+.notification-popover-header strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.notification-popover-header small {
+  color: var(--notification-muted);
+  font-size: 11px;
+}
+
+.notification-popover-header button,
+.notification-popover-footer button,
+.notification-popover-state button {
+  border: 0;
+  border-radius: 5px;
+  color: var(--notification-text);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.notification-popover-header button {
+  padding: 6px 7px;
+  color: var(--notification-muted);
+  font-size: 11px;
+}
+
+.notification-popover-header button:hover,
+.notification-popover-footer button:hover,
+.notification-popover-state button:hover {
+  background: var(--notification-hover);
+}
+
+.notification-popover-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--notification-border) transparent;
+}
+
+.notification-popover-items {
+  padding: 5px;
+}
+
+.notification-popover-item + .notification-popover-item {
+  border-top: 1px solid var(--notification-border);
+}
+
+.notification-popover-open {
+  width: 100%;
+  padding: 9px 8px;
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-popover-open:hover,
+.notification-popover-open:focus-visible {
+  background: var(--notification-hover);
+}
+
+.notification-popover-dot {
+  width: 6px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.notification-popover-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.notification-popover-title-row {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notification-popover-title-row strong {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-popover-title-row time,
+.notification-popover-description {
+  color: var(--notification-muted);
+  font-size: 11px;
+}
+
+.notification-popover-title-row time {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.notification-popover-description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-popover-count {
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--notification-muted);
+  background: var(--notification-active);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.notification-popover-state {
+  min-height: 116px;
+  padding: 24px 16px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--notification-muted);
+  text-align: center;
+}
+
+.notification-popover-state > i {
+  font-size: 15px;
+}
+
+.notification-popover-state strong {
+  color: var(--notification-text);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.notification-popover-state button {
+  padding: 6px 9px;
+  background: var(--notification-active);
+  font-size: 11px;
+}
+
+.notification-popover-loading {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.notification-popover-loading span {
+  height: 42px;
+  border-radius: 5px;
+  background: var(--notification-active);
+  animation: notification-pulse 1.4s ease-in-out infinite;
+}
+
+.notification-popover-footer {
+  padding: 5px;
+  border-top: 1px solid var(--notification-border);
+}
+
+.notification-popover-footer button {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 550;
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-popover-loading span {
+    animation: none;
+  }
+}

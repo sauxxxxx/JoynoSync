@@ -4,6 +4,22 @@ import { escapeHtml, matchesSearch, normalizeForMatch, phoneDigitsOnly } from ".
 import { tableActionMenu, viewSectionHead } from "../utils/ui.js";
 import { getContactContext, getLeadContext, getPrimaryLeadContact } from "../modules/crm-context.js";
 import { findDirectThreadByName as findDirectThreadByNameInData } from "../modules/comms-core.js";
+import {
+  buildLeadAdminViewCounts,
+  formatLeadAdminSyncLabel,
+  isLeadAdminRole,
+  renderLeadAdminTableFooter,
+  resolveLeadAdminViewId,
+  resolveLeadScopeForRole
+} from "../modules/lead-admin-view.js";
+import {
+  buildLeadAgentViewCounts,
+  resolveLeadAgentViewId
+} from "../modules/lead-agent-view.js";
+import { renderLeadListHeader } from "../modules/lead-list-header.js";
+import { renderLeadProfileNotionDrawer } from "../modules/lead-profile-notion-view.js";
+import { renderCrmTableEmptyState } from "../modules/crm-table-empty-state.js";
+import { isActiveSalesMember } from "../modules/lead-assignment-policy.js";
 
 function initialsFromLabel(value) {
   const raw = String(value || "").trim();
@@ -20,13 +36,24 @@ function initialsFromLabel(value) {
   return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
 }
 
+function avatarHueFromLabel(value) {
+  const normalized = String(value || "-").trim().toLowerCase();
+  let hash = 2166136261;
+  for (let index = 0; index < normalized.length; index += 1) {
+    hash ^= normalized.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash >>> 0) % 360;
+}
+
 function crmAvatarCell(label, type = "person") {
   const safeLabel = escapeHtml(label || "-");
   const initials = escapeHtml(initialsFromLabel(label));
-  const toneClass = type === "company" ? " is-company" : "";
+  const toneClass = type === "company" ? " is-company" : " is-person-tone";
+  const toneStyle = type === "company" ? "" : ` style="--crm-avatar-hue:${avatarHueFromLabel(label)}"`;
   return `
     <span class="crm-name-cell">
-      <span class="crm-inline-avatar${toneClass}" aria-hidden="true">${initials}</span>
+      <span class="crm-inline-avatar${toneClass}"${toneStyle} aria-hidden="true">${initials}</span>
       <span class="crm-name-text">${safeLabel}</span>
     </span>
   `;
@@ -36,10 +63,11 @@ function crmAvatarStackCell(label, subLabel = "", type = "person", nameMeta = ""
   const safeLabel = escapeHtml(label || "-");
   const safeSubLabel = escapeHtml(subLabel || "");
   const initials = escapeHtml(initialsFromLabel(label));
-  const toneClass = type === "company" ? " is-company" : "";
+  const toneClass = type === "company" ? " is-company" : " is-person-tone";
+  const toneStyle = type === "company" ? "" : ` style="--crm-avatar-hue:${avatarHueFromLabel(label)}"`;
   return `
     <span class="crm-name-cell">
-      <span class="crm-inline-avatar${toneClass}" aria-hidden="true">${initials}</span>
+      <span class="crm-inline-avatar${toneClass}"${toneStyle} aria-hidden="true">${initials}</span>
       <span class="crm-name-stack">
         <span class="crm-name-line">
           <span class="crm-name-text">${safeLabel}</span>
@@ -374,12 +402,16 @@ function summarizeLeadWeeklyRemovalQueue(leads = []) {
   );
 }
 
-function renderLeadAttemptPill(attemptMeta) {
+function renderLeadAdminProgress(attemptMeta) {
   const count = normalizeLeadAttemptCount(attemptMeta?.attemptCount);
-  if (!count) {
-    return "";
-  }
-  return `<span class="crm-lead-attempt-pill is-step-${count}" title="${count} of 3 attempts logged">${count}/3</span>`;
+  return `
+    <span class="lead-admin-progress is-step-${count}" title="${count} of 3 attempts logged">
+      <strong>${count}/3</strong>
+      <span class="lead-admin-progress-dots" aria-hidden="true">
+        ${[1, 2, 3].map((step) => `<i class="${step <= count ? "is-complete" : ""}"></i>`).join("")}
+      </span>
+    </span>
+  `;
 }
 
 function getDealValueNumber(value) {
@@ -459,7 +491,7 @@ function getLeadFollowUpMeta(value) {
   const parsed = Date.parse(String(value || ""));
   if (!Number.isFinite(parsed)) {
     return {
-      label: "Not set",
+      label: "—",
       className: "is-not-set",
       fullLabel: "Not set"
     };
@@ -480,6 +512,26 @@ function getLeadFollowUpMeta(value) {
     className: "is-upcoming",
     fullLabel
   };
+}
+
+function formatLeadNextAction(value) {
+  const parsed = Date.parse(String(value || ""));
+  if (!Number.isFinite(parsed)) {
+    return "—";
+  }
+  const date = new Date(parsed);
+  const diff = leadDayDiffFromToday(value);
+  const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
+  if (diff < 0) {
+    return `Overdue · ${time}`;
+  }
+  if (diff === 0) {
+    return `Today, ${time}`;
+  }
+  if (diff === 1) {
+    return `Tomorrow, ${time}`;
+  }
+  return `${formatLeadTableDate(value)}, ${time}`;
 }
 
 function leadProfileStatusClass(value) {
@@ -585,22 +637,6 @@ function getCurrentUserTeamMember(data) {
   );
 }
 
-function isLeadershipProfile(person) {
-  if (!person || typeof person !== "object") {
-    return false;
-  }
-  return [person.team, person.department, person.title, person.role]
-    .map((value) => String(value || "").trim().toLowerCase())
-    .some((value) => value === "leadership" || value.includes("leadership"));
-}
-
-function canViewReserveLeadCount(data, canManageLeads) {
-  if (!canManageLeads) {
-    return false;
-  }
-  return isLeadershipProfile(data?.currentUser) || isLeadershipProfile(getCurrentUserTeamMember(data));
-}
-
 function leadProfileIconText(icon, text, className = "lead-profile-icon-text") {
   return `
     <span class="${className}">
@@ -698,24 +734,13 @@ function getLeadPhoneEntries(lead) {
   ]);
 }
 
-function crmPhoneActionButtons(action, id, phone) {
+function crmPhoneActionButtons(_action, id, phone) {
   const safePhone = String(phone || "").trim();
   if (!safePhone) {
     return "";
   }
   return `
     <span class="crm-phone-actions">
-      <button
-        type="button"
-        class="crm-phone-call-btn"
-        data-action="${escapeHtml(action)}"
-        data-id="${escapeHtml(id)}"
-        data-phone="${escapeHtml(safePhone)}"
-        aria-label="Call ${escapeHtml(safePhone)}"
-        title="Call ${escapeHtml(safePhone)}"
-      >
-        <i class="bi bi-telephone" aria-hidden="true"></i>
-      </button>
       <button
         type="button"
         class="crm-phone-copy-btn"
@@ -731,7 +756,7 @@ function crmPhoneActionButtons(action, id, phone) {
   `;
 }
 
-function crmPhoneListCell(entries, action, id, emptyLabel = "No phone") {
+function crmPhoneListCell(entries, action, id, emptyLabel = "No phone", showLeadingIcon = false) {
   if (!entries.length) {
     return `<span class="crm-table-meta">${escapeHtml(emptyLabel)}</span>`;
   }
@@ -741,6 +766,7 @@ function crmPhoneListCell(entries, action, id, emptyLabel = "No phone") {
         .map(
           (entry) => `
             <div class="crm-phone-cell">
+              ${showLeadingIcon ? '<i class="bi bi-telephone lead-admin-phone-icon" aria-hidden="true"></i>' : ""}
               <span class="crm-phone-copy">
                 <span class="crm-phone-value">${escapeHtml(entry.value)}</span>
               </span>
@@ -990,9 +1016,10 @@ const LEAD_STATUS_FILTER_OPTIONS = [
 ];
 const LEAD_DATE_FILTER_OPTIONS = [
   { id: "all", label: "All dates" },
+  { id: "follow-up", label: "Has follow-up" },
   { id: "overdue", label: "Overdue" },
-  { id: "today", label: "Today" },
-  { id: "tomorrow", label: "Tomorrow" },
+  { id: "today", label: "Follow-up today" },
+  { id: "tomorrow", label: "Follow-up tomorrow" },
   { id: "not-set", label: "Not set" }
 ];
 const LEAD_TIMEZONE_FILTER_OPTIONS = [
@@ -1136,7 +1163,9 @@ const LEAD_SORTERS = {
   status: (a, b) => compareLeadRowsByWorkflowStatus(a, b),
   owner: (a, b) => compareText(a._ownerDisplay || a.owner, b._ownerDisplay || b.owner),
   lastTouch: (a, b) => compareDateIso(a._lastTouchAt, b._lastTouchAt),
-  nextFollowUp: (a, b) => compareDateIso(a.nextFollowUp, b.nextFollowUp)
+  nextFollowUp: (a, b) => compareDateIso(a.nextFollowUp, b.nextFollowUp),
+  updatedAt: (a, b) => compareDateIso(a.updatedAt, b.updatedAt),
+  createdAt: (a, b) => compareDateIso(a.createdAt, b.createdAt)
 };
 
 const CONTACT_SORTERS = {
@@ -1335,12 +1364,14 @@ function crmContactLeadCell(contact) {
 }
 
 function leadRow(lead, leadEmailById = {}, context = {}) {
+  const isAdminLeadView = Boolean(context.isAdminLeadView);
   const leadEmail = String(leadEmailById[lead.id] || "").trim();
   const leadPhoneEntries = getLeadPhoneEntries(lead);
   const leadAttemptMeta = getLeadAttemptMeta(lead);
   const phoneTimezoneLabel = formatLeadPhoneTimezoneBucket(lead.phoneTimezoneBucket);
   const interest = String(lead.interest || "").trim();
   const followUpMeta = getLeadFollowUpMeta(lead.nextFollowUp);
+  const nextActionLabel = isAdminLeadView ? followUpMeta.label : formatLeadNextAction(lead.nextFollowUp);
   const lastTouchLabel = formatLeadLastTouch(lead._lastTouchAt);
   const lastActivityOutcome = String(lead.lastCallOutcome || "").trim();
   const leadMenuItems = leadTableMenuItems(lead);
@@ -1373,8 +1404,9 @@ function leadRow(lead, leadEmailById = {}, context = {}) {
       <td class="table-col-check crm-lead-select-cell">
         <input type="checkbox" name="leadSelect" value="${escapeHtml(lead.id)}" ${isSelected ? "checked" : ""} ${isArchiving ? "disabled" : ""} aria-label="Select ${escapeHtml(lead.name || "lead")}" />
       </td>
-      <td class="lead-name-cell">${crmAvatarStackCell(lead.name, leadEmail, "person", renderLeadAttemptPill(leadAttemptMeta))}</td>
-      <td class="crm-phone-cell-col">${crmPhoneListCell(leadPhoneEntries, "lead-log-call", lead.id)}</td>
+      <td class="lead-name-cell">${crmAvatarStackCell(lead.name, leadEmail, "person")}</td>
+      <td class="crm-progress-cell">${renderLeadAdminProgress(leadAttemptMeta)}</td>
+      <td class="crm-phone-cell-col">${crmPhoneListCell(leadPhoneEntries, "lead-log-call", lead.id, "No phone")}</td>
       <td class="crm-timezone-cell"><span class="crm-table-meta">${escapeHtml(phoneTimezoneLabel)}</span></td>
       <td class="crm-interest-cell"><span class="crm-table-meta crm-interest-text" title="${escapeHtml(interest || "No interest")}">${escapeHtml(interest || "No interest")}</span></td>
       <td class="table-status-text crm-status-cell">
@@ -1422,19 +1454,41 @@ function leadRow(lead, leadEmailById = {}, context = {}) {
           }
         </div>
       </td>
-      <td class="crm-owner-cell"><span class="crm-owner-text">${escapeHtml(lead._ownerDisplay || lead.owner)}</span></td>
+      ${isAdminLeadView ? `<td class="crm-owner-cell">${crmAvatarCell(lead._ownerDisplay || lead.owner || "Unassigned")}</td>` : ""}
       <td class="crm-last-touch-cell">
         <span class="crm-table-meta">${escapeHtml(lastTouchLabel)}</span>
         ${lastActivityOutcome ? `<small class="crm-last-activity-outcome">${escapeHtml(lastActivityOutcome)}</small>` : ""}
       </td>
       <td class="lead-followup-cell crm-next-followup-cell">
         <div class="lead-followup-cell-inner">
-          <span class="waiting-due-pill ${followUpMeta.className}" title="${escapeHtml(followUpMeta.fullLabel)}">${escapeHtml(followUpMeta.label)}</span>
-          <span class="lead-row-inline-actions row-actions row-actions-table">
-            ${tableActionMenu("More lead actions", leadMenuItems)}
-          </span>
+          ${followUpMeta.className !== "is-not-set" ? '<i class="bi bi-calendar3 lead-admin-followup-icon" aria-hidden="true"></i>' : ""}
+          <span class="waiting-due-pill ${followUpMeta.className}" title="${escapeHtml(followUpMeta.fullLabel)}">${escapeHtml(nextActionLabel)}</span>
         </div>
       </td>
+      ${
+        isAdminLeadView
+          ? `
+            <td class="crm-admin-row-actions">
+              <span class="lead-admin-quick-actions" aria-label="Quick actions for ${escapeHtml(lead.name || "lead")}">
+                <button type="button" data-action="lead-log-call" data-id="${escapeHtml(lead.id)}" aria-label="Call ${escapeHtml(lead.name || "lead")}" title="Call"><i class="bi bi-telephone" aria-hidden="true"></i></button>
+                <button type="button" data-action="lead-send-email" data-id="${escapeHtml(lead.id)}" aria-label="Email ${escapeHtml(lead.name || "lead")}" title="Email"><i class="bi bi-envelope" aria-hidden="true"></i></button>
+                <button type="button" data-action="lead-edit" data-id="${escapeHtml(lead.id)}" aria-label="Edit ${escapeHtml(lead.name || "lead")}" title="Edit"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
+                <button type="button" data-action="lead-open" data-id="${escapeHtml(lead.id)}" aria-label="Open ${escapeHtml(lead.name || "lead")}" title="Open profile"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
+              </span>
+              <span class="lead-row-inline-actions row-actions row-actions-table">${tableActionMenu("More lead actions", leadMenuItems)}</span>
+            </td>
+          `
+          : `
+            <td class="crm-agent-row-actions">
+              <span class="lead-agent-quick-actions" aria-label="Quick actions for ${escapeHtml(lead.name || "lead")}">
+                <button type="button" data-action="lead-log-call" data-id="${escapeHtml(lead.id)}" aria-label="Call ${escapeHtml(lead.name || "lead")}" title="Call" ${leadPhoneEntries.length ? "" : "disabled"}><i class="bi bi-telephone" aria-hidden="true"></i></button>
+                <button type="button" data-action="lead-create-callback" data-id="${escapeHtml(lead.id)}" aria-label="Schedule follow-up for ${escapeHtml(lead.name || "lead")}" title="Schedule follow-up"><i class="bi bi-calendar-plus" aria-hidden="true"></i></button>
+                <button type="button" data-action="lead-open" data-id="${escapeHtml(lead.id)}" aria-label="Open ${escapeHtml(lead.name || "lead")}" title="Open profile"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
+              </span>
+              <span class="lead-row-inline-actions row-actions row-actions-table">${tableActionMenu("More lead actions", leadMenuItems)}</span>
+            </td>
+          `
+      }
     </tr>
   `;
 }
@@ -1444,7 +1498,10 @@ function crmSkeletonBar(width, extraClass = "") {
   return `<span class="crm-skeleton-bar${extraClass ? ` ${extraClass}` : ""}" style="width:${safeWidth}" aria-hidden="true"></span>`;
 }
 
-function renderLeadSkeletonRows(count = 7) {
+function renderLeadSkeletonRows(count = 7, options = {}) {
+  const includeProgress = options.includeProgress !== false;
+  const includeOwner = Boolean(options.includeOwner);
+  const includeActions = options.includeActions !== false;
   return Array.from({ length: count }, (_, index) => {
     const cycle = index % 4;
     const nameWidth = [132, 118, 146, 124][cycle];
@@ -1466,11 +1523,12 @@ function renderLeadSkeletonRows(count = 7) {
             </span>
           </span>
         </td>
+        ${includeProgress ? `<td>${crmSkeletonBar(48, "is-pill")}</td>` : ""}
         <td>${crmSkeletonBar(phoneWidth, "is-medium")}</td>
         <td>${crmSkeletonBar(66, "is-short")}</td>
         <td>${crmSkeletonBar(interestWidth, "is-medium")}</td>
         <td>${crmSkeletonBar(76, "is-pill")}</td>
-        <td>${crmSkeletonBar(ownerWidth, "is-short")}</td>
+        ${includeOwner ? `<td>${crmSkeletonBar(ownerWidth, "is-short")}</td>` : ""}
         <td>${crmSkeletonBar(touchWidth, "is-short")}</td>
         <td class="lead-followup-cell">
           <div class="lead-followup-cell-inner lead-skeleton-followup">
@@ -1478,6 +1536,7 @@ function renderLeadSkeletonRows(count = 7) {
             <span class="crm-skeleton-icon"></span>
           </div>
         </td>
+        ${includeActions ? '<td class="crm-admin-row-actions"><span class="crm-skeleton-icon"></span></td>' : ""}
       </tr>
     `;
   }).join("");
@@ -1732,6 +1791,7 @@ function buildLeadOwnerFilterOptions(data) {
   const seen = new Set();
   const people = [data.currentUser, ...(Array.isArray(data.teamMembers) ? data.teamMembers : [])]
     .filter((person) => person && typeof person === "object")
+    .filter(isActiveSalesMember)
     .map((person) => ({
       id: String(person.id || "").trim(),
       name: String(person.name || "").trim()
@@ -1753,6 +1813,59 @@ function buildLeadOwnerFilterOptions(data) {
       label: person.name
     }))
   ];
+}
+
+function renderLeadFilterDropdown({ name, options, selectedId, owner = false, searchable = false }) {
+  const normalizedOptions = Array.isArray(options) ? options : [];
+  const selectedOption = normalizedOptions.find((option) => option.id === selectedId) || normalizedOptions[0];
+  const selectedValue = String(selectedOption?.id || "all");
+  const selectedLabel = String(selectedOption?.label || "Select");
+  const optionRows = normalizedOptions
+    .map((option) => {
+      const optionId = String(option.id || "");
+      const optionLabel = String(option.label || optionId);
+      const selected = optionId === selectedValue;
+      const ownerIdentity = owner && !["all", "unassigned"].includes(optionId)
+        ? `<span class="lead-filter-owner-avatar" style="--lead-filter-avatar-hue:${avatarHueFromLabel(optionLabel)}" aria-hidden="true">${escapeHtml(initialsFromLabel(optionLabel))}</span>`
+        : owner
+          ? `<span class="lead-filter-owner-avatar is-system" aria-hidden="true"><i class="bi ${optionId === "unassigned" ? "bi-person-dash" : "bi-people"}"></i></span>`
+          : "";
+      return `
+        <button
+          type="button"
+          class="lead-filter-dropdown-option ${selected ? "is-selected" : ""}"
+          data-lead-filter-option
+          data-value="${escapeHtml(optionId)}"
+          data-label="${escapeHtml(optionLabel)}"
+          data-search-text="${escapeHtml(optionLabel.toLowerCase())}"
+          role="option"
+          aria-selected="${selected}"
+        >
+          ${ownerIdentity}
+          <span>${escapeHtml(optionLabel)}</span>
+          <i class="bi bi-check-lg lead-filter-dropdown-check" aria-hidden="true"></i>
+        </button>`;
+    })
+    .join("");
+  return `
+    <details class="lead-filter-dropdown ${owner ? "is-owner" : ""}" data-lead-filter-dropdown>
+      <summary class="lead-filter-dropdown-trigger" aria-haspopup="listbox">
+        <span data-lead-filter-value>${escapeHtml(selectedLabel)}</span>
+        <i class="bi bi-chevron-down" aria-hidden="true"></i>
+      </summary>
+      <div class="lead-filter-dropdown-menu" role="listbox" aria-label="${escapeHtml(selectedLabel)} options">
+        ${
+          searchable
+            ? `<label class="lead-filter-dropdown-search"><i class="bi bi-search" aria-hidden="true"></i><span class="sr-only">Search owners</span><input type="search" placeholder="Search sales members" data-lead-owner-filter-search /></label>`
+            : ""
+        }
+        <div class="lead-filter-dropdown-options" data-lead-filter-options>
+          ${optionRows}
+          <p class="lead-filter-dropdown-empty" data-lead-filter-empty hidden>No active Sales member found.</p>
+        </div>
+      </div>
+      <input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(selectedValue)}" />
+    </details>`;
 }
 
 function leadMatchesOwnerFilter(data, lead, ownerFilter, ownerOptionMap) {
@@ -1799,6 +1912,9 @@ function leadMatchesDateFilter(lead, dateFilter) {
   if (normalizedFilter === "not-set") {
     return !nextFollowUp;
   }
+  if (normalizedFilter === "follow-up") {
+    return Boolean(nextFollowUp);
+  }
   if (!nextFollowUp) {
     return false;
   }
@@ -1843,8 +1959,10 @@ function formatLeadPhoneTimezoneBucket(value) {
 
 export function renderLeads(data, context) {
   const routeId = "leads";
-  const canManageLeads = ["Owner", "Admin", "Manager"].includes(String(data.currentUser?.role || "").trim());
-  const activeScope = canManageLeads ? "all" : "mine";
+  const currentUserRole = String(data.currentUser?.role || "").trim();
+  const canManageLeads = isLeadAdminRole(currentUserRole);
+  const activeScope = resolveLeadScopeForRole(currentUserRole, context.leadsScope);
+  const leadRowContext = { ...context, isAdminLeadView: canManageLeads };
   const currentUserName = String(data.currentUser?.name || "").trim();
   const rawSortKey = String(context.crmSortKey || "").trim();
   const sortDir = context.crmSortDir === "desc" ? "desc" : context.crmSortDir === "asc" ? "asc" : "none";
@@ -1882,6 +2000,7 @@ export function renderLeads(data, context) {
   let showInitialLoadingRow = false;
   let visibleRowsForSelection = [];
   let reviewableLeads = [];
+  let agentCountSource = [];
   const hiddenLeadIds = new Set(
     (Array.isArray(context.leadArchiveHiddenIds) ? context.leadArchiveHiddenIds : [])
       .map((id) => String(id || "").trim())
@@ -1895,6 +2014,9 @@ export function renderLeads(data, context) {
 
   if (canUsePagedLeadsData) {
     const pageData = context.leadsPageData && typeof context.leadsPageData === "object" ? context.leadsPageData : {};
+    const showingImportResults = Boolean(
+      context.leadsImportViewActive && String(context.leadsImportJobId || "").trim()
+    );
     const localLeadById = new Map((data.leads || []).map((lead) => [String(lead.id || "").trim(), lead]));
     const pageRows = (Array.isArray(pageData.rows) ? pageData.rows : [])
       .map((lead) => {
@@ -1916,9 +2038,11 @@ export function renderLeads(data, context) {
       };
       })
       .filter((lead) =>
-        lead?.activePool !== false &&
         !hiddenLeadIds.has(String(lead?.id || "").trim()) &&
-        !(lead.archived || String(lead.status || "") === "Archived")
+        (showingImportResults || (
+          lead?.activePool !== false &&
+          !(lead.archived || String(lead.status || "") === "Archived")
+        ))
       );
     const pageSize = normalizeCrmPageSize(pageData.pageSize || context.crmPageSize, routeId);
     const leadEmailById = Object.fromEntries(
@@ -1974,7 +2098,8 @@ export function renderLeads(data, context) {
     showInitialLoadingRow = Boolean(pageData.rowLoading) && !pageRows.length;
     visibleRowsForSelection = pageRows;
     reviewableLeads = pageRows;
-    rows = pageRows.map((lead) => leadRow(lead, leadEmailById, context)).join("");
+    agentCountSource = pageRows;
+    rows = pageRows.map((lead) => leadRow(lead, leadEmailById, leadRowContext)).join("");
   } else {
     const baseVisibleLeads = (data.leads || []).filter((lead) => {
       if (
@@ -2008,6 +2133,7 @@ export function renderLeads(data, context) {
       leadMatchesOwnerFilter(data, lead, activeOwnerFilter, ownerOptionMap)
     );
     reviewableLeads = countBaseLeads;
+    agentCountSource = countBaseLeads;
     const leadEmailById = Object.fromEntries(
       countBaseLeads.map((lead) => [lead.id, resolveLeadEmail(lead, data.contacts || [])])
     );
@@ -2054,9 +2180,9 @@ export function renderLeads(data, context) {
     );
     showTableSkeleton = Boolean(context.crmTableLoading) && !(data.leads || []).length;
     rows = showTableSkeleton
-      ? renderLeadSkeletonRows()
+      ? renderLeadSkeletonRows(5, { includeOwner: canManageLeads })
       : ((visibleRowsForSelection = sortedRows.slice(pagination.startIndex, pagination.endIndex)),
-        visibleRowsForSelection.map((lead) => leadRow(lead, leadEmailById, context)).join(""));
+        visibleRowsForSelection.map((lead) => leadRow(lead, leadEmailById, leadRowContext)).join(""));
     visibleLeadCount = filtered.length;
     footerTotalRecords = sortedRows.length;
   }
@@ -2074,22 +2200,6 @@ export function renderLeads(data, context) {
       ? String(selectedVisibleRows[0]?.status || "").trim()
       : "";
   const totalLeadCount = visibleLeadCount;
-  const showReserveLeadCount = canViewReserveLeadCount(data, canManageLeads);
-  const reserveCount = showReserveLeadCount
-    ? Math.max(0, Number(context.leadsPageData?.reserveCount || 0) || 0)
-    : 0;
-  const showReserveLeadMeter = showReserveLeadCount && reserveCount > 0;
-  const reserveCountLabel = reserveCount.toLocaleString();
-  const activeScopeLabel = canManageLeads
-    ? (
-        {
-          mine: "My Leads",
-          unassigned: "Unassigned",
-          assigned: "Assigned",
-          all: "All Leads"
-        }[activeScope] || "Leads"
-      )
-    : "My Leads";
   const activeFilterCount = [
     String(context.searchTerm || "").trim(),
     activeStatusFilter !== "all",
@@ -2101,6 +2211,32 @@ export function renderLeads(data, context) {
   const leadFilterButtonLabel = activeFilterCount
     ? `Open filters (${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"})`
     : "Open filters";
+  const adminViewId = canManageLeads
+    ? context.leadsImportViewActive && String(context.leadsImportJobId || "").trim()
+      ? "last-import"
+      : resolveLeadAdminViewId({ scope: activeScope, status: activeStatusFilter, date: activeDateFilter })
+    : "";
+  const adminViewCounts = canManageLeads
+    ? {
+        ...buildLeadAdminViewCounts(context.leadsPageData, visibleLeadCount),
+        lastImport: Number(context.leadsImportResultCount || 0)
+      }
+    : {};
+  const adminSyncLabel = canManageLeads
+    ? formatLeadAdminSyncLabel(context.leadsPageData?.lastAttemptAt, Boolean(context.supabaseConfigured))
+    : "";
+  const agentViewId = canManageLeads
+    ? ""
+    : resolveLeadAgentViewId({ status: activeStatusFilter, date: activeDateFilter });
+  const agentViewCounts = canManageLeads
+    ? {}
+    : buildLeadAgentViewCounts(context.leadsPageData, visibleLeadCount, agentCountSource, {
+        statusCountsAreExact: !canUsePagedLeadsData
+      });
+  const nextCallableLead = canManageLeads
+    ? null
+    : visibleRowsForSelection.find((lead) => getLeadPhoneEntries(lead).length > 0) || null;
+  const isLeadListLoading = Boolean(showTableSkeleton || showInitialLoadingRow);
   const filterPopover = context.leadFiltersOpen
     ? `
       <form id="leadFilterForm" class="kanban-filter-popover lead-filter-popover" autocomplete="off">
@@ -2124,97 +2260,36 @@ export function renderLeads(data, context) {
               />
             </div>
           </label>
-          <label class="kanban-filter-popover-field">
+          <div class="kanban-filter-popover-field">
             <span>Status</span>
-            <div class="kanban-filter-select">
-              <select name="statusFilter">
-                ${LEAD_STATUS_FILTER_OPTIONS
-                  .map(
-                    (option) => `
-                      <option value="${escapeHtml(option.id)}" ${activeStatusFilter === option.id ? "selected" : ""}>
-                        ${escapeHtml(option.label)}
-                      </option>
-                    `
-                  )
-                  .join("")}
-              </select>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </div>
-          </label>
+            ${renderLeadFilterDropdown({ name: "statusFilter", options: LEAD_STATUS_FILTER_OPTIONS, selectedId: activeStatusFilter })}
+          </div>
           ${
             canManageLeads
               ? `
-                <label class="kanban-filter-popover-field">
+                <div class="kanban-filter-popover-field">
                   <span>Owner</span>
-                  <div class="kanban-filter-select">
-                    <select name="ownerFilter">
-                      ${ownerFilterOptions
-                        .map(
-                          (option) => `
-                            <option value="${escapeHtml(option.id)}" ${activeOwnerFilter === option.id ? "selected" : ""}>
-                              ${escapeHtml(option.label)}
-                            </option>
-                          `
-                        )
-                        .join("")}
-                    </select>
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                  </div>
-                </label>
+                  ${renderLeadFilterDropdown({ name: "ownerFilter", options: ownerFilterOptions, selectedId: activeOwnerFilter, owner: true, searchable: true })}
+                </div>
               `
               : `<input type="hidden" name="ownerFilter" value="all" />`
           }
-          <label class="kanban-filter-popover-field">
+          <div class="kanban-filter-popover-field">
             <span>Source</span>
-            <div class="kanban-filter-select">
-              <select name="sourceFilter">
-                ${sourceOptions
-                  .map(
-                    (option) => `
-                      <option value="${escapeHtml(option.id)}" ${activeSourceFilter === option.id ? "selected" : ""}>
-                        ${escapeHtml(option.id === "all" ? "All sources" : option.label)}
-                      </option>
-                    `
-                  )
-                  .join("")}
-              </select>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </div>
-          </label>
-          <label class="kanban-filter-popover-field">
+            ${renderLeadFilterDropdown({
+              name: "sourceFilter",
+              options: sourceOptions.map((option) => ({ ...option, label: option.id === "all" ? "All sources" : option.label })),
+              selectedId: activeSourceFilter
+            })}
+          </div>
+          <div class="kanban-filter-popover-field">
             <span>Timezone</span>
-            <div class="kanban-filter-select">
-              <select name="timezoneFilter">
-                ${LEAD_TIMEZONE_FILTER_OPTIONS
-                  .map(
-                    (option) => `
-                      <option value="${escapeHtml(option.id)}" ${activeTimezoneFilter === option.id ? "selected" : ""}>
-                        ${escapeHtml(option.label)}
-                      </option>
-                    `
-                  )
-                  .join("")}
-              </select>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </div>
-          </label>
-          <label class="kanban-filter-popover-field">
+            ${renderLeadFilterDropdown({ name: "timezoneFilter", options: LEAD_TIMEZONE_FILTER_OPTIONS, selectedId: activeTimezoneFilter })}
+          </div>
+          <div class="kanban-filter-popover-field">
             <span>Date</span>
-            <div class="kanban-filter-select">
-              <select name="dateFilter">
-                ${LEAD_DATE_FILTER_OPTIONS
-                  .map(
-                    (option) => `
-                      <option value="${escapeHtml(option.id)}" ${activeDateFilter === option.id ? "selected" : ""}>
-                        ${escapeHtml(option.label)}
-                      </option>
-                    `
-                  )
-                  .join("")}
-              </select>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </div>
-          </label>
+            ${renderLeadFilterDropdown({ name: "dateFilter", options: LEAD_DATE_FILTER_OPTIONS, selectedId: activeDateFilter })}
+          </div>
         </div>
         <div class="kanban-filter-popover-actions">
           <button type="button" class="ghost-btn" data-action="lead-filters-clear" data-id="clear">Reset</button>
@@ -2230,45 +2305,25 @@ export function renderLeads(data, context) {
     primaryAction: "Add Lead",
     showWaitingPanel: false,
     html: `
-      <section class="view-block crm-list-v2 crm-leads-list">
-        <div class="crm-lead-header-shell">
-          <div class="crm-lead-header-main">
-            <div class="crm-lead-title-group">
-              <div class="crm-lead-title-row">
-                <h3 class="block-title">Leads</h3>
-                <span class="crm-lead-total-badge">${escapeHtml(String(visibleLeadCount))}</span>
-              </div>
-              <p class="crm-lead-title-meta">${escapeHtml(activeScopeLabel)} view${visibleLeadCount !== totalLeadCount ? ` · ${escapeHtml(String(totalLeadCount))} total` : ""}</p>
-            </div>
-            <div class="team-head-actions crm-lead-header-actions">
-              ${showReserveLeadMeter ? `<span class="crm-lead-reserve-meter" title="Reserve leads available for refill"><span>Reserve</span><strong>${escapeHtml(reserveCountLabel)}</strong></span>` : ""}
-              ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn crm-lead-import-btn" data-action="lead-import-open" data-id="open" aria-label="Import leads" title="Import leads"><i class="bi bi-upload" aria-hidden="true"></i></button>` : ""}
-              ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn crm-lead-export-btn" data-action="lead-export-leads" data-id="leads" aria-label="Export leads" title="Export leads"><i class="bi bi-download" aria-hidden="true"></i></button>` : ""}
-              ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn crm-lead-export-btn" data-action="lead-export-duplicates" data-id="duplicates" aria-label="Export duplicate leads" title="Export duplicate leads"><i class="bi bi-files" aria-hidden="true"></i></button>` : ""}
-              ${canManageLeads ? `<button type="button" class="mini-btn crm-lead-header-icon-btn" data-action="lead-ownership-manager" data-id="" aria-label="Manage lead owners" title="Manage lead owners"><i class="bi bi-person-gear" aria-hidden="true"></i></button>` : ""}
-              <button class="table-ops-columns-btn" type="button" data-action="view-add-record" data-id="create">
-                <i class="bi bi-plus-lg" aria-hidden="true"></i>
-                <span>New Lead</span>
-              </button>
-              <div class="kanban-filter-shell lead-filter-shell">
-                <button
-                  class="mini-btn kanban-filter-btn crm-lead-header-icon-btn crm-lead-filter-btn ${activeFilterCount ? "is-active" : ""}"
-                  type="button"
-                  data-action="lead-open-filters"
-                  data-id="open"
-                  aria-label="${escapeHtml(leadFilterButtonLabel)}"
-                  title="${escapeHtml(leadFilterButtonLabel)}"
-                  aria-expanded="${context.leadFiltersOpen ? "true" : "false"}"
-                >
-                  <i class="bi bi-funnel" aria-hidden="true"></i>
-                  ${activeFilterCount ? `<small>${escapeHtml(String(activeFilterCount))}</small>` : ""}
-                </button>
-                ${filterPopover}
-              </div>
-            </div>
-          </div>
-        </div>
+      <section class="view-block crm-list-v2 crm-leads-list ${canManageLeads ? "is-admin-view" : "is-agent-view"} ${isLeadListLoading ? "is-loading" : ""}" ${isLeadListLoading ? 'aria-busy="true"' : ""}>
+        ${renderLeadListHeader({
+          canManageLeads,
+          visibleCount: visibleLeadCount,
+          adminSyncLabel,
+          activeFilterCount,
+          filterButtonLabel: leadFilterButtonLabel,
+          filtersOpen: Boolean(context.leadFiltersOpen),
+          filterPopover,
+          adminViewId,
+          adminViewCounts,
+          agentViewId,
+          agentViewCounts,
+          nextCallableLeadId: nextCallableLead?.id || "",
+          isLoading: isLeadListLoading,
+          showLastImport: Boolean(String(context.leadsImportJobId || "").trim())
+        })}
         <div class="table-ops-wrap data-table-shell">
+          ${!canManageLeads && isLeadListLoading ? '<div class="lead-agent-loading-line" aria-hidden="true"><span></span></div>' : ""}
           <table class="data-table">
             <thead>
               <tr>
@@ -2283,21 +2338,23 @@ export function renderLeads(data, context) {
                   />
                 </th>
                 <th class="crm-col-lead">${crmHeaderSortButton("Lead", "name", sortKey, sortDir)}</th>
+                <th class="crm-col-progress"><span>Progress</span></th>
                 <th class="crm-col-phone">${crmHeaderSortButton("Phone", "phone", sortKey, sortDir)}</th>
                 <th class="crm-col-timezone">${crmHeaderSortButton("Timezone", "timezone", sortKey, sortDir)}</th>
                 <th class="crm-col-interest">${crmHeaderSortButton("Interest", "interest", sortKey, sortDir)}</th>
                 <th class="crm-col-status">${crmHeaderSortButton("Status", "status", sortKey, sortDir)}</th>
-                <th class="crm-col-owner">${crmHeaderSortButton("Owner", "owner", sortKey, sortDir)}</th>
+                ${canManageLeads ? `<th class="crm-col-owner">${crmHeaderSortButton("Owner", "owner", sortKey, sortDir)}</th>` : ""}
                 <th class="crm-col-last-touch">${crmHeaderSortButton("Last Activity", "lastTouch", sortKey, sortDir)}</th>
-                <th class="crm-col-next-followup">${crmHeaderSortButton("Next Follow-up", "nextFollowUp", sortKey, sortDir)}</th>
+                <th class="crm-col-next-followup">${crmHeaderSortButton(canManageLeads ? "Next Follow-up" : "Next Action", "nextFollowUp", sortKey, sortDir)}</th>
+                ${canManageLeads ? '<th class="crm-col-admin-actions"><button type="button" data-action="lead-open-filters" data-id="open" aria-label="Configure table" title="Configure table"><i class="bi bi-sliders" aria-hidden="true"></i></button></th>' : '<th class="crm-col-agent-actions"><span class="sr-only">Actions</span></th>'}
               </tr>
             </thead>
             <tbody>
               ${
                 rows ||
                 (showInitialLoadingRow
-                  ? "<tr><td colspan='9' class='task-meta'>Loading leads...</td></tr>"
-                  : "<tr><td colspan='9' class='task-meta'>No leads found.</td></tr>")
+                  ? renderLeadSkeletonRows(5, { includeOwner: canManageLeads })
+                  : renderCrmTableEmptyState("leads", canManageLeads ? 11 : 10))
               }
             </tbody>
           </table>
@@ -2333,16 +2390,18 @@ export function renderLeads(data, context) {
                     <i class="bi bi-check2-circle" aria-hidden="true"></i>
                     <span>${selectedCount === 1 ? "Log attempt" : "Log attempts"}</span>
                   </button>
-                  <button
-                    type="button"
-                    class="crm-lead-bulk-trigger"
-                    data-action="lead-bulk-reassign"
-                    data-id="reassign"
-                    ${controlsBusy ? "disabled" : ""}
-                  >
-                    <i class="bi bi-person-plus" aria-hidden="true"></i>
-                    <span>Reassign</span>
-                  </button>
+                  ${canManageLeads ? `
+                    <button
+                      type="button"
+                      class="crm-lead-bulk-trigger"
+                      data-action="lead-bulk-reassign"
+                      data-id="reassign"
+                      ${controlsBusy ? "disabled" : ""}
+                    >
+                      <i class="bi bi-person-plus" aria-hidden="true"></i>
+                      <span>Reassign</span>
+                    </button>
+                  ` : ""}
                   <button
                     type="button"
                     class="crm-lead-bulk-trigger crm-lead-bulk-trigger-archive"
@@ -2394,10 +2453,15 @@ export function renderLeads(data, context) {
             `
             : ""
         }
-        ${showTableSkeleton ? "" : renderCrmTableFooter(routeId, pagination, footerTotalRecords, {
-          showTotalRecords: exactTotalCount,
-          navigationPending: Boolean(context.leadsPageData?.rowLoading)
-        })}
+        ${canManageLeads || isLeadListLoading ? "" : '<p class="lead-agent-workflow-hint"><i class="bi bi-check2-circle" aria-hidden="true"></i><span>Calls are logged automatically. Complete the wrap-up to continue.</span></p>'}
+        ${
+          isLeadListLoading
+            ? ""
+            : renderLeadAdminTableFooter(routeId, pagination, footerTotalRecords, {
+                showTotalRecords: canUsePagedLeadsData ? exactTotalCount : true,
+                navigationPending: Boolean(context.leadsPageData?.rowLoading)
+              })
+        }
       </section>
     `
   };
@@ -2923,6 +2987,12 @@ export function renderLeadProfile(data, context) {
     : leadContext.linkedTasks.length
       ? "Review the latest activity and keep the next customer touch on track."
       : "Create a follow-up so ownership and timing stay visible.";
+  const hasScheduledFollowUp = followUpLabel !== "Not set";
+  const leadDrawerSummaryMarkup = `
+    <span class="status-chip status-${leadProfileStatusClass(lead.status)}">${escapeHtml(lead.status || "New")}</span>
+    <span class="lead-record-header-meta-item"><i class="bi bi-person" aria-hidden="true"></i>Owner ${escapeHtml(ownerLabel)}</span>
+    <span class="lead-record-header-meta-item"><i class="bi bi-arrow-down-right" aria-hidden="true"></i>${escapeHtml(lead.source || "No source")}</span>
+  `;
   const leadSummaryParts = [
     lead.source || "No source",
     `Owner ${ownerLabel}`,
@@ -2931,6 +3001,20 @@ export function renderLeadProfile(data, context) {
   ].filter(Boolean);
   const leadSummaryMarkup = leadSummaryParts
     .map((item) => `<span class="lead-record-header-meta-item">${escapeHtml(item)}</span>`)
+    .join("");
+  const leadDrawerQuickActions = [
+    { action: "lead-log-call", label: "Call", icon: "bi-telephone" },
+    { action: "lead-send-email", label: "Email", icon: "bi-envelope" },
+    { action: "lead-create-followup-task", label: "Add task", icon: "bi-check2-square" },
+    { action: "lead-log-attempt", label: "Log attempt", icon: "bi-check2-circle", disabled: leadAttemptGuidance.disableLogging }
+  ]
+    .map(
+      (item) => `
+        <button type="button" class="mini-btn" data-action="${item.action}" data-id="${lead.id}" ${item.disabled ? "disabled" : ""}>
+          ${leadProfileActionLabel(item.icon, item.label)}
+        </button>
+      `
+    )
     .join("");
   const leadQuickActions = [
     { action: "lead-log-call", label: "Log Call", icon: "bi-telephone" },
@@ -2961,24 +3045,96 @@ export function renderLeadProfile(data, context) {
       </div>
     `
     : "<p class='lead-profile-empty'>No contact channel linked yet.</p>";
-  const leadInterestLineMarkup = interestLabel
+  const nextTask = leadContext.linkedTasks[0] || null;
+  const leadNextTaskMarkup = nextTask
     ? `
-      <div class="lead-record-subline-row">
-        <p class="lead-profile-subline">${escapeHtml(leadHeaderSubline)}</p>
-        <button
-          type="button"
-          class="lead-record-copy-btn"
-          data-action="lead-copy-name-interest"
-          data-id="${escapeHtml(lead.id)}"
-          data-text="${escapeHtml(`${String(lead.name || "Lead").trim()}\n${interestLabel}`)}"
-          aria-label="Copy lead name and interest for ${escapeHtml(String(lead.name || "Lead").trim())}"
-          title="Copy lead name and interest"
-        >
-          <i class="bi bi-clipboard" aria-hidden="true"></i>
+      <button type="button" class="lead-notion-linked-task" data-task-open="${escapeHtml(nextTask.id)}">
+        <span>
+          <strong>${escapeHtml(nextTask.title || "Follow-up task")}</strong>
+          <small>${escapeHtml(`${nextTask.day || "No date"}${nextTask.time ? ` | ${nextTask.time}` : ""}`)}</small>
+        </span>
+        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </button>
+    `
+    : "";
+  const leadName = String(lead.name || "Lead").trim();
+  const leadCopyText = [leadName, interestLabel].filter(Boolean).join("\n");
+  const leadNameCopyMarkup = `
+    <button
+      type="button"
+      class="lead-record-copy-btn lead-name-copy-btn"
+      data-action="lead-copy-name-interest"
+      data-id="${escapeHtml(lead.id)}"
+      data-text="${escapeHtml(leadCopyText)}"
+      aria-label="Copy lead name${interestLabel ? " and interest" : ""} for ${escapeHtml(leadName)}"
+      title="Copy lead name${interestLabel ? " and interest" : ""}"
+    >
+      <i class="bi bi-clipboard" aria-hidden="true"></i>
+    </button>
+  `;
+  const leadInterestLineMarkup = `<p class="lead-profile-subline">${escapeHtml(leadHeaderSubline)}</p>`;
+  const leadDrawerNextStepPanel = `
+    <section class="lead-notion-next-step" aria-labelledby="leadNextStepTitle">
+      <p class="lead-notion-section-label" id="leadNextStepTitle">Next step</p>
+      <div class="lead-notion-next-row">
+        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        <div class="lead-notion-next-copy">
+          <strong>${escapeHtml(hasScheduledFollowUp ? `Follow-up ${followUpLabel}` : "No follow-up scheduled")}</strong>
+          <span>${escapeHtml(hasScheduledFollowUp ? leadFocusCopy : "Schedule the next touch to keep momentum.")}</span>
+        </div>
+        <button type="button" class="mini-btn lead-notion-primary-action" data-action="lead-set-followup" data-id="${lead.id}">
+          ${leadProfileActionLabel("bi-calendar3", hasScheduledFollowUp ? "Reschedule" : "Schedule")}
         </button>
       </div>
-    `
-    : `<p class="lead-profile-subline">${escapeHtml(leadHeaderSubline)}</p>`;
+      ${leadNextTaskMarkup ? `<div class="lead-notion-next-tasks">${leadNextTaskMarkup}</div>` : ""}
+    </section>
+  `;
+  const leadDrawerAttemptPanel = `
+    <details class="lead-notion-section lead-attempt-panel" open>
+      <summary>
+        <span><i class="bi bi-bullseye" aria-hidden="true"></i>Outreach &amp; Attempts</span>
+        <i class="bi bi-chevron-right lead-notion-chevron" aria-hidden="true"></i>
+      </summary>
+      <div class="lead-notion-section-body">
+        <div class="lead-notion-attempt-head">
+          <div>
+            <strong>${escapeHtml(attemptCountLabel)} attempts</strong>
+            <span>${escapeHtml(leadAttemptGuidance.label)}</span>
+          </div>
+          <button
+            type="button"
+            class="mini-btn lead-notion-primary-action"
+            data-action="lead-log-attempt"
+            data-id="${lead.id}"
+            ${leadAttemptGuidance.disableLogging ? 'disabled title="This lead has reached the attempt limit and is ready for reassignment."' : ""}
+          >
+            ${leadProfileActionLabel("bi-check2-circle", "Log attempt")}
+          </button>
+        </div>
+        <div class="lead-record-detail-list lead-notion-attempt-grid">
+          ${leadProfileDetailRow("bi-clock-history", "Last attempt", lastAttemptAtLabel)}
+          ${leadProfileDetailRow("bi-chat-left-text", "Last result", lastAttemptReasonLabel)}
+          ${leadProfileDetailRow("bi-person-badge", "Assigned for", assignedAtLabel)}
+          ${leadProfileDetailRow("bi-person", "Last outreach by", leadAttemptHistoryEntries[0]?.actor || "Not logged yet")}
+        </div>
+        ${
+          showWeeklyRemovalHelper
+            ? `
+              <div class="lead-weekly-removal-helper">
+                <p class="lead-weekly-removal-title">Weekly cleanup</p>
+                <p class="lead-weekly-removal-copy">This lead will leave active leads Friday at 8:00 AM if it stays Unqualified.</p>
+                <p class="lead-weekly-removal-note">Scheduled removal: ${escapeHtml(weeklyRemovalDueLabel)}</p>
+              </div>
+            `
+            : ""
+        }
+        <div class="lead-attempt-history">
+          <p class="lead-notion-subsection-title">Attempt history</p>
+          <div class="lead-attempt-history-list">${leadAttemptHistoryRows}</div>
+        </div>
+      </div>
+    </details>
+  `;
   const leadFocusPanel = `
     <section class="lead-record-focus-card lead-record-side-panel">
       <div class="lead-record-focus-rail">
@@ -3001,13 +3157,7 @@ export function renderLeadProfile(data, context) {
           <p class="lead-profile-section-title">Attempt tracker</p>
           <p class="lead-record-section-subtitle">Log RingCentral or manual outreach without leaving the lead detail.</p>
         </div>
-        <button
-          type="button"
-          class="mini-btn"
-          data-action="lead-log-attempt"
-          data-id="${lead.id}"
-          ${leadAttemptGuidance.disableLogging ? 'disabled title="This lead has reached the attempt limit and is ready for reassignment."' : ""}
-        >
+        <button type="button" class="mini-btn" data-action="lead-log-attempt" data-id="${lead.id}" ${leadAttemptGuidance.disableLogging ? "disabled" : ""}>
           ${leadProfileActionLabel("bi-check2-circle", "Log attempt")}
         </button>
       </div>
@@ -3018,17 +3168,6 @@ export function renderLeadProfile(data, context) {
         ${leadProfileDetailRow("bi-person-badge", "Assigned for", assignedAtLabel)}
       </div>
       <p class="lead-attempt-helper is-${escapeHtml(leadAttemptGuidance.tone)}">${escapeHtml(leadAttemptGuidance.label)}</p>
-      ${
-        showWeeklyRemovalHelper
-          ? `
-            <div class="lead-weekly-removal-helper">
-              <p class="lead-weekly-removal-title">Weekly cleanup</p>
-              <p class="lead-weekly-removal-copy">This lead will leave active leads Friday at 8:00 AM if it stays Unqualified.</p>
-              <p class="lead-weekly-removal-note">Scheduled removal: ${escapeHtml(weeklyRemovalDueLabel)}</p>
-            </div>
-          `
-          : ""
-      }
       <div class="lead-attempt-history">
         <div class="lead-record-section-head lead-attempt-history-headbar">
           <div>
@@ -3040,6 +3179,60 @@ export function renderLeadProfile(data, context) {
       </div>
     </section>
   `;
+
+  if (isDrawer) {
+    const leadDrawerDetailsMarkup = [
+      leadProfileDetailRow("bi-envelope", "Email", lead.email || "Not set"),
+      leadProfilePhoneDetailRow("bi-telephone", "Phone", leadPhoneEntries, lead.id),
+      leadProfileDetailRow("bi-globe-americas", "Timezone", formatLeadPhoneTimezoneBucket(lead.phoneTimezoneBucket)),
+      leadProfileDetailRow("bi-book", "Interest", interestLabel || "Not set"),
+      leadProfileDetailRow("bi-broadcast-pin", "Source", lead.source || "Not set"),
+      leadProfileDetailRow("bi-building", "Company", companyLabel || "Not linked"),
+      leadProfileDetailRow("bi-person", "Owner", ownerLabel),
+      leadProfileDetailRow("bi-flag", "Status", lead.status || "New"),
+      leadProfileDetailRow("bi-calendar3", "Next follow-up", followUpLabel),
+      leadProfileDetailRow("bi-clock-history", "Last activity", lastTouchLabel)
+    ].join("");
+    const leadDrawerMoreActionsMarkup = `
+      <details class="lead-profile-actions-menu">
+        <summary aria-label="More lead actions"><i class="bi bi-three-dots" aria-hidden="true"></i></summary>
+        <div class="lead-profile-actions-dropdown">
+          ${leadProfileMenuItem("lead-edit", lead.id, "Edit lead", "bi-pencil-square")}
+          ${leadProfileMenuItem("lead-reassign-owner", lead.id, "Reassign owner", "bi-person-gear")}
+          ${leadProfileMenuItem("lead-set-followup", lead.id, "Set follow-up", "bi-calendar-event")}
+          ${leadProfileMenuItem("lead-schedule-call", lead.id, "Schedule call", "bi-calendar-plus")}
+          ${leadProfileMenuItem("lead-create-callback", lead.id, "Create callback", "bi-telephone-inbound")}
+          ${leadProfileMenuItem("lead-archive", lead.id, "Archive", "bi-archive")}
+          ${leadProfileDangerMenuItem("lead-delete", lead.id, "Delete", "bi-trash3")}
+        </div>
+      </details>
+    `;
+
+    return {
+      title: "Lead Details",
+      subtitle: profileSubtitleParts.join(" | "),
+      showWaitingPanel: false,
+      html: renderLeadProfileNotionDrawer({
+        id: escapeHtml(lead.id),
+        name: escapeHtml(lead.name || "Lead"),
+        initials: escapeHtml(initialsFromLabel(lead.name || "Lead")),
+        avatarHue: avatarHueFromLabel(lead.name || "Lead"),
+        titleActionMarkup: leadNameCopyMarkup,
+        interestMarkup: leadInterestLineMarkup,
+        headerMetaMarkup: leadDrawerSummaryMarkup,
+        quickActionsMarkup: leadDrawerQuickActions,
+        moreActionsMarkup: leadDrawerMoreActionsMarkup,
+        nextStepMarkup: leadDrawerNextStepPanel,
+        activityRows,
+        auditRows,
+        detailsMarkup: leadDrawerDetailsMarkup,
+        attemptMarkup: leadDrawerAttemptPanel,
+        notesMarkup: notesLabel,
+        contactsRows,
+        dealsRows: relatedDealsRows
+      })
+    };
+  }
 
   return {
     title: lead.name || "Lead Profile",
@@ -3069,6 +3262,7 @@ export function renderLeadProfile(data, context) {
                 <p class="lead-profile-eyebrow">Lead</p>
                 <div class="lead-record-header-title-row">
                   <h4>${escapeHtml(lead.name)}</h4>
+                  ${leadNameCopyMarkup}
                 </div>
                 ${leadInterestLineMarkup}
                 <div class="lead-record-header-meta">${leadSummaryMarkup}</div>
@@ -3258,7 +3452,7 @@ export function renderAccountProfile(data, context) {
         subtitle: "Loading account details",
         showWaitingPanel: false,
         html: `
-          <section class="view-block lead-profile-page-view">
+          <section class="view-block lead-profile-page-view account-profile-view">
             <section class="lead-profile-empty-state">
               <p class="lead-profile-eyebrow">Account</p>
               <h3>Loading account details</h3>
@@ -3275,7 +3469,7 @@ export function renderAccountProfile(data, context) {
         : "Account record not found",
       showWaitingPanel: false,
       html: `
-        <section class="view-block lead-profile-page-view">
+        <section class="view-block lead-profile-page-view account-profile-view">
           <section class="lead-profile-empty-state">
             <p class="lead-profile-eyebrow">Account</p>
             <h3>${escapeHtml(
@@ -3359,7 +3553,7 @@ export function renderAccountProfile(data, context) {
     subtitle: `${account.industry || "Industry"} | ${account.owner || "Owner"}`,
     showWaitingPanel: false,
     html: `
-      <section class="view-block lead-profile-page-view">
+      <section class="view-block lead-profile-page-view account-profile-view">
         <div class="lead-profile-page-toolbar">
           <button type="button" class="mini-btn" data-route="accounts">
             <i class="bi bi-arrow-left" aria-hidden="true"></i>
@@ -3543,7 +3737,7 @@ export function renderDealProfile(data, context) {
         subtitle: "Loading deal details",
         showWaitingPanel: false,
         html: `
-          <section class="view-block lead-profile-page-view">
+          <section class="view-block lead-profile-page-view deal-profile-view">
             <section class="lead-profile-empty-state">
               <p class="lead-profile-eyebrow">Deal</p>
               <h3>Loading deal details</h3>
@@ -3560,7 +3754,7 @@ export function renderDealProfile(data, context) {
         : "Deal record not found",
       showWaitingPanel: false,
       html: `
-        <section class="view-block lead-profile-page-view">
+        <section class="view-block lead-profile-page-view deal-profile-view">
           <section class="lead-profile-empty-state">
             <p class="lead-profile-eyebrow">Deal</p>
             <h3>${escapeHtml(
@@ -3655,7 +3849,7 @@ export function renderDealProfile(data, context) {
     subtitle: `${deal.account || "Account"} | ${stageLabel}`,
     showWaitingPanel: false,
     html: `
-      <section class="view-block lead-profile-page-view">
+      <section class="view-block lead-profile-page-view deal-profile-view">
         <div class="lead-profile-page-toolbar">
           <button type="button" class="mini-btn" data-route="deals">
             <i class="bi bi-arrow-left" aria-hidden="true"></i>
@@ -3883,7 +4077,7 @@ export function renderContacts(data, context) {
       linkedType: contact.account
     })),
     html: `
-      <section class="view-block crm-list-v2">
+      <section class="view-block crm-list-v2 contacts-directory-view">
         ${viewSectionHead("Contact Directory", "Add Contact")}
         <div class="table-ops-wrap data-table-shell">
           <table class="data-table">
@@ -3898,11 +4092,11 @@ export function renderContacts(data, context) {
               </tr>
             </thead>
             <tbody>
-              ${rows || "<tr><td colspan='6' class='task-meta'>No contacts found.</td></tr>"}
+              ${rows || renderCrmTableEmptyState("contacts", 6)}
             </tbody>
           </table>
         </div>
-        ${showTableSkeleton ? "" : renderCrmTableFooter(routeId, pagination, sortedRows.length)}
+        ${renderCrmTableFooter(routeId, pagination, sortedRows.length)}
       </section>
     `
   };
@@ -3982,11 +4176,11 @@ export function renderAccounts(data, context) {
               </tr>
             </thead>
             <tbody>
-              ${rows || "<tr><td colspan='5' class='task-meta'>No accounts found.</td></tr>"}
+              ${rows || renderCrmTableEmptyState("accounts", 5)}
             </tbody>
           </table>
         </div>
-        ${showTableSkeleton ? "" : renderCrmTableFooter(routeId, pagination, sortedRows.length)}
+        ${renderCrmTableFooter(routeId, pagination, sortedRows.length)}
       </section>
     `
   };
@@ -4190,7 +4384,7 @@ export function renderDeals(data, context) {
     primaryAction: "Add Deal",
     showWaitingPanel: false,
     html: `
-      <section class="view-block crm-list-v2">
+      <section class="view-block crm-list-v2 deals-directory-view">
         <div class="team-section-head deal-section-head">
           <h3 class="block-title">Deal Pipeline</h3>
         </div>
@@ -4255,11 +4449,11 @@ export function renderDeals(data, context) {
                     </tr>
                   </thead>
                   <tbody>
-                    ${rows || "<tr><td colspan='7' class='task-meta'>No deals found for this filter.</td></tr>"}
+                    ${rows || renderCrmTableEmptyState("deals", 7)}
                   </tbody>
                 </table>
               </div>
-              ${showTableSkeleton ? "" : renderCrmTableFooter(routeId, pagination, sortedDeals.length)}
+              ${renderCrmTableFooter(routeId, pagination, sortedDeals.length)}
             `
             : `
               <div class="deal-pipeline-board">

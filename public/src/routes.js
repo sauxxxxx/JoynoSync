@@ -1,10 +1,5 @@
-import {
-  renderCalendar,
-  renderKanban,
-  renderMyWork,
-  renderProjects,
-  renderTable
-} from "./views/work.js";
+import { renderCalendar } from "./views/calendar.js";
+import { renderKanban } from "./views/kanban.js";
 import {
   renderAccountProfile,
   renderAccounts,
@@ -24,14 +19,14 @@ import {
 } from "./views/extended.js";
 import { renderCommsMessenger } from "./views/messenger.js";
 import { renderIntegrations } from "./views/integrations.js";
+import { renderNotifications } from "./views/notifications.js";
+import { renderLeadArchive } from "./views/lead-archive.js";
 import {
   renderInviteAcceptance,
   renderLoginView,
-  renderMyProfile,
-  renderSettings,
-  renderTeamMemberProfile,
-  renderWorkspaceProfile
+  renderTeamMemberProfile
 } from "./views/settings.js";
+import { renderSettings } from "./views/settings-console.js";
 
 export const defaultRouteId = "dashboard";
 
@@ -40,17 +35,15 @@ export const navSections = [
     title: "Work",
     routes: [
       { id: "dashboard", label: "Dashboard", icon: "bi bi-speedometer2", render: renderDashboard },
-      { id: "my-work", label: "My Work", icon: "bi bi-grid", render: renderMyWork },
       { id: "calendar", label: "Calendar", icon: "bi bi-calendar3", render: renderCalendar },
-      { id: "kanban", label: "Kanban", icon: "bi bi-grid-3x2-gap", render: renderKanban },
-      { id: "table", label: "Table", icon: "bi bi-table", render: renderTable },
-      { id: "projects", label: "Projects", icon: "bi bi-folder2-open", render: renderProjects }
+      { id: "kanban", label: "Tasks", icon: "bi bi-grid-3x2-gap", render: renderKanban }
     ]
   },
   {
     title: "CRM",
     routes: [
       { id: "leads", label: "Leads", icon: "bi bi-person", render: renderLeads },
+      { id: "lead-archive", label: "Archived", icon: "bi bi-archive", render: renderLeadArchive, adminOnly: true },
       { id: "contacts", label: "Contacts", icon: "bi bi-person-vcard", render: renderContacts },
       { id: "accounts", label: "Accounts", icon: "bi bi-buildings", render: renderAccounts },
       { id: "deals", label: "Deals", icon: "bi bi-bar-chart", render: renderDeals }
@@ -79,11 +72,12 @@ export const navSections = [
 const hiddenRoutes = [
   { id: "login", label: "Sign In", icon: "bi bi-door-open", render: renderLoginView },
   { id: "invite", label: "Accept Invite", icon: "bi bi-person-check", render: renderInviteAcceptance },
+  { id: "notifications", label: "Notifications", icon: "bi bi-bell", render: renderNotifications },
   { id: "account-profile", label: "Account Profile", icon: "bi bi-buildings", render: renderAccountProfile },
   { id: "deal-profile", label: "Deal Profile", icon: "bi bi-bar-chart", render: renderDealProfile },
   { id: "lead-profile", label: "Lead Profile", icon: "bi bi-person", render: renderLeadProfile },
-  { id: "settings-workspace", label: "Workspace", icon: "bi bi-gear", render: renderWorkspaceProfile },
-  { id: "settings-me", label: "Profile", icon: "bi bi-person-circle", render: renderMyProfile },
+  { id: "settings-workspace", label: "Workspace", icon: "bi bi-gear", render: renderSettings },
+  { id: "settings-me", label: "Profile", icon: "bi bi-person-circle", render: renderSettings },
   { id: "team-member-profile", label: "Team Member Profile", icon: "bi bi-person-badge", render: renderTeamMemberProfile }
 ];
 
@@ -97,6 +91,12 @@ const routeMap = new Map(
     ...hiddenRoutes.map((route) => [route.id, route])
   ]
 );
+
+const legacyRouteAliases = new Map([
+  ["my-work", "kanban"],
+  ["table", "kanban"],
+  ["projects", "kanban"]
+]);
 
 export function getRoute(routeId) {
   return routeMap.get(routeId) || routeMap.get(defaultRouteId);
@@ -115,6 +115,9 @@ export function getRouteFromHash(hashValue) {
   }
   if (routeId === "communications") {
     return "comms-messenger";
+  }
+  if (legacyRouteAliases.has(routeId)) {
+    return legacyRouteAliases.get(routeId);
   }
   return routeMap.has(routeId) ? routeId : defaultRouteId;
 }

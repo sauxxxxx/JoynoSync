@@ -1,0 +1,361 @@
+/* Desktop Team Attendance: quiet, document-like, and flat. */
+.attendance-manager-compact-controls {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  #appShell .view-content:has(> .attendance-view) {
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .view-content:has(> .attendance-view) > .attendance-view {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-view .attendance-v2-tabs {
+    border: 0;
+  }
+
+  #appShell .attendance-view .attendance-tab-btn.is-active {
+    border-bottom-color: var(--ui-color-text);
+  }
+
+  #appShell .attendance-manager-shell {
+    display: block;
+  }
+
+  #appShell .attendance-manager-sidebar {
+    display: none;
+  }
+
+  #appShell .attendance-manager-side-card + .attendance-manager-side-card {
+    margin-top: 20px;
+    padding-top: 20px !important;
+    border: 0 !important;
+  }
+
+  #appShell .attendance-manager-calendar-head strong,
+  #appShell .attendance-manager-namecell strong,
+  #appShell .attendance-manager-topbar-copy strong {
+    color: var(--ui-color-text);
+  }
+
+  #appShell .attendance-manager-calendar-nav,
+  #appShell .attendance-manager-calendar-day {
+    color: var(--ui-color-text-secondary);
+  }
+
+  #appShell .attendance-manager-calendar-day:hover {
+    background: var(--ui-color-surface-hover);
+    color: var(--ui-color-text);
+  }
+
+  #appShell .attendance-manager-calendar-day.is-today {
+    box-shadow: none;
+    font-weight: 600;
+  }
+
+  #appShell .attendance-manager-calendar-day.is-selected {
+    color: var(--ui-color-text);
+    background: var(--ui-color-neutral-soft);
+    box-shadow: none;
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row.is-segmented {
+    border: 0;
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row.is-segmented .mini-btn,
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row:not(.is-segmented) .mini-btn {
+    color: var(--ui-color-text-muted);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row.is-segmented .mini-btn:hover,
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row:not(.is-segmented) .mini-btn:hover {
+    color: var(--ui-color-text);
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row.is-segmented .mini-btn.is-active {
+    color: var(--ui-color-text);
+    background: transparent;
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row.is-segmented .mini-btn.is-active::after {
+    background: var(--ui-color-text);
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-manager-chip-row:not(.is-segmented) .mini-btn.is-active {
+    color: var(--ui-color-text);
+    background: var(--ui-color-neutral-soft);
+    box-shadow: none;
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-history-field select,
+  #appShell .attendance-manager-search {
+    color: var(--ui-color-text);
+    background-color: var(--ui-color-neutral-soft);
+    border: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-manager-sidebar .attendance-history-field select:focus,
+  #appShell .attendance-manager-search:focus-within {
+    box-shadow: var(--ui-focus-ring);
+  }
+
+  #appShell .attendance-manager-main {
+    gap: 0;
+    align-content: start;
+  }
+
+  #appShell .attendance-manager-topbar-panel,
+  #appShell .attendance-manager-main > .attendance-panel,
+  #appShell .attendance-manager-table-panel {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-manager-topbar-panel {
+    padding-bottom: 10px;
+    position: relative;
+    z-index: 20;
+    overflow: visible !important;
+  }
+
+  #appShell .attendance-manager-main > .attendance-panel {
+    padding: 10px 0 12px;
+  }
+
+  #appShell .attendance-manager-summary-grid {
+    gap: 0;
+  }
+
+  #appShell .attendance-manager-summary-card {
+    min-height: 0;
+    padding: 0 16px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
+  #appShell .attendance-manager-summary-card:first-child {
+    padding-left: 0;
+  }
+
+  #appShell .attendance-manager-summary-card:last-child {
+    border-right: 0;
+  }
+
+  #appShell .attendance-manager-summary-card strong {
+    color: var(--ui-color-text);
+    font-size: 18px;
+  }
+
+  #appShell .attendance-manager-table-panel {
+    padding-top: 16px;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table {
+    background: transparent;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table th {
+    color: var(--ui-color-text-muted);
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table td {
+    color: var(--ui-color-text-secondary);
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table :is(thead, tbody) tr::after {
+    display: none !important;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table tbody tr:hover td {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .attendance-manager-table-panel .table-ops-footer {
+    border-top: 0;
+    background: transparent;
+  }
+
+  #appShell .attendance-manager-topbar-actions .table-ops-columns-btn {
+    color: #ffffff;
+    background: #202124;
+    border: 0;
+  }
+
+  #appShell .attendance-manager-topbar-actions .table-ops-columns-btn:hover {
+    color: #ffffff;
+    background: #343538;
+    border: 0;
+  }
+
+  #appShell .attendance-manager-topbar-actions .mini-btn {
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-neutral-soft);
+    border: 0;
+  }
+
+  #appShell .attendance-manager-topbar {
+    display: grid;
+    gap: 10px;
+  }
+
+  #appShell .attendance-manager-topbar-actions {
+    width: 100%;
+    gap: 8px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    margin-left: 0;
+  }
+
+  #appShell .attendance-manager-search {
+    flex: 0 1 240px;
+    min-width: 190px;
+  }
+
+  #appShell .attendance-manager-compact-controls,
+  #appShell .attendance-manager-range-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  #appShell .attendance-manager-range-tabs {
+    gap: 14px;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  #appShell .attendance-manager-range-tabs .mini-btn {
+    height: 34px;
+    padding: 0 0 2px;
+    background: transparent;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  #appShell .attendance-manager-range-tabs .mini-btn.is-active {
+    color: var(--ui-color-text);
+    background: transparent;
+    border-bottom-color: var(--ui-color-text);
+  }
+
+  #appShell .attendance-manager-filter-menu {
+    position: relative;
+    z-index: 31;
+  }
+
+  #appShell .attendance-manager-filter-menu > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-manager-filter-menu > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #appShell .attendance-manager-filter-count {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-surface);
+    border-radius: var(--ui-radius-pill);
+    font-size: 10px;
+  }
+
+  #appShell .attendance-manager-filter-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+    width: 292px;
+    padding: 12px;
+    display: grid;
+    gap: 12px;
+    background: var(--ui-color-surface);
+    border-radius: var(--ui-radius-overlay);
+    box-shadow: var(--ui-shadow-menu);
+  }
+
+  #appShell .attendance-manager-filter-popover .attendance-manager-chip-row {
+    gap: 4px;
+  }
+
+  #appShell .attendance-manager-filter-popover .mini-btn {
+    height: 28px;
+    padding: 0 9px;
+    color: var(--ui-color-text-muted);
+    background: transparent;
+  }
+
+  #appShell .attendance-manager-filter-popover .mini-btn:hover,
+  #appShell .attendance-manager-filter-popover .mini-btn.is-active {
+    color: var(--ui-color-text);
+    background: var(--ui-color-neutral-soft);
+  }
+
+  #appShell .attendance-manager-filter-popover .attendance-history-field {
+    gap: 5px;
+  }
+
+  #appShell .attendance-manager-filter-popover .attendance-history-field > span {
+    color: var(--ui-color-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  #appShell .attendance-manager-filter-popover select {
+    width: 100%;
+    height: 34px;
+    padding: 0 10px;
+    color: var(--ui-color-text);
+    background: var(--ui-color-neutral-soft);
+    border: 0;
+    border-radius: var(--ui-radius-control);
+  }
+
+  #appShell .attendance-manager-secondary-actions {
+    margin-left: auto;
+  }
+
+  #appShell .attendance-manager-main,
+  #appShell .attendance-manager-shell,
+  #appShell .attendance-v2-panels {
+    overflow: visible;
+  }
+
+  #appShell .attendance-table-icon-btn {
+    color: var(--ui-color-text-secondary);
+    background: transparent;
+    border-color: transparent;
+  }
+
+  #appShell .attendance-table-icon-btn:hover,
+  #appShell .attendance-table-icon-btn.is-active {
+    color: var(--ui-color-text);
+    background: var(--ui-color-surface-hover);
+    border-color: transparent;
+    box-shadow: none;
+  }
+}

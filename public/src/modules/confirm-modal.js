@@ -119,7 +119,6 @@ export function createConfirmModalController({ state, closeModal, escapeModalTex
     modalCard.classList.remove("is-account-compose");
     modalCard.classList.remove("is-wide");
     modalCard.classList.remove("is-task-compose");
-    modalCard.classList.remove("is-project-compose");
     modalCard.classList.remove("is-profile-compose");
     modalCard.classList.remove("is-attendance-policy");
     modalCard.classList.add("is-confirm");

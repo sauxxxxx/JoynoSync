@@ -2,25 +2,25 @@ const MESSENGER_THEME_OPTIONS = [
   {
     key: "default",
     label: "Default",
-    summary: "Clean blue and white chat surfaces.",
+    summary: "JoynoSync charcoal.",
     previewClass: "is-default"
   },
   {
     key: "soft",
-    label: "Soft",
-    summary: "Gentle surfaces with a calmer accent.",
+    label: "Warm",
+    summary: "Muted clay accent.",
     previewClass: "is-soft"
   },
   {
     key: "midnight",
-    label: "Midnight",
-    summary: "Dark pane with brighter accent bubbles.",
+    label: "Ink",
+    summary: "Deep graphite accent.",
     previewClass: "is-midnight"
   },
   {
     key: "mint",
-    label: "Mint",
-    summary: "Fresh green accent with airy surfaces.",
+    label: "Sage",
+    summary: "Calm green accent.",
     previewClass: "is-mint"
   }
 ];
@@ -41,6 +41,45 @@ export function getMessengerThemeLabel(value) {
 
 export function getMessengerThemeSummary(value) {
   return getMessengerThemeOption(value).summary;
+}
+
+function normalizeParticipantName(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+export function getMessengerNicknameForSender(
+  conversationKeyValue,
+  senderNameValue,
+  canonicalSenderNameValue,
+  nicknamesByConversationKey = {}
+) {
+  const conversationKey = String(conversationKeyValue || "").trim();
+  const nicknames = nicknamesByConversationKey?.[conversationKey];
+  if (!nicknames || typeof nicknames !== "object") {
+    return "";
+  }
+
+  const canonicalName = normalizeParticipantName(canonicalSenderNameValue);
+  const senderName = normalizeParticipantName(senderNameValue);
+  const entries = Object.entries(nicknames)
+    .map(([participantName, nickname]) => ({
+      participantName: normalizeParticipantName(participantName),
+      nickname: String(nickname || "").trim()
+    }))
+    .filter((entry) => entry.participantName && entry.nickname);
+
+  const exactMatch = entries.find(
+    (entry) => entry.participantName === canonicalName || entry.participantName === senderName
+  );
+  if (exactMatch) {
+    return exactMatch.nickname;
+  }
+
+  if (!senderName) {
+    return "";
+  }
+  const shortNameMatches = entries.filter((entry) => entry.participantName.startsWith(`${senderName} `));
+  return shortNameMatches.length === 1 ? shortNameMatches[0].nickname : "";
 }
 
 export { MESSENGER_THEME_OPTIONS };

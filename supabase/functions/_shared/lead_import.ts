@@ -7,8 +7,15 @@ import {
   normalizePhoneDigits,
   normalizeSource,
   normalizeStatus,
-  normalizeText
+  normalizeText,
+  timestampsMatch
 } from "./lead_import_policy.ts";
+import {
+  LEAD_IMPORT_DUPLICATE_SELECT,
+  fetchLeadById,
+  findExistingLeadDuplicate
+} from "./lead_import_duplicates.ts";
+import { buildLeadImportRestartMeta } from "./lead_import_restart.js";
 export {
   type ImportRow,
   normalizeDateOnly,
@@ -50,12 +57,12 @@ export type LeadImportRowResult = {
   operation?: "created" | "updated" | "skipped";
   leadId?: string;
   reason?: string;
+  reasonCode?: string;
   before?: Record<string, unknown> | null;
+  leadName?: string;
+  ownerMemberId?: string;
+  ownerName?: string;
 };
-
-const LEAD_IMPORT_DUPLICATE_SELECT =
-  "id,workspace_id,name,company_name,email,phone,secondary_phone,role,interest,source,status,owner_member_id,next_follow_up_date,notes,tags,meta,account_id,active_pool,archived_at,updated_at";
-
 
 function teamMemberStatusRank(status: unknown) {
   const normalized = normalizeText(status).toLowerCase();
@@ -212,105 +219,6 @@ export async function fetchLeadImportContext(
   };
 }
 
-async function fetchLeadById(
-  serviceClient: SupabaseClient,
-  workspaceId: string,
-  leadId: string
-) {
-  const normalizedLeadId = normalizeText(leadId);
-  if (!normalizedLeadId) {
-    return null;
-  }
-  const { data, error } = await serviceClient
-    .from("leads")
-    .select(LEAD_IMPORT_DUPLICATE_SELECT)
-    .eq("workspace_id", workspaceId)
-    .eq("id", normalizedLeadId)
-    .maybeSingle();
-  if (error) {
-    throw error;
-  }
-  return data ? (data as Record<string, unknown>) : null;
-}
-
-async function findExistingLeadDuplicate(
-  serviceClient: SupabaseClient,
-  workspaceId: string,
-  row: ImportRow,
-  existingLeadById: Map<string, Record<string, unknown>>
-) {
-  const duplicateLeadId = normalizeText(row.duplicateLeadId);
-  if (duplicateLeadId) {
-    const cached = existingLeadById.get(duplicateLeadId);
-    if (cached) {
-      return cached;
-    }
-    const fetched = await fetchLeadById(serviceClient, workspaceId, duplicateLeadId);
-    if (fetched) {
-      existingLeadById.set(duplicateLeadId, fetched);
-      return fetched;
-    }
-  }
-
-  const emailKey = normalizeEmail(row.values.email);
-  if (emailKey) {
-    const { data, error } = await serviceClient
-      .from("leads")
-      .select(LEAD_IMPORT_DUPLICATE_SELECT)
-      .eq("workspace_id", workspaceId)
-      .ilike("email", emailKey)
-      .limit(1);
-    if (error) {
-      throw error;
-    }
-    const match = Array.isArray(data) ? data[0] : null;
-    if (match) {
-      existingLeadById.set(normalizeText(match.id), match as Record<string, unknown>);
-      return match as Record<string, unknown>;
-    }
-  }
-
-  const phoneKeys = [...new Set([normalizePhoneDigits(row.values.phone), normalizePhoneDigits(row.values.secondaryPhone)].filter(Boolean))];
-  for (const phoneKey of phoneKeys) {
-    const { data, error } = await serviceClient
-      .from("leads")
-      .select(LEAD_IMPORT_DUPLICATE_SELECT)
-      .eq("workspace_id", workspaceId)
-      .or(`phone_digits.eq.${phoneKey},secondary_phone_digits.eq.${phoneKey}`)
-      .limit(1);
-    if (error) {
-      throw error;
-    }
-    const match = Array.isArray(data) ? data[0] : null;
-    if (match) {
-      existingLeadById.set(normalizeText(match.id), match as Record<string, unknown>);
-      return match as Record<string, unknown>;
-    }
-  }
-
-  const exactName = normalizeText(row.values.name);
-  const exactCompany = normalizeText(row.values.company);
-  if (exactName && exactCompany) {
-    const { data, error } = await serviceClient
-      .from("leads")
-      .select(LEAD_IMPORT_DUPLICATE_SELECT)
-      .eq("workspace_id", workspaceId)
-      .eq("name_match", normalizeMatch(exactName))
-      .eq("company_match", normalizeMatch(exactCompany))
-      .limit(1);
-    if (error) {
-      throw error;
-    }
-    const match = Array.isArray(data) ? data[0] : null;
-    if (match) {
-      existingLeadById.set(normalizeText(match.id), match as Record<string, unknown>);
-      return match as Record<string, unknown>;
-    }
-  }
-
-  return null;
-}
-
 export async function processLeadImportRow(
   serviceClient: SupabaseClient,
   options: {
@@ -328,6 +236,7 @@ export async function processLeadImportRow(
     importMode?: string;
     restoreArchived?: boolean;
     importJobId?: string;
+    resetStatusToNew?: boolean;
   }
 ): Promise<LeadImportRowResult> {
   const {
@@ -344,8 +253,23 @@ export async function processLeadImportRow(
     nowIso,
     importMode = "new",
     restoreArchived = false,
-    importJobId = ""
+    importJobId = "",
+    resetStatusToNew = false
   } = options;
+
+  if (row.validationIssues.length) {
+    return {
+      created: 0,
+      updated: 0,
+      skipped: 1,
+      assigned: 0,
+      leftUnassigned: 0,
+      operation: "skipped",
+      reason: row.validationIssues.join(" "),
+      reasonCode: "invalid_status",
+      leadName: row.values.name
+    };
+  }
 
   if (row.result === "review" || (row.result === "duplicate" && !normalizeText(row.duplicateLeadId))) {
     return {
@@ -353,23 +277,38 @@ export async function processLeadImportRow(
       updated: 0,
       skipped: 1,
       assigned: 0,
-      leftUnassigned: 0
+      leftUnassigned: 0,
+      operation: "skipped",
+      reason: row.result === "review" ? "Row requires review." : "Duplicate approval is required.",
+      reasonCode: row.result === "review" ? "review_required" : "duplicate_approval_required",
+      leadName: row.values.name
     };
   }
 
   const normalizedDuplicateMode = normalizeText(duplicateMode).toLowerCase();
   const updateByLeadId = normalizeText(importMode) === "update-exported";
+  const updateLeadId = normalizeText(row.values.leadId);
   const existingLead = updateByLeadId
-    ? await fetchLeadById(serviceClient, workspaceId, normalizeText(row.values.leadId))
+    ? existingLeadById.get(updateLeadId) || await fetchLeadById(serviceClient, workspaceId, updateLeadId)
     : row.result === "update" || row.result === "duplicate" || row.result === "ready"
       ? await findExistingLeadDuplicate(serviceClient, workspaceId, row, existingLeadById)
       : null;
 
   if (updateByLeadId && !existingLead) {
-    return { created: 0, updated: 0, skipped: 1, assigned: 0, leftUnassigned: 0, operation: "skipped", reason: "Lead ID was not found." };
+    return {
+      created: 0,
+      updated: 0,
+      skipped: 1,
+      assigned: 0,
+      leftUnassigned: 0,
+      operation: "skipped",
+      reason: "Lead ID was not found.",
+      reasonCode: "lead_not_found",
+      leadName: row.values.name
+    };
   }
   const exportedVersion = normalizeText(row.values.updatedAt);
-  if (updateByLeadId && exportedVersion && normalizeText(existingLead?.updated_at) !== exportedVersion) {
+  if (updateByLeadId && exportedVersion && !timestampsMatch(existingLead?.updated_at, exportedVersion)) {
     return {
       created: 0,
       updated: 0,
@@ -378,7 +317,9 @@ export async function processLeadImportRow(
       leftUnassigned: 0,
       operation: "skipped",
       leadId: normalizeText(existingLead?.id),
-      reason: "Lead changed after it was exported."
+      reason: "Lead changed after it was exported.",
+      reasonCode: "record_changed",
+      leadName: row.values.name || normalizeText(existingLead?.name)
     };
   }
 
@@ -388,15 +329,30 @@ export async function processLeadImportRow(
       updated: 0,
       skipped: 1,
       assigned: 0,
-      leftUnassigned: 0
+      leftUnassigned: 0,
+      operation: "skipped",
+      leadId: normalizeText(existingLead.id),
+      reason: "Matches an existing lead.",
+      reasonCode: "duplicate_match",
+      leadName: normalizeText(existingLead.name),
+      ownerMemberId: normalizeText(existingLead.owner_member_id),
+      ownerName: normalizeText(teamMembers.find((member) => normalizeText(member.id) === normalizeText(existingLead.owner_member_id))?.name)
     };
   }
 
   if (existingLead && normalizedDuplicateMode === "update") {
     const nextCompanyName = row.provided.company ? row.values.company : normalizeText(existingLead.company_name);
     const nextOwner = row.provided.owner ? matchMemberByName(row.values.owner, teamMembers) : null;
+    const roundRobinOwner = distributionMode === "auto-assign" && assignedMember ? assignedMember : null;
+    const existingMeta = existingLead.meta && typeof existingLead.meta === "object"
+      ? existingLead.meta as Record<string, unknown>
+      : {};
     const updatePayload: Record<string, unknown> = {
-      updated_by_member_id: normalizeText(callerMember.id)
+      updated_by_member_id: normalizeText(callerMember.id),
+      meta: {
+        ...existingMeta,
+        ...(importJobId ? { importJobId, importRowNumber: row.rowNumber } : {})
+      }
     };
 
     if (row.provided.name) {
@@ -418,19 +374,46 @@ export async function processLeadImportRow(
     if (row.provided.interest) {
       updatePayload.interest = row.values.interest;
     }
-    if (row.provided.owner) {
+    if (roundRobinOwner) {
+      updatePayload.owner_member_id = normalizeText(roundRobinOwner.id);
+      updatePayload.active_pool = true;
+      updatePayload.meta = {
+        ...existingMeta,
+        assignmentState: "assigned",
+        assignedAt: nowIso,
+        assignedBy: normalizeText(callerMember.name),
+        assignmentBatchId: batchId,
+        ...(importJobId ? { importJobId, importRowNumber: row.rowNumber } : {})
+      };
+    } else if (row.provided.owner) {
       updatePayload.owner_member_id = normalizeText(nextOwner?.id) || normalizeText(existingLead.owner_member_id) || null;
       if (normalizeText(updatePayload.owner_member_id)) {
         updatePayload.active_pool = true;
       }
     }
+    if (updateByLeadId && resetStatusToNew) {
+      const nextOwnerMemberId = normalizeText(updatePayload.owner_member_id || existingLead.owner_member_id);
+      updatePayload.status = "New";
+      updatePayload.next_follow_up_date = null;
+      updatePayload.active_pool = Boolean(nextOwnerMemberId);
+      updatePayload.meta = buildLeadImportRestartMeta(updatePayload.meta, {
+        restartedAt: nowIso,
+        restartedByMemberId: normalizeText(callerMember.id),
+        restartedByName: normalizeText(callerMember.name),
+        importJobId,
+        previousOwnerMemberId: normalizeText(existingLead.owner_member_id),
+        nextOwnerMemberId,
+        previousStatus: normalizeText(existingLead.status),
+        previousNextFollowUp: normalizeText(existingLead.next_follow_up_date)
+      });
+    }
     if (row.provided.source && normalizeSource(row.values.source)) {
       updatePayload.source = normalizeSource(row.values.source);
     }
-    if (row.provided.status) {
+    if (!(updateByLeadId && resetStatusToNew) && row.provided.status) {
       updatePayload.status = normalizeStatus(row.values.status);
     }
-    if (row.provided.nextFollowUp) {
+    if (!(updateByLeadId && resetStatusToNew) && row.provided.nextFollowUp) {
       updatePayload.next_follow_up_date = normalizeDateOnly(row.values.nextFollowUp);
     }
     if (row.provided.role) {
@@ -458,11 +441,18 @@ export async function processLeadImportRow(
       created: 0,
       updated: 1,
       skipped: 0,
-      assigned: 0,
+      assigned: roundRobinOwner ? 1 : 0,
       leftUnassigned: 0,
       operation: "updated",
       leadId: normalizeText(existingLead.id),
-      before: existingLead
+      before: existingLead,
+      leadName: row.provided.name ? row.values.name : normalizeText(existingLead.name),
+      ownerMemberId: normalizeText(updatePayload.owner_member_id || existingLead.owner_member_id),
+      ownerName: normalizeText(
+        roundRobinOwner?.name ||
+          nextOwner?.name ||
+          teamMembers.find((member) => normalizeText(member.id) === normalizeText(existingLead.owner_member_id))?.name
+      )
     };
   }
 
@@ -487,7 +477,10 @@ export async function processLeadImportRow(
         assigned: distributionMode === "auto-assign" && assignedMember ? 1 : 0,
         leftUnassigned: distributionMode === "auto-assign" && assignedMember ? 0 : 1,
         operation: "created",
-        leadId: normalizeText(priorLead.id)
+        leadId: normalizeText(priorLead.id),
+        leadName: row.values.name,
+        ownerMemberId: normalizeText(assignedMember?.id),
+        ownerName: normalizeText(assignedMember?.name)
       };
     }
   }
@@ -544,6 +537,9 @@ export async function processLeadImportRow(
     assigned,
     leftUnassigned: assigned ? 0 : 1,
     operation: "created",
-    leadId: normalizeText(insertedLead?.id)
+    leadId: normalizeText(insertedLead?.id),
+    leadName: row.values.name,
+    ownerMemberId: normalizeText(assignedMember?.id),
+    ownerName: normalizeText(assignedMember?.name)
   };
 }

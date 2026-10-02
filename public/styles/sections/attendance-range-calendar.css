@@ -1,0 +1,297 @@
+/* Focused attendance corrections: calendar range, compact toolbar, and viewport table. */
+.modal-form[data-mode="attendance-range-compose"] {
+  gap: 16px;
+}
+
+.modal-card.is-wide:has(.modal-form[data-mode="attendance-range-compose"]) {
+  width: min(720px, 100%);
+  padding: 14px;
+  border: 0;
+  border-radius: 8px;
+}
+
+.modal-card:has(.modal-form[data-mode="attendance-range-compose"]) .modal-head .icon-btn {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.modal-form[data-mode="attendance-range-compose"] > .task-meta {
+  margin: 0;
+}
+
+.attendance-range-calendars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.attendance-range-calendar {
+  min-width: 0;
+}
+
+.attendance-range-calendar + .attendance-range-calendar {
+  padding-left: 24px;
+  border-left: 1px solid var(--ui-color-border-subtle, #ececeb);
+}
+
+.attendance-range-calendar-heading,
+.attendance-range-calendar-nav,
+.attendance-range-calendar-weekdays,
+.attendance-range-calendar-days {
+  display: flex;
+  align-items: center;
+}
+
+.attendance-range-calendar-heading {
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.attendance-range-calendar-heading > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.attendance-range-calendar-heading span {
+  color: var(--ui-color-text-muted, #787774);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.attendance-range-calendar-heading strong {
+  color: var(--ui-color-text, #202124);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-range-calendar-nav {
+  gap: 2px;
+}
+
+.attendance-range-calendar-nav button {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--ui-color-text-secondary, #5f5e5b);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.attendance-range-calendar-nav button:hover,
+.attendance-range-calendar-nav button:focus-visible {
+  color: var(--ui-color-text, #202124);
+  background: var(--ui-color-surface-hover, #f1f1ef);
+}
+
+.attendance-range-calendar-month {
+  margin-bottom: 8px;
+  color: var(--ui-color-text, #202124);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.attendance-range-calendar-weekdays,
+.attendance-range-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.attendance-range-calendar-weekdays {
+  margin-bottom: 4px;
+}
+
+.attendance-range-calendar-weekdays span {
+  color: var(--ui-color-text-muted, #787774);
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.attendance-range-calendar-days {
+  gap: 2px 0;
+}
+
+.attendance-range-calendar-day {
+  width: 32px;
+  height: 32px;
+  justify-self: center;
+  padding: 0;
+  color: var(--ui-color-text-secondary, #5f5e5b);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.attendance-range-calendar-day:hover,
+.attendance-range-calendar-day:focus-visible {
+  color: var(--ui-color-text, #202124);
+  background: var(--ui-color-surface-hover, #f1f1ef);
+}
+
+.attendance-range-calendar-day.is-outside {
+  color: var(--ui-color-text-disabled, #c4c4c1);
+}
+
+.attendance-range-calendar-day.is-in-range:not(.is-selected) {
+  background: var(--ui-color-neutral-soft, #f1f1ef);
+}
+
+.attendance-range-calendar-day.is-selected {
+  color: #fff;
+  background: #202124;
+  font-weight: 600;
+}
+
+.modal-form[data-mode="attendance-range-compose"] .form-actions {
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-color-border-subtle, #ececeb);
+}
+
+.modal-form[data-mode="attendance-range-compose"] .form-actions .btn-accent {
+  color: #fff;
+  background: #202124;
+  border-color: #202124;
+}
+
+.modal-form[data-mode="attendance-range-compose"] .form-actions .btn-accent:hover {
+  background: #343538;
+  border-color: #343538;
+}
+
+@media (min-width: 1025px) {
+  #appShell .attendance-manager-topbar-panel {
+    padding: 4px 0 18px !important;
+  }
+
+  #appShell .attendance-manager-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  #appShell .attendance-manager-topbar-copy {
+    flex: 0 0 auto;
+  }
+
+  #appShell .attendance-manager-topbar-actions {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  #appShell .attendance-manager-compact-controls {
+    gap: 10px;
+  }
+
+  #appShell .attendance-manager-secondary-actions {
+    margin-left: 0;
+  }
+
+  #appShell .attendance-manager-search {
+    flex: 0 1 210px;
+    min-width: 170px;
+    height: 34px;
+    gap: 8px;
+    padding: 0 10px;
+    overflow: hidden;
+    color: var(--ui-color-text);
+    background: var(--ui-color-neutral-soft) !important;
+    border: 0 !important;
+    border-radius: 5px;
+    box-shadow: none !important;
+  }
+
+  #appShell .attendance-manager-search i {
+    flex: 0 0 auto;
+    color: var(--ui-color-text-muted);
+    background: transparent !important;
+  }
+
+  #appShell .attendance-manager-search input {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 0 !important;
+    color: var(--ui-color-text) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0;
+  }
+
+  #appShell .attendance-manager-filter-menu,
+  #appShell .attendance-manager-filter-menu > summary {
+    pointer-events: auto;
+  }
+
+  #appShell .attendance-manager-detail-grid {
+    min-height: 0;
+    padding-top: 8px;
+  }
+
+  #appShell .attendance-manager-summary-grid {
+    padding: 8px 0 18px;
+  }
+
+  #appShell .attendance-manager-summary-card {
+    gap: 5px;
+  }
+
+  #appShell .attendance-manager-table-panel {
+    height: calc(100vh - 326px);
+    min-height: 360px;
+    padding-top: 18px;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  #appShell .attendance-manager-table-panel > .data-table-shell {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  #appShell .attendance-manager-table-panel > .data-table-shell .data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .attendance-manager-table-panel > .table-ops-footer {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+    padding: 8px 0 0;
+    background: var(--ui-color-surface);
+  }
+}
+
+@media (max-width: 680px) {
+  .attendance-range-calendars {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .attendance-range-calendar + .attendance-range-calendar {
+    padding: 18px 0 0;
+    border-top: 1px solid var(--ui-color-border-subtle, #ececeb);
+    border-left: 0;
+  }
+}

@@ -56,7 +56,7 @@ export function observeAuth(callback) {
         callback(null);
         return;
       }
-      callback(normalizeAuthUser(data.session));
+      callback(normalizeAuthUser(data.session), "INITIAL_SESSION");
     })
     .catch(() => {
       callback(null);
@@ -64,8 +64,8 @@ export function observeAuth(callback) {
 
   const {
     data: { subscription }
-  } = services.client.auth.onAuthStateChange((_event, session) => {
-    callback(normalizeAuthUser(session));
+  } = services.client.auth.onAuthStateChange((event, session) => {
+    callback(normalizeAuthUser(session), String(event || "AUTH_STATE_CHANGED"));
   });
 
   return () => {

@@ -6,6 +6,11 @@ import { tableActionMenu, viewSectionHead } from "../utils/ui.js";
 import { canonicalTaskType, isCallTaskType, isCallbackTaskType } from "../modules/task-call.js";
 import { canManageTeamMembersByRole, normalizeTeamMemberStatus } from "../modules/profile-core.js";
 import { canTaskEditCore, canTaskUpdateProgress } from "../modules/task-rbac.js";
+import {
+  renderDashboardNotionLoadingState,
+  renderDashboardNotionMessageState,
+  renderDashboardNotionView
+} from "../modules/dashboard-notion-view.js";
 import { renderAttendanceUpgrade } from "./attendance-upgrade.js";
 
 const CALLS_SCHEDULER_START_HOUR = 7;
@@ -1740,6 +1745,22 @@ function renderCallsPerformanceView(data, context) {
       return memberDepartment === departmentFilterValue.toLowerCase();
     })
     .sort((left, right) => compareText(left?.name, right?.name));
+  const selectedAgentName = agentFilterValue === "all"
+    ? ""
+    : String(visibleAgentOptions.find((member) => String(member?.id || "").trim() === agentFilterValue)?.name || "Selected agent").trim();
+  const activeScopeLabels = [
+    selectedAgentName,
+    departmentFilterValue === "all" ? "" : departmentFilterValue,
+    outcomeFilterValue === "all" ? "" : CALLS_PERFORMANCE_OUTCOMES.find((outcome) => outcome.toLowerCase() === outcomeFilterValue) || outcomeFilterValue,
+    searchValue ? `Search: ${searchValue}` : ""
+  ].filter(Boolean);
+  const hasCustomFilters =
+    rangeWindow.range !== "today" ||
+    selectedDateIso !== todayIso ||
+    agentFilterValue !== "all" ||
+    departmentFilterValue !== "all" ||
+    outcomeFilterValue !== "all" ||
+    Boolean(searchValue);
   const effectiveEvents = getCallsPerformanceEffectiveEvents(
     performanceEvents,
     performanceData,
@@ -1859,6 +1880,10 @@ function renderCallsPerformanceView(data, context) {
     <section class="calls-performance-shell attendance-manager-shell">
       <aside class="attendance-manager-sidebar calls-performance-sidebar">
         <article class="attendance-manager-side-card">
+          <div class="calls-performance-sidebar-heading">
+            <strong>Date</strong>
+            <span>${escapeHtml(callsPerformanceRangeLabel(rangeWindow))}</span>
+          </div>
           <div class="attendance-manager-calendar">
             <div class="attendance-manager-calendar-head">
               <button type="button" class="attendance-manager-calendar-nav" data-action="calls-performance-month" data-id="prev" aria-label="Previous month">
@@ -1892,6 +1917,10 @@ function renderCallsPerformanceView(data, context) {
         </article>
 
         <article class="attendance-manager-side-card">
+          <div class="calls-performance-sidebar-heading">
+            <strong>Filters</strong>
+            <button type="button" class="calls-performance-clear" data-action="calls-performance-clear" ${hasCustomFilters ? "" : "disabled"}>Reset</button>
+          </div>
           <div class="attendance-manager-filter-group">
             <div class="attendance-manager-filter-label">
               <span>Range</span>
@@ -1955,6 +1984,21 @@ function renderCallsPerformanceView(data, context) {
       </aside>
 
       <section class="attendance-manager-main calls-performance-main">
+        <header class="calls-performance-overview-head">
+          <div class="calls-performance-overview-copy">
+            <h2>Performance</h2>
+            <p>${escapeHtml(callsPerformanceRangeLabel(rangeWindow))}<span aria-hidden="true"> · </span>${escapeHtml(activeScopeLabels.length ? activeScopeLabels.join(" · ") : "All agents · All outcomes")}</p>
+          </div>
+          <div class="calls-performance-period-nav" role="group" aria-label="Change reporting period">
+            <button type="button" data-action="calls-performance-period" data-id="prev" aria-label="Previous ${escapeHtml(rangeWindow.range)}">
+              <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" data-action="calls-performance-period" data-id="today">Today</button>
+            <button type="button" data-action="calls-performance-period" data-id="next" aria-label="Next ${escapeHtml(rangeWindow.range)}">
+              <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </header>
         <section class="attendance-manager-summary-grid calls-performance-summary-grid">
           <article class="attendance-manager-summary-card calls-performance-kpi-card is-contacted">
             <span class="calls-performance-kpi-icon" aria-hidden="true">
@@ -2140,112 +2184,24 @@ function buildNameResolver(data) {
 }
 
 function renderDashboardLoadingState() {
-  return {
-    title: "Dashboard",
-    subtitle: "Revenue, pipeline, and activity",
-    primaryAction: "Add Task",
-    showWaitingPanel: false,
-    html: `
-      <section class="dashboard-v3" aria-busy="true">
-        <section class="dashboard-kpi-grid">
-          ${Array.from({ length: 4 }, (_, index) => `
-            <article class="dashboard-kpi-card dashboard-kpi-skeleton dashboard-kpi-skeleton-${index + 1}" aria-hidden="true">
-              <span class="dashboard-skeleton-icon"></span>
-              <span class="dashboard-skeleton-line is-label"></span>
-              <span class="dashboard-skeleton-line is-value"></span>
-              <span class="dashboard-skeleton-line is-meta"></span>
-            </article>
-          `).join("")}
-        </section>
-        <section class="dashboard-main-grid">
-          <article class="dashboard-panel dashboard-panel-skeleton" aria-hidden="true">
-            <header class="dashboard-panel-head">
-              <span class="dashboard-skeleton-line is-title"></span>
-              <span class="dashboard-skeleton-pill"></span>
-            </header>
-            <section class="dashboard-stage-grid">
-              ${Array.from({ length: 5 }, () => `
-                <article class="dashboard-stage-cell">
-                  <span class="dashboard-skeleton-line is-stage"></span>
-                  <span class="dashboard-skeleton-line is-stage-label"></span>
-                  <span class="dashboard-skeleton-line is-stage-value"></span>
-                </article>
-              `).join("")}
-            </section>
-            <div class="dashboard-table-shell">
-              <div class="dashboard-skeleton-table">
-                ${Array.from({ length: 4 }, () => `<span class="dashboard-skeleton-line is-row"></span>`).join("")}
-              </div>
-            </div>
-          </article>
-          <aside class="dashboard-side-column">
-            ${Array.from({ length: 2 }, () => `
-              <article class="dashboard-panel dashboard-panel-skeleton" aria-hidden="true">
-                <header class="dashboard-panel-head">
-                  <span class="dashboard-skeleton-line is-title"></span>
-                </header>
-                <div class="dashboard-feed">
-                  ${Array.from({ length: 3 }, () => `
-                    <div class="dashboard-skeleton-feed-item">
-                      <span class="dashboard-skeleton-avatar"></span>
-                      <div class="dashboard-skeleton-feed-copy">
-                        <span class="dashboard-skeleton-line is-feed-title"></span>
-                        <span class="dashboard-skeleton-line is-feed-meta"></span>
-                      </div>
-                    </div>
-                  `).join("")}
-                </div>
-              </article>
-            `).join("")}
-          </aside>
-        </section>
-      </section>
-    `
-  };
+  return renderDashboardNotionLoadingState();
 }
 
 function renderDashboardErrorState(message) {
-  return {
-    title: "Dashboard",
-    subtitle: "Revenue, pipeline, and activity",
-    primaryAction: "Add Task",
-    showWaitingPanel: false,
-    html: `
-      <section class="dashboard-v3">
-        <article class="dashboard-panel dashboard-state-panel">
-          <header class="dashboard-panel-head">
-            <h3>Dashboard unavailable</h3>
-          </header>
-          <div class="dashboard-state-copy">
-            <p>${escapeHtml(message || "We couldn't load the latest dashboard snapshot.")}</p>
-            <p class="task-meta">Try refreshing the page after the workspace data finishes syncing.</p>
-          </div>
-        </article>
-      </section>
-    `
-  };
+  return renderDashboardNotionMessageState({
+    title: "Dashboard unavailable",
+    message: message || "We couldn't load the latest dashboard data.",
+    detail: "Try again after the workspace finishes syncing."
+  });
 }
 
 function renderDashboardLockedState() {
-  return {
-    title: "Dashboard",
-    subtitle: "Revenue, pipeline, and activity",
-    primaryAction: "Open My Work",
-    showWaitingPanel: false,
-    html: `
-      <section class="dashboard-v3">
-        <article class="dashboard-panel dashboard-state-panel">
-          <header class="dashboard-panel-head">
-            <h3>Dashboard locked</h3>
-          </header>
-          <div class="dashboard-state-copy">
-            <p>Your role does not currently include dashboard access.</p>
-            <p class="task-meta">Ask a workspace owner or admin to enable the Dashboard view permission for your member profile.</p>
-          </div>
-        </article>
-      </section>
-    `
-  };
+  return renderDashboardNotionMessageState({
+    title: "Dashboard locked",
+    message: "Your role does not currently include dashboard access.",
+    detail: "Ask a workspace owner or admin to enable the Dashboard view permission for your profile.",
+    locked: true
+  });
 }
 
 function parseDashboardDate(value) {
@@ -2369,6 +2325,7 @@ function normalizeDashboardUiState(uiState) {
     range: allowedRanges.has(range) ? range : "30d",
     sourceMetric: allowedSourceMetrics.has(sourceMetric) ? sourceMetric : "converted",
     ownerMetric: allowedOwnerMetrics.has(ownerMetric) ? ownerMetric : "qualified",
+    compare: uiState?.compare !== false,
     hiddenSeries
   };
 }
@@ -2424,6 +2381,7 @@ function dashboardSnapshotSignature(snapshot) {
     quarterLabel: String(snapshot.quarterLabel || ""),
     leadStatusDistribution: dashboardCollectionSignature(snapshot.leadStatusDistribution, ["key", "label", "count"]),
     salesFunnel: dashboardCollectionSignature(snapshot.salesFunnel, ["key", "label", "count"]),
+    qualificationPerformance: dashboardCollectionSignature(snapshot.qualificationPerformance, ["memberId", "name", "qualifiedCount"]),
     topReps: dashboardCollectionSignature(snapshot.topReps, ["id", "name", "dealsClosed", "percent"]),
     pipelineTrend: dashboardCollectionSignature(snapshot.pipelineTrend?.points, ["key", "label", "values"]),
     followUpTasks: dashboardCollectionSignature(snapshot.followUpTasks, ["id", "title", "assignee", "dueDate", "status"]),
@@ -3171,7 +3129,8 @@ function buildDashboardModel(data, snapshot) {
     : `No funnel activity in ${rangeLabelLower}.`;
   const activeTeamMembers = (Array.isArray(data?.teamMembers) ? data.teamMembers : [])
     .filter((member) => String(member?.name || "").trim())
-    .filter((member) => normalizeTeamMemberStatus(member?.status) !== "invited");
+    .filter((member) => normalizeTeamMemberStatus(member?.status) === "Active")
+    .filter((member) => String(member?.team || member?.department || "").trim().toLowerCase() === "sales");
   const teamRows = activeTeamMembers
     .map((member) => {
       const memberLeads = leads.filter((lead) => dashboardMemberMatchesRecord(member, lead?.ownerId, lead?.owner));
@@ -3553,9 +3512,20 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
     return Boolean(nextFollowUp) && nextFollowUp < todayIso;
   });
   const staleDeals = openDeals.filter((deal) => dashboardDaysAgo(deal?.updatedAt || deal?.createdAt, now) >= 14);
+  const newLeadsAwaitingContact = leads.filter(
+    (lead) => String(lead?.status || "").trim().toLowerCase() === "new"
+  );
+  const unassignedQualifiedLeads = leads.filter((lead) => {
+    const status = String(lead?.status || "").trim().toLowerCase();
+    const ownerId = String(lead?.ownerId || "").trim();
+    const owner = String(lead?.owner || "").trim().toLowerCase();
+    return status === "qualified" && !ownerId && (!owner || owner === "unassigned");
+  });
   const callsToday = openTasks.filter(
     (task) => isCallTaskType(task?.taskType) && isTaskScheduledForToday(task, todayIso, todayShortDay)
   );
+  const tasksDueToday = openTasks.filter((task) => String(task?.dueDate || "").trim() === todayIso);
+  const followUpsToday = leads.filter((lead) => String(lead?.nextFollowUp || "").trim() === todayIso);
   const pipelineValue = openDeals.reduce((sum, deal) => sum + Number(deal?.value || 0), 0);
   const atRiskCount = overdueLeadFollowUps.length + overdueTasks.length;
   const rangeLabelLower = String(rangeMeta.label || "selected window").toLowerCase();
@@ -3714,6 +3684,66 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
     }
   ];
   const attentionCount = attentionSummary.reduce((sum, item) => sum + Math.max(0, Number(item.count || 0)), 0);
+  const attentionGroups = [
+    {
+      key: "overdue-followups",
+      label: "Overdue follow-ups",
+      meta: "Leads waiting beyond their follow-up date",
+      count: overdueLeadFollowUps.length,
+      icon: "bi-clock-history",
+      tone: "danger"
+    },
+    {
+      key: "awaiting-contact",
+      label: "New leads awaiting contact",
+      meta: "New leads that have not advanced yet",
+      count: newLeadsAwaitingContact.length,
+      icon: "bi-person-exclamation",
+      tone: "warning"
+    },
+    {
+      key: "unassigned-qualified",
+      label: "Unassigned qualified leads",
+      meta: "Qualified leads without an owner",
+      count: unassignedQualifiedLeads.length,
+      icon: "bi-person-dash",
+      tone: "warning"
+    },
+    {
+      key: "stale-deals",
+      label: "Stale deals",
+      meta: "Open deals without movement for 14 days",
+      count: staleDeals.length,
+      icon: "bi-hourglass-split",
+      tone: "danger"
+    }
+  ];
+  const todaySummary = [
+    {
+      key: "followups",
+      label: "Follow-ups due",
+      meta: "Lead conversations scheduled for today",
+      count: followUpsToday.length,
+      icon: "bi-arrow-repeat",
+      tone: "neutral"
+    },
+    {
+      key: "calls",
+      label: "Scheduled calls",
+      meta: "Calls in today's work queue",
+      count: callsToday.length,
+      icon: "bi-telephone",
+      tone: "neutral"
+    },
+    {
+      key: "tasks",
+      label: "Tasks due",
+      meta: "Open tasks due before the day ends",
+      count: tasksDueToday.length,
+      icon: "bi-check2-square",
+      tone: "neutral"
+    }
+  ];
   const statusDistributionOrder = [
     { key: "contacted", label: "Contacted", color: "#1f84f1" },
     { key: "new", label: "New", color: "#20b486" },
@@ -3800,7 +3830,8 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
     : `No funnel activity in ${rangeLabelLower}.`;
   const activeTeamMembers = (Array.isArray(data?.teamMembers) ? data.teamMembers : [])
     .filter((member) => String(member?.name || "").trim())
-    .filter((member) => normalizeTeamMemberStatus(member?.status) !== "invited");
+    .filter((member) => normalizeTeamMemberStatus(member?.status) === "Active")
+    .filter((member) => String(member?.team || member?.department || "").trim().toLowerCase() === "sales");
   const teamRows = activeTeamMembers
     .map((member) => {
       const memberLeads = leads.filter((lead) => dashboardMemberMatchesRecord(member, lead?.ownerId, lead?.owner));
@@ -3816,6 +3847,7 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
         name: String(member?.name || "Unknown").trim() || "Unknown",
         initials: getDashboardInitials(member?.name),
         role: String(member?.role || "Member").trim() || "Member",
+        profileAvailable: true,
         leads: memberLeads.length,
         openDeals: memberOpenDeals.length,
         overdueFollowUps: memberOverdueFollowUps.length,
@@ -3890,36 +3922,26 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
       overdueFollowUps: member.overdueFollowUps
     });
   });
-  leads.forEach((lead) => {
-    const ownerName = String(lead?.owner || "Unassigned").trim() || "Unassigned";
-    const ownerId = String(lead?.ownerId || "").trim();
-    const existingMatch = [...ownerSeedMap.values()].find((member) =>
-      dashboardMemberMatchesRecord({ id: member.id, name: member.name }, ownerId, ownerName)
-    );
-    if (existingMatch) {
-      return;
-    }
-    const key = ownerId || ownerName.toLowerCase();
-    ownerSeedMap.set(key, {
-      id: key,
-      name: ownerName,
-      initials: getDashboardInitials(ownerName),
-      role: "Owner",
-      openDeals: openDeals.filter((deal) => dashboardMemberMatchesRecord({ id: key, name: ownerName }, deal?.ownerId, deal?.owner)).length,
-      overdueFollowUps: overdueLeadFollowUps.filter((leadEntry) =>
-        dashboardMemberMatchesRecord({ id: key, name: ownerName }, leadEntry?.ownerId, leadEntry?.owner)
-      ).length
-    });
-  });
   const ownerMetricKey = dashboardUiState.ownerMetric === "converted" ? "convertedLeads" : "qualifiedLeads";
   const ownerMetricLabel = dashboardUiState.ownerMetric === "converted" ? "converted" : "qualified";
+  const qualificationPerformance = Array.isArray(snapshot?.qualificationPerformance)
+    ? snapshot.qualificationPerformance
+    : null;
   const ownerRows = [...ownerSeedMap.values()]
     .map((member) => {
-      const qualifiedLeads = leadsInRange.filter(
+      const localQualifiedLeads = leadsInRange.filter(
         (lead) =>
           dashboardMemberMatchesRecord({ id: member.id, name: member.name }, lead?.ownerId, lead?.owner) &&
           String(lead?.status || "").trim() === "Qualified"
       ).length;
+      const qualificationCredit = qualificationPerformance?.find(
+        (row) =>
+          String(row?.memberId || "").trim() === String(member.id || "").trim() ||
+          String(row?.name || "").trim().toLowerCase() === String(member.name || "").trim().toLowerCase()
+      );
+      const qualifiedLeads = qualificationPerformance
+        ? Math.max(0, Number(qualificationCredit?.qualifiedCount || 0))
+        : localQualifiedLeads;
       const convertedLeads = leadsInRange.filter(
         (lead) =>
           dashboardMemberMatchesRecord({ id: member.id, name: member.name }, lead?.ownerId, lead?.owner) &&
@@ -4410,11 +4432,11 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
     String(data?.currentUser?.email || "").trim();
   const firstName = currentUserName ? currentUserName.split(/\s+/)[0].split("@")[0] : "";
   const currentHour = now.getHours();
-  const dayGreeting = currentHour < 12 ? "Good Morning" : currentHour < 18 ? "Good Afternoon" : "Good Evening";
+  const dayGreeting = currentHour < 12 ? "Good morning" : currentHour < 18 ? "Good afternoon" : "Good evening";
   const relativeGeneratedAt = hasSnapshot && snapshot?.generatedAt ? formatRelativeTime(snapshot.generatedAt) : "";
   const model = {
-    toolbarHeading: firstName ? `${dayGreeting}, ${firstName}` : dayGreeting,
-    toolbarSummary: "Your CRM performance this week",
+    toolbarHeading: "Dashboard",
+    toolbarSummary: `${dayGreeting}${firstName ? `, ${firstName}` : ""}! 👋`,
     toolbarRangeLabel: rangeMeta.label,
     toolbarSyncLabel: relativeGeneratedAt
       ? `Last sync ${relativeGeneratedAt === "now" ? "just now" : `${relativeGeneratedAt} ago`}`
@@ -4430,6 +4452,7 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
     ],
     sourceMetric: dashboardUiState.sourceMetric,
     ownerMetric: dashboardUiState.ownerMetric,
+    compareVisible: dashboardUiState.compare,
     ownerPanelNote,
     kpis: [
       {
@@ -4439,7 +4462,12 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
         value: new Intl.NumberFormat("en-US").format(commandTotalLeadsValue),
         note: rangeMeta.label,
         deltaLabel: formatDashboardDeltaBadge(commandTotalLeadsValue, commandTotalLeadsBaseline),
-        deltaTone: commandTotalLeadsValue >= commandTotalLeadsBaseline ? "up" : "down",
+        deltaTone:
+          commandTotalLeadsValue === commandTotalLeadsBaseline
+            ? "neutral"
+            : commandTotalLeadsValue > commandTotalLeadsBaseline
+              ? "up"
+              : "down",
         tone: "new-leads",
         sparkPoints: commandNewLeadSparkPoints
       },
@@ -4461,7 +4489,12 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
         value: formatCompactMoney(commandWonValue),
         note: rangeMeta.label,
         deltaLabel: formatDashboardDeltaBadge(commandWonValue, commandWonBaseline),
-        deltaTone: commandWonValue >= commandWonBaseline ? "up" : "down",
+        deltaTone:
+          commandWonValue === commandWonBaseline
+            ? "neutral"
+            : commandWonValue > commandWonBaseline
+              ? "up"
+              : "down",
         tone: "won-month",
         sparkPoints: commandWonSparkPoints
       },
@@ -4490,6 +4523,8 @@ function buildDashboardCommandModel(data, snapshot, uiState = {}) {
     attentionCount,
     attentionItems,
     attentionSummary,
+    attentionGroups,
+    todaySummary,
     statusDistribution: commandStatusDistribution,
     statusDistributionTotal: commandStatusDistributionTotal,
     statusDistributionFeatured: commandStatusDistributionFeatured,
@@ -4649,7 +4684,6 @@ function renderDashboardCommandShell(model) {
         <section class="dashboard-command-toolbar" data-dashboard-region="toolbar">
           <div class="dashboard-command-toolbar-shell" data-live-key="toolbar-shell">
             <div class="dashboard-command-toolbar-copy">
-              <p class="dashboard-command-toolbar-eyebrow">Dashboard</p>
               <h2>${escapeHtml(model.toolbarHeading || "Workspace overview")}</h2>
               <p>${escapeHtml(model.toolbarSummary || "Track movement, ownership, and urgency from one place.")}</p>
             </div>
@@ -4776,29 +4810,18 @@ function renderDashboardCommandShell(model) {
   };
 }
 
-function hasDashboardRenderableData(data) {
-  return Boolean(
-    Object.keys(data?.currentUser || {}).length ||
-      (Array.isArray(data?.teamMembers) && data.teamMembers.length) ||
-      (Array.isArray(data?.leads) && data.leads.length) ||
-      (Array.isArray(data?.deals) && data.deals.length) ||
-      (Array.isArray(data?.tasks) && data.tasks.length) ||
-      (Array.isArray(data?.messages) && data.messages.length)
-  );
-}
-
 export function renderDashboard(data, context = {}) {
   if (context.supabaseConfigured && context.dashboardLocked) {
     return renderDashboardLockedState();
   }
-  const hasSourceData = hasDashboardRenderableData(data) || Boolean(context.dashboardSnapshot);
-  if (context.supabaseConfigured && !hasSourceData && (context.authBootstrapPending || context.dashboardLoading)) {
+  const hasDashboardSnapshot = Boolean(context.dashboardSnapshot);
+  if (context.supabaseConfigured && !hasDashboardSnapshot && (context.authBootstrapPending || context.dashboardLoading)) {
     return renderDashboardLoadingState();
   }
-  if (context.supabaseConfigured && !hasSourceData && context.dashboardSnapshotError) {
+  if (context.supabaseConfigured && !hasDashboardSnapshot && context.dashboardSnapshotError) {
     return renderDashboardErrorState(context.dashboardSnapshotError);
   }
-  return renderDashboardCommandShell(
+  return renderDashboardNotionView(
     buildDashboardCommandModel(data || {}, context.dashboardSnapshot, context.dashboardUiState)
   );
 }
@@ -4877,30 +4900,26 @@ function teamMemberInitials(nameValue) {
   return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
 }
 
-function workloadToneClass(workloadValue) {
-  const numeric = Number(workloadValue || 0);
-  if (numeric >= 80) {
-    return "is-high";
-  }
-  if (numeric >= 60) {
-    return "is-medium";
-  }
-  return "is-normal";
-}
-
 export function renderTeam(data, context) {
   const rawSortKey = String(context.crmSortKey || "").trim();
   const sortDir = context.crmSortDir === "desc" ? "desc" : context.crmSortDir === "asc" ? "asc" : "none";
   const sortKey = Object.prototype.hasOwnProperty.call(TEAM_SORTERS, rawSortKey) ? rawSortKey : "";
-  const teamView = context.teamView === "table" ? "table" : "cards";
   const canManageTeam = canManageTeamMembersByRole(data.currentUser?.role);
+  const teamView = String(context.teamView || "table").toLowerCase() === "cards" ? "cards" : "table";
   const filteredMembers = data.teamMembers
     .filter((member) =>
       matchesSearch([member.name, member.email, member.team, member.role, member.status], context.searchTerm)
     );
   const sortedMembers = sortTeamRows(filteredMembers, sortKey, sortDir);
+  const pageSize = Math.max(1, Number(context.crmPageSize) || 20);
+  const totalPages = Math.max(1, Math.ceil(sortedMembers.length / pageSize));
+  const page = Math.min(totalPages, Math.max(1, Number(context.crmPage) || 1));
+  const startIndex = (page - 1) * pageSize;
+  const visibleMembers = sortedMembers.slice(startIndex, startIndex + pageSize);
+  const fromRecord = sortedMembers.length ? startIndex + 1 : 0;
+  const toRecord = sortedMembers.length ? Math.min(startIndex + pageSize, sortedMembers.length) : 0;
 
-  const rows = sortedMembers
+  const rows = visibleMembers
     .map(
       (member) => {
         const memberAvatarUrl = String(member.avatarUrl || "").trim();
@@ -4921,8 +4940,8 @@ export function renderTeam(data, context) {
               </span>
             </div>
           </td>
-          <td>${roleBadge(member)}</td>
           <td>${escapeHtml(member.team || "-")}</td>
+          <td>${roleBadge(member)}</td>
           <td>${teamStatusBadge(member.status)}</td>
           <td>${escapeHtml(teamLastActiveLabel(member))}</td>
           <td class="row-actions row-actions-table">
@@ -4934,43 +4953,33 @@ export function renderTeam(data, context) {
     )
     .join("");
 
-  const cards = sortedMembers
+  const cards = visibleMembers
     .map((member) => {
-      const workload = Math.max(0, Math.min(100, Number(member.workload || 0)));
-      const workloadTone = workloadToneClass(workload);
       const memberAvatarUrl = String(member.avatarUrl || "").trim();
       return `
-        <article class="team-card" data-team-open="${member.id}">
-          <header class="team-card-head">
-            <span class="team-card-avatar">
-              ${
-                memberAvatarUrl
-                  ? `<img src="${escapeHtml(memberAvatarUrl)}" alt="${escapeHtml(member.name || "Team member")}" />`
-                  : escapeHtml(teamMemberInitials(member.name))
-              }
-            </span>
-            <div class="team-card-identity">
-              <p class="team-card-name">${escapeHtml(member.name || "Unnamed Member")}</p>
-              <p class="team-card-email">${escapeHtml(member.email || "No email")}</p>
-            </div>
-            <div class="team-card-actions">
-              ${tableActionMenu("More member actions", teamActionMenuItems(member, canManageTeam))}
-            </div>
-          </header>
-          <div class="team-card-meta">
-            <span class="team-tag">${escapeHtml(member.team || "Unassigned")}</span>
-            ${roleBadge(member)}
-            ${teamStatusBadge(member.status)}
+        <article class="team-directory-card" data-team-open="${escapeHtml(member.id)}">
+          <div class="team-directory-card-head">
+            <button type="button" class="crm-name-cell team-directory-card-profile" data-action="team-open-profile" data-id="${escapeHtml(member.id)}" aria-label="Open ${escapeHtml(member.name || "team member")} profile">
+              <span class="crm-inline-avatar team-directory-card-avatar" aria-hidden="true">
+                ${
+                  memberAvatarUrl
+                    ? `<img src="${escapeHtml(memberAvatarUrl)}" alt="${escapeHtml(member.name || "Team member")}" />`
+                    : escapeHtml(teamMemberInitials(member.name))
+                }
+              </span>
+              <span class="crm-name-stack">
+                <span class="crm-name-text">${escapeHtml(member.name || "-")}</span>
+                <span class="crm-name-sub">${escapeHtml(member.email || "-")}</span>
+              </span>
+            </button>
+            ${tableActionMenu("More member actions", teamActionMenuItems(member, canManageTeam))}
           </div>
-          <div class="team-workload">
-            <div class="team-workload-row">
-              <span class="team-workload-label">${normalizeTeamMemberStatus(member.status) === "Pending Invite" ? "Invite Status" : "Workload"}</span>
-              <strong class="team-workload-value">${escapeHtml(normalizeTeamMemberStatus(member.status) === "Pending Invite" ? teamLastActiveLabel(member) : `${Math.round(workload)}%`)}</strong>
-            </div>
-            <div class="team-workload-meter">
-              <span class="${workloadTone}" style="width:${workload}%"></span>
-            </div>
-          </div>
+          <dl class="team-directory-card-details">
+            <div><dt>Department</dt><dd>${escapeHtml(member.team || "-")}</dd></div>
+            <div><dt>Role</dt><dd>${roleBadge(member)}</dd></div>
+            <div><dt>Status</dt><dd>${teamStatusBadge(member.status)}</dd></div>
+            <div><dt>Last active</dt><dd>${escapeHtml(teamLastActiveLabel(member))}</dd></div>
+          </dl>
         </article>
       `;
     })
@@ -4982,30 +4991,22 @@ export function renderTeam(data, context) {
     primaryAction: canManageTeam ? "Invite Team Member" : "",
     showWaitingPanel: false,
     html: `
-      <section class="view-block crm-list-v2">
+      <section class="view-block crm-list-v2 team-directory-view">
         <div class="view-section-head team-section-head">
-          <h3 class="block-title">Workspace Members</h3>
+          <div class="team-directory-title">
+            <div class="team-directory-title-row">
+              <h1 class="block-title">Team</h1>
+              <span class="team-directory-count" aria-label="${sortedMembers.length} members">${sortedMembers.length}</span>
+            </div>
+            <p>Manage workspace access, roles, departments, and member status.</p>
+          </div>
           <div class="team-head-actions">
-            <div class="team-view-toggle" role="tablist" aria-label="Team view mode">
-              <button
-                class="team-view-toggle-btn ${teamView === "cards" ? "is-active" : ""}"
-                type="button"
-                role="tab"
-                aria-selected="${teamView === "cards"}"
-                data-action="team-view"
-                data-id="cards"
-              >
-                Cards
+            <div class="team-view-switcher" role="group" aria-label="Team view">
+              <button type="button" data-action="team-view" data-id="table" class="${teamView === "table" ? "is-active" : ""}" aria-pressed="${teamView === "table"}" aria-label="List view" title="List view">
+                <i class="bi bi-list-ul" aria-hidden="true"></i>
               </button>
-              <button
-                class="team-view-toggle-btn ${teamView === "table" ? "is-active" : ""}"
-                type="button"
-                role="tab"
-                aria-selected="${teamView === "table"}"
-                data-action="team-view"
-                data-id="table"
-              >
-                Table
+              <button type="button" data-action="team-view" data-id="cards" class="${teamView === "cards" ? "is-active" : ""}" aria-pressed="${teamView === "cards"}" aria-label="Card view" title="Card view">
+                <i class="bi bi-grid" aria-hidden="true"></i>
               </button>
             </div>
             ${
@@ -5013,40 +5014,44 @@ export function renderTeam(data, context) {
                 ? `
                   <button class="table-ops-columns-btn" type="button" data-action="view-add-record" data-id="create">
                     <i class="bi bi-person-plus" aria-hidden="true"></i>
-                    <span>Invite Team Member</span>
+                    <span>Invite member</span>
                   </button>
                 `
                 : ""
             }
           </div>
         </div>
-        ${
-          teamView === "table"
-            ? `
-              <div class="data-table-shell">
+        <div class="data-table-shell team-directory-table-shell is-${teamView}">
+          ${
+            teamView === "cards"
+              ? `<div class="team-directory-card-grid">${cards || "<p class='task-meta team-directory-empty'>No members found.</p>"}</div>`
+              : `
                 <table class="data-table">
                   <thead>
                     <tr>
                       <th>${teamHeaderSortButton("Member", "name", sortKey, sortDir)}</th>
-                      <th>${teamHeaderSortButton("Role", "role", sortKey, sortDir)}</th>
                       <th>${teamHeaderSortButton("Department", "team", sortKey, sortDir)}</th>
+                      <th>${teamHeaderSortButton("Role", "role", sortKey, sortDir)}</th>
                       <th>${teamHeaderSortButton("Status", "status", sortKey, sortDir)}</th>
                       <th>${teamHeaderSortButton("Last Active", "lastActive", sortKey, sortDir)}</th>
-                      <th>Actions</th>
+                      <th><span class="sr-only">Actions</span></th>
                     </tr>
                   </thead>
                   <tbody>
                     ${rows || "<tr><td colspan='6' class='task-meta'>No members found.</td></tr>"}
                   </tbody>
                 </table>
-              </div>
-            `
-            : `
-              <div class="team-card-grid">
-                ${cards || "<p class='team-card-empty'>No members found.</p>"}
-              </div>
-            `
-        }
+              `
+          }
+          <footer class="team-directory-pagination" aria-label="Team pagination">
+            <span>Showing ${fromRecord}-${toRecord} of ${sortedMembers.length}</span>
+            <div class="team-directory-pagination-actions">
+              <span>Page ${page} of ${totalPages}</span>
+              <button type="button" data-action="crm-table-page" data-id="prev" ${page <= 1 ? "disabled" : ""}>Previous</button>
+              <button type="button" data-action="crm-table-page" data-id="next" ${page >= totalPages ? "disabled" : ""}>Next</button>
+            </div>
+          </footer>
+        </div>
       </section>
     `
   };
@@ -6759,7 +6764,7 @@ function getLinkedContext(data, conversation, messages) {
 
   if (conversation?.targetType === "channel" && conversation.channelType) {
     const possible = conversation.channelType.toLowerCase();
-    if (possible === "deal" || possible === "lead" || possible === "account" || possible === "project") {
+    if (possible === "deal" || possible === "lead" || possible === "account") {
       const label = conversation.name.includes(":")
         ? conversation.name.split(":").slice(1).join(":").trim()
         : conversation.name;
@@ -6894,11 +6899,8 @@ function routeForLinkedType(linkedType) {
   if (normalized === "contact") {
     return "contacts";
   }
-  if (normalized === "project") {
-    return "projects";
-  }
   if (normalized === "task") {
-    return "my-work";
+    return "kanban";
   }
   return "";
 }
@@ -8286,7 +8288,7 @@ export function renderCommunications(data, context) {
   const emailCrmOpen = Boolean(
     String(emailDraft.linkedType || "").trim() || String(emailDraft.linkedLabel || "").trim()
   );
-  const emailLinkedTypeOptions = ["None", "Lead", "Contact", "Account", "Deal", "Project", "Task"]
+  const emailLinkedTypeOptions = ["None", "Lead", "Contact", "Account", "Deal", "Task"]
     .map((option) => {
       const value = option === "None" ? "" : option;
       const selected = value === emailDraftLinkedType ? "selected" : "";
@@ -8732,7 +8734,6 @@ export function renderCommunications(data, context) {
               <option value="Contact">Contact</option>
               <option value="Account">Account</option>
               <option value="Deal">Deal</option>
-              <option value="Project">Project</option>
               <option value="Task">Task</option>
             </select>
           </label>

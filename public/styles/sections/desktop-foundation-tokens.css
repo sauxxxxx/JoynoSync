@@ -1,0 +1,105 @@
+/*
+ * Phase 1 desktop design tokens.
+ *
+ * These aliases form the stable Notion-inspired contract for new and migrated
+ * components. Existing legacy variables remain intact so approved Leads,
+ * sidebar, and topbar surfaces do not change during the foundation rollout.
+ */
+:root {
+  --ui-color-shell: #eef3f9;
+  --ui-color-canvas: #f7f9fc;
+  --ui-color-surface: #ffffff;
+  --ui-color-surface-subtle: #f8fafc;
+  --ui-color-surface-hover: #f1f5f9;
+  --ui-color-border: #dfe7f1;
+  --ui-color-border-strong: #cbd5e1;
+
+  --ui-color-text: #0f172a;
+  --ui-color-text-secondary: #536176;
+  --ui-color-text-muted: #64748b;
+  --ui-color-disabled: #94a3b8;
+
+  --ui-color-primary: #2563eb;
+  --ui-color-primary-fill: #2563eb;
+  --ui-color-primary-hover: #1d4ed8;
+  --ui-color-primary-pressed: #1e40af;
+  --ui-color-on-primary: #ffffff;
+  --ui-color-primary-soft: #edf3ff;
+  --ui-color-primary-soft-strong: #dce8ff;
+
+  --ui-color-info: #1d4ed8;
+  --ui-color-info-soft: #eff6ff;
+  --ui-color-success: #047857;
+  --ui-color-success-soft: #ecfdf5;
+  --ui-color-warning: #92400e;
+  --ui-color-warning-soft: #fffbeb;
+  --ui-color-danger: #b91c1c;
+  --ui-color-danger-fill: #b91c1c;
+  --ui-color-danger-soft: #fef2f2;
+  --ui-color-neutral: #475569;
+  --ui-color-neutral-soft: #f1f5f9;
+
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-5: 20px;
+  --ui-space-6: 24px;
+  --ui-space-8: 32px;
+  --ui-space-10: 40px;
+  --ui-space-12: 48px;
+
+  --ui-radius-control: 5px;
+  --ui-radius-surface: 5px;
+  --ui-radius-overlay: 8px;
+  --ui-radius-pill: 999px;
+
+  --ui-shadow-overlay: 0 16px 40px rgba(15, 23, 42, 0.14);
+  --ui-shadow-menu: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --ui-scrim: rgba(15, 23, 42, 0.48);
+  --ui-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.25);
+
+  --ui-motion-fast: 150ms;
+  --ui-motion-standard: 200ms;
+  --ui-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root[data-theme="dark"] {
+  --ui-color-shell: #181818;
+  --ui-color-canvas: #212121;
+  --ui-color-surface: #242424;
+  --ui-color-surface-subtle: #1d1d1d;
+  --ui-color-surface-hover: #2b2b2b;
+  --ui-color-border: #343434;
+  --ui-color-border-strong: #3a3a3a;
+
+  --ui-color-text: #f1f5f9;
+  --ui-color-text-secondary: #b5b5b5;
+  --ui-color-text-muted: #a8a8a8;
+  --ui-color-disabled: #737373;
+
+  --ui-color-primary: #76a0ff;
+  --ui-color-primary-fill: #2563eb;
+  --ui-color-primary-hover: #1d4ed8;
+  --ui-color-primary-pressed: #1e40af;
+  --ui-color-on-primary: #ffffff;
+  --ui-color-primary-soft: #292f3a;
+  --ui-color-primary-soft-strong: #30394a;
+
+  --ui-color-info: #93c5fd;
+  --ui-color-info-soft: rgba(59, 130, 246, 0.14);
+  --ui-color-success: #6ee7b7;
+  --ui-color-success-soft: rgba(16, 185, 129, 0.14);
+  --ui-color-warning: #f0b85a;
+  --ui-color-warning-soft: rgba(240, 184, 90, 0.14);
+  --ui-color-danger: #fb7185;
+  --ui-color-danger-fill: #b91c1c;
+  --ui-color-danger-soft: rgba(251, 113, 133, 0.14);
+  --ui-color-neutral: #cbd5e1;
+  --ui-color-neutral-soft: rgba(255, 255, 255, 0.06);
+
+  --ui-shadow-overlay: 0 18px 48px rgba(0, 0, 0, 0.38);
+  --ui-shadow-menu: 0 10px 28px rgba(0, 0, 0, 0.32);
+  --ui-scrim: rgba(0, 0, 0, 0.6);
+  --ui-focus-ring: 0 0 0 3px rgba(118, 160, 255, 0.35);
+}

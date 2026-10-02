@@ -8121,3 +8121,102 @@
 :root[data-theme="dark"] .new-direct-chat-item:hover {
   background: #303030;
 }
+.lead-import-result-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.lead-import-result-group {
+  min-width: 0;
+  border: 1px solid var(--border-soft, #dbe4f0);
+  border-radius: 10px;
+  background: var(--surface, #fff);
+  overflow: hidden;
+}
+
+.lead-import-result-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-soft, #dbe4f0);
+  color: var(--text-strong, #0f2547);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.lead-import-result-group-head strong {
+  min-width: 24px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eaf8f1;
+  color: #087a4b;
+  text-align: center;
+}
+
+.lead-import-result-group.is-skipped .lead-import-result-group-head strong {
+  background: #fff2e8;
+  color: #a64b12;
+}
+
+.lead-import-result-list {
+  max-height: 224px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.lead-import-result-list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border-soft, #dbe4f0);
+}
+
+.lead-import-result-row-number {
+  color: var(--text-muted, #6c7d96);
+  font-size: 11px;
+}
+
+.lead-import-result-identity {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.lead-import-result-identity strong,
+.lead-import-result-identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lead-import-result-identity strong {
+  color: var(--text-strong, #0f2547);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lead-import-result-identity small,
+.lead-import-result-empty,
+.lead-import-result-more {
+  color: var(--text-muted, #6c7d96);
+  font-size: 11px;
+}
+
+.lead-import-result-empty,
+.lead-import-result-more {
+  margin: 0;
+  padding: 12px;
+}
+
+@media (max-width: 720px) {
+  .lead-import-result-groups {
+    grid-template-columns: 1fr;
+  }
+}

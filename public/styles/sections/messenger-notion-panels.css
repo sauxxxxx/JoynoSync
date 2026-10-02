@@ -1,0 +1,286 @@
+/* Messenger composer, details drawer, adaptive desktop, and theme states. */
+@media (min-width: 1025px) {
+  .messenger-view .comms-composer {
+    position: relative;
+    z-index: 5;
+    padding: 10px 32px 22px;
+    border: 0;
+    background: transparent;
+  }
+
+  .messenger-view .messenger-surface {
+    position: relative;
+    width: min(100%, 720px);
+    margin-inline: auto;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .messenger-view .messenger-compose-dock {
+    min-height: 44px;
+    padding: 5px 6px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) 34px;
+    align-items: end;
+    gap: 5px;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .messenger-view .messenger-compose-dock:focus-within {
+    outline: 1px solid #9b9a97;
+    outline-offset: 2px;
+    box-shadow: var(--ui-shadow-menu);
+    transform: translateY(-1px);
+  }
+
+  .messenger-view .messenger-compose-menu > summary {
+    cursor: pointer;
+  }
+
+  .messenger-view .messenger-compose-menu[open] > summary {
+    background: var(--messenger-hover);
+    color: var(--messenger-text);
+  }
+
+  .messenger-view .messenger-compose-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    z-index: 20;
+    width: 168px;
+    padding: 5px;
+  }
+
+  #appShell .view-content.is-messenger-view .messenger-view .messenger-compose-dock textarea,
+  #appShell .view-content.is-messenger-view .messenger-view .messenger-compose-dock textarea:focus,
+  #appShell .view-content.is-messenger-view .messenger-view .messenger-compose-dock textarea:focus-visible {
+    width: 100%;
+    min-width: 0;
+    min-height: 34px;
+    max-height: 120px;
+    padding: 8px 7px;
+    resize: none;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--messenger-text);
+    box-shadow: none;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .messenger-view .messenger-send-btn,
+  .view-content.is-messenger-view .messenger-view .btn.btn-accent.messenger-send-btn {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-grid;
+    place-items: center;
+    border: 0 !important;
+    border-radius: 7px;
+    background: var(--messenger-accent) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .messenger-view .messenger-send-btn:hover,
+  .view-content.is-messenger-view .messenger-view .btn.btn-accent.messenger-send-btn:hover {
+    background: #191919 !important;
+  }
+
+  .messenger-view .messenger-emoji-picker {
+    top: auto;
+    bottom: 54px;
+    left: 0;
+    width: min(310px, calc(100% - 10px));
+    padding: 7px;
+  }
+
+  .messenger-view .messenger-attachment-list,
+  .messenger-view .messenger-attachment-actions,
+  .messenger-view .messenger-edit-banner {
+    margin-bottom: 7px;
+  }
+
+  .messenger-view .messenger-info-pane {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: 312px;
+    padding: 56px 16px 20px;
+    display: grid;
+    align-content: start;
+    gap: 0;
+    overflow-y: auto;
+    border-left: 1px solid var(--messenger-line);
+    background: #fbfbfa;
+    box-shadow: -12px 0 28px rgba(15, 15, 15, 0.08);
+  }
+
+  .messenger-view .messenger-info-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+  }
+
+  .messenger-view .messenger-info-top {
+    padding: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--messenger-line);
+  }
+
+  .messenger-view .messenger-info-avatar {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #e6e6e2;
+    color: #484741;
+  }
+
+  .messenger-view .messenger-info-name {
+    margin: 0;
+    color: var(--messenger-text);
+    font-size: 13px;
+  }
+
+  .messenger-view .messenger-info-status,
+  .messenger-view .messenger-info-note,
+  .messenger-view .messenger-customize-row span,
+  .messenger-view .messenger-info-card-meta {
+    color: var(--messenger-muted);
+    font-size: 9px;
+  }
+
+  .messenger-view .messenger-info-section {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--messenger-line);
+  }
+
+  .messenger-view .messenger-info-label {
+    margin: 0 0 7px;
+    color: var(--messenger-muted);
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .messenger-view .messenger-customize-row,
+  .messenger-view .messenger-info-card,
+  .messenger-view .messenger-info-member {
+    width: 100%;
+    padding: 7px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .messenger-view .messenger-customize-row:hover,
+  .messenger-view .messenger-info-card:hover {
+    background: var(--messenger-hover);
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1180px) {
+  .messenger-view.comms-layout,
+  .messenger-view.comms-layout.is-context-collapsed,
+  .messenger-view.comms-layout.is-info-open {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .messenger-view .messenger-info-pane {
+    width: 296px;
+  }
+}
+
+@media (min-width: 1025px) {
+  :root[data-theme="dark"] .view-content.is-messenger-view,
+  :root[data-theme="dark"] .messenger-view.comms-layout,
+  :root[data-theme="dark"] .messenger-view.comms-layout.is-info-open {
+    --messenger-canvas: #202020;
+    --messenger-rail: #252525;
+    --messenger-hover: #30302f;
+    --messenger-selected: #373735;
+    --messenger-line: #3a3a38;
+    --messenger-text: #ececea;
+    --messenger-muted: #aaa9a5;
+    --messenger-soft: #8f8e8a;
+    --messenger-accent: #ececea;
+    background: var(--messenger-canvas);
+    color: var(--messenger-text);
+  }
+
+  :root[data-theme="dark"] .messenger-view .comms-rail,
+  :root[data-theme="dark"] .messenger-view .comms-thread,
+  :root[data-theme="dark"] .messenger-view .message-list,
+  :root[data-theme="dark"] .messenger-view .comms-thread-head {
+    background: var(--messenger-canvas);
+    border-color: var(--messenger-line);
+  }
+
+  :root[data-theme="dark"] .messenger-view .comms-rail,
+  :root[data-theme="dark"] .messenger-view .messenger-info-pane {
+    background: var(--messenger-rail);
+  }
+
+  :root[data-theme="dark"] .messenger-view .messenger-inbox-heading h2,
+  :root[data-theme="dark"] .messenger-view .messenger-thread-title,
+  :root[data-theme="dark"] .messenger-view .conversation-name,
+  :root[data-theme="dark"] .messenger-view .messenger-info-name {
+    color: #f2f2ef;
+  }
+
+  :root[data-theme="dark"] .messenger-view .messenger-create-toggle,
+  :root[data-theme="dark"] .messenger-view .messenger-send-btn,
+  :root[data-theme="dark"] .view-content.is-messenger-view .messenger-view .btn.btn-accent.messenger-send-btn {
+    background: #ececea !important;
+    color: #242420 !important;
+  }
+
+  :root[data-theme="dark"] .messenger-view .messenger-search,
+  :root[data-theme="dark"] .messenger-view .messenger-compose-dock,
+  :root[data-theme="dark"] .messenger-view .messenger-create-dropdown,
+  :root[data-theme="dark"] .messenger-view .conversation-row-dropdown,
+  :root[data-theme="dark"] .messenger-view .message-inline-actions,
+  :root[data-theme="dark"] .messenger-view .messenger-compose-dropdown,
+  :root[data-theme="dark"] .messenger-view .messenger-emoji-picker {
+    border-color: var(--messenger-line);
+    background: #292928;
+    color: var(--messenger-text);
+  }
+
+  :root[data-theme="dark"] .messenger-view .message-row.is-peer .message-bubble {
+    background: #30302f;
+    color: #ececea;
+  }
+
+  :root[data-theme="dark"] .messenger-view .message-row.is-self .message-bubble {
+    background: #e4e4e0;
+    color: #252521;
+  }
+
+  :root[data-theme="dark"] .messenger-view .message-row.is-self .message-text {
+    color: #252521;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .messenger-view .messenger-compose-dock {
+    transition: none;
+  }
+}

@@ -90,7 +90,7 @@ export function defaultPermissionValueByRole(role, action, moduleId) {
     return true;
   }
   if (normalizedRole === "guest") {
-    return action === "view" && ["dashboard", "projects", "messenger", "calls", "sms", "email"].includes(moduleId);
+    return action === "view" && ["dashboard", "messenger", "calls", "sms", "email"].includes(moduleId);
   }
   if (moduleId === "team" || moduleId === "settings") {
     return action === "view";
@@ -236,8 +236,10 @@ export function ensureProfileCollections(data, options = {}) {
     },
     notifications: {
       inApp: notifyDefaults.inApp === undefined ? true : Boolean(notifyDefaults.inApp),
-      email: notifyDefaults.email === undefined ? true : Boolean(notifyDefaults.email),
-      sms: Boolean(notifyDefaults.sms)
+      messages: notifyDefaults.messages === undefined ? true : Boolean(notifyDefaults.messages),
+      tasks: notifyDefaults.tasks === undefined ? true : Boolean(notifyDefaults.tasks),
+      crm: notifyDefaults.crm === undefined ? true : Boolean(notifyDefaults.crm),
+      calls: notifyDefaults.calls === undefined ? true : Boolean(notifyDefaults.calls)
     },
     scope: PROFILE_SCOPE_OPTIONS.includes(String(currentMember?.scope || data.currentUser.scope || "").toLowerCase())
       ? String(currentMember?.scope || data.currentUser.scope || "").toLowerCase()
@@ -300,13 +302,17 @@ export function ensureProfileCollections(data, options = {}) {
         member.notifications && typeof member.notifications === "object"
           ? {
               inApp: member.notifications.inApp === undefined ? true : Boolean(member.notifications.inApp),
-              email: member.notifications.email === undefined ? true : Boolean(member.notifications.email),
-              sms: Boolean(member.notifications.sms)
+              messages: member.notifications.messages === undefined ? true : Boolean(member.notifications.messages),
+              tasks: member.notifications.tasks === undefined ? true : Boolean(member.notifications.tasks),
+              crm: member.notifications.crm === undefined ? true : Boolean(member.notifications.crm),
+              calls: member.notifications.calls === undefined ? true : Boolean(member.notifications.calls)
             }
           : {
               inApp: true,
-              email: true,
-              sms: false
+              messages: true,
+              tasks: true,
+              crm: true,
+              calls: true
             },
       communication:
         member.communication && typeof member.communication === "object"

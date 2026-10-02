@@ -1,0 +1,143 @@
+.modal-card.is-messenger-workflow,
+.modal-card.is-new-direct-chat {
+  width: min(480px, calc(100vw - 32px));
+  border: 1px solid #dededb;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(15, 15, 15, 0.16);
+}
+
+.messenger-group-editor,
+.new-group-chat-modal {
+  display: grid;
+  gap: 14px;
+}
+
+.messenger-field,
+.new-group-chat-name-field {
+  display: grid;
+  gap: 6px;
+  color: #57564f;
+  font-size: 11px;
+}
+
+.messenger-field input,
+.new-group-chat-name-field input {
+  min-height: 34px;
+  border: 1px solid #dededb;
+  border-radius: 5px;
+  padding: 7px 9px;
+  color: #37352f;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.messenger-field input:focus,
+.new-group-chat-name-field input:focus {
+  border-color: #9b9a97;
+  outline: 0;
+}
+
+.messenger-member-picker {
+  display: grid;
+  gap: 6px;
+}
+
+.messenger-member-picker-head {
+  display: flex;
+  justify-content: space-between;
+  color: #57564f;
+  font-size: 11px;
+}
+
+.messenger-member-picker-head small {
+  color: #9b9a97;
+}
+
+.messenger-member-options {
+  max-height: 248px;
+  overflow: auto;
+  padding: 3px;
+  border: 1px solid #e6e6e3;
+  border-radius: 6px;
+  background: #fbfbfa;
+}
+
+.messenger-member-option {
+  display: grid;
+  grid-template-columns: auto 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.messenger-member-option:hover {
+  background: #efefed;
+}
+
+.messenger-member-option input {
+  accent-color: #37352f;
+}
+
+.messenger-member-avatar {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: #e7e7e4;
+  color: #57564f;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.messenger-member-option > span:last-child {
+  display: grid;
+  gap: 1px;
+}
+
+.messenger-member-option strong {
+  color: #37352f;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.messenger-member-option small {
+  color: #9b9a97;
+  font-size: 9px;
+}
+
+.messenger-dialog-actions {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.messenger-text-action,
+.messenger-primary-action {
+  min-height: 30px;
+  width: auto;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.messenger-text-action {
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #57564f;
+}
+
+.messenger-text-action:hover {
+  background: #efefed;
+}
+
+.messenger-text-action.is-danger {
+  color: #b42318;
+}

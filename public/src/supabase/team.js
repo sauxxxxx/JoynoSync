@@ -139,8 +139,10 @@ function normalizeNotifications(value) {
   const source = normalizeJsonObject(value);
   return {
     inApp: source.inApp === undefined ? true : normalizeBoolean(source.inApp, true),
-    email: source.email === undefined ? true : normalizeBoolean(source.email, true),
-    sms: normalizeBoolean(source.sms, false)
+    messages: source.messages === undefined ? true : normalizeBoolean(source.messages, true),
+    tasks: source.tasks === undefined ? true : normalizeBoolean(source.tasks, true),
+    crm: source.crm === undefined ? true : normalizeBoolean(source.crm, true),
+    calls: source.calls === undefined ? true : normalizeBoolean(source.calls, true)
   };
 }
 

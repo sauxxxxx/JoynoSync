@@ -12,7 +12,7 @@ export async function hydrateLeadExportRows(client, rows = []) {
     const batchIds = ids.slice(index, index + EXPORT_BATCH_SIZE);
     const { data, error } = await client
       .from("leads")
-      .select("id,name,company_name,email,phone,secondary_phone,source,status,interest,next_follow_up_date,role,tags,notes,archived_at,created_at,updated_at")
+      .select("id,name,company_name,email,phone,secondary_phone,source,status,interest,owner_member_id,next_follow_up_date,role,tags,notes,archived_at,created_at,updated_at")
       .in("id", batchIds);
     if (error) {
       throw error;

@@ -1,0 +1,57 @@
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .calls-layout {
+    grid-template-columns: 220px minmax(340px, 1fr) 260px;
+  }
+
+  .calls-scheduler-toolbar-left,
+  .calls-scheduler-toolbar-right {
+    width: 100%;
+  }
+
+  .calls-scheduler-toolbar-right {
+    justify-content: flex-start;
+  }
+}
+
+:root[data-theme="dark"] .view-content:has(.calls-workspace-shell),
+:root[data-theme="dark"] .view-block.calls-workspace-shell,
+:root[data-theme="dark"] .calls-subview-tabs,
+:root[data-theme="dark"] .calls-layout,
+:root[data-theme="dark"] .calls-rail,
+:root[data-theme="dark"] .calls-center,
+:root[data-theme="dark"] .calls-dialer-column,
+:root[data-theme="dark"] .calls-dialer-card,
+:root[data-theme="dark"] .calls-scheduler-shell,
+:root[data-theme="dark"] .calls-scheduler-toolbar,
+:root[data-theme="dark"] .calls-scheduler-board,
+:root[data-theme="dark"] .calls-scheduler-time-rail,
+:root[data-theme="dark"] .calls-scheduler-time-rail-body,
+:root[data-theme="dark"] .calls-scheduler-day,
+:root[data-theme="dark"] .calls-scheduler-day-head,
+:root[data-theme="dark"] .calls-scheduler-time-rail-head,
+:root[data-theme="dark"] .calls-performance-sidebar,
+:root[data-theme="dark"] .calls-performance-card {
+  background: #202020;
+}
+
+:root[data-theme="dark"] :is(.calls-subview-tabs, .calls-rail, .calls-center, .calls-workspace-head, .calls-scheduler-toolbar, .calls-scheduler-day, .calls-scheduler-day-head, .calls-scheduler-time-rail, .calls-scheduler-time-rail-head, .calls-performance-summary-grid, .calls-performance-kpi-card, .calls-performance-grid, .calls-performance-grid > .calls-performance-card + .calls-performance-card, .calls-performance-table-card) {
+  border-color: #3a3a3a;
+}
+
+:root[data-theme="dark"] :is(.calls-subview-tabs .mini-btn.is-active, .calls-list-tabs .mini-btn.is-active, .calls-scheduler-nav strong, .calls-left-row-head strong, .calls-detail-hero-copy h3, .calls-key-digit, .calls-performance-kpi-copy strong) {
+  color: #f1f1f1;
+}
+
+:root[data-theme="dark"] :is(.calls-left-row.is-selected .calls-left-row-main, .calls-scheduler-toggle .mini-btn.is-active, .calls-key-btn, .calls-performance-kpi-icon) {
+  background: #2f2f2f !important;
+}
+
+:root[data-theme="dark"] :is(.calls-left-row-main:hover, .calls-detail-actions .mini-btn:hover, .calls-sync-btn:hover, .calls-dialer-icon-btn:hover, .calls-key-btn:hover, .calls-performance-action-btn:hover) {
+  background: #373737;
+}
+
+:root[data-theme="dark"] :is(.calls-list-head .search, .calls-number-wrap, .calls-scheduler-owner-select select, .calls-performance-sidebar .attendance-manager-select-field, .calls-performance-sidebar .attendance-manager-search) {
+  border-color: #484848;
+  background: #292929;
+  color: #f1f1f1;
+}

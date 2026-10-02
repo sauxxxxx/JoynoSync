@@ -1,0 +1,470 @@
+/* Calls Performance — compact, neutral, and operational. */
+@media (min-width: 1024px) {
+  #appShell .view-content.is-comms-view:has(> .calls-workspace-shell) {
+    padding: 0;
+    background: var(--ui-color-surface, #fff);
+  }
+
+  #appShell .view-content.is-comms-view > .calls-workspace-shell {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  #appShell .calls-performance-body {
+    height: auto;
+    min-height: 0;
+    max-height: 100%;
+    margin-top: 0;
+    padding: 18px 20px 32px;
+    border: 0;
+    border-radius: 0;
+    background: var(--ui-color-surface, #fff);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ui-color-border-strong, #c9c9c6) transparent;
+  }
+
+  #appShell .calls-performance-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  #appShell .calls-performance-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  #appShell .calls-performance-body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--ui-color-border-strong, #c9c9c6);
+  }
+
+  #appShell .view-block.calls-workspace-shell {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .calls-subview-tabs {
+    padding-inline: 20px;
+    border: 0;
+  }
+
+  #appShell .calls-performance-shell.attendance-manager-shell {
+    display: grid;
+    grid-template-columns: 224px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  #appShell .calls-performance-sidebar {
+    position: sticky;
+    top: 16px;
+    display: grid;
+    align-content: start;
+    gap: 0;
+    padding: 0 20px 0 0;
+    border: 0;
+    border-right: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-side-card {
+    padding: 0 !important;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-side-card + .attendance-manager-side-card {
+    margin-top: 28px;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+  }
+
+  .calls-performance-sidebar-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 24px;
+    margin-bottom: 10px;
+  }
+
+  .calls-performance-sidebar-heading strong {
+    color: var(--ui-color-text, #202124);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .calls-performance-sidebar-heading span {
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .calls-performance-clear {
+    min-width: 0;
+    min-height: 24px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ui-color-text-secondary, #52514d);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .calls-performance-clear:hover:not(:disabled) {
+    background: var(--ui-color-surface-hover, #f1f1ef);
+    color: var(--ui-color-text, #202124);
+  }
+
+  .calls-performance-clear:disabled {
+    color: var(--ui-color-text-disabled, #b4b4b0);
+    cursor: default;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar {
+    gap: 8px;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-head strong {
+    color: var(--ui-color-text, #202124);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-nav {
+    color: var(--ui-color-text-muted, #787774);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-nav:hover {
+    background: var(--ui-color-surface-hover, #f1f1ef);
+    color: var(--ui-color-text, #202124);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-weekdays span {
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 9px;
+    font-weight: 500;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-day {
+    min-height: 26px;
+    border-radius: 4px;
+    color: var(--ui-color-text-secondary, #52514d);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-day:hover {
+    background: var(--ui-color-surface-hover, #f1f1ef);
+    color: var(--ui-color-text, #202124);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-day.is-outside {
+    color: var(--ui-color-text-disabled, #b4b4b0);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-day.is-today {
+    box-shadow: inset 0 0 0 1px var(--ui-color-border-strong, #c9c9c6);
+    font-weight: 600;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-calendar-day.is-selected {
+    background: var(--ui-color-text, #202124);
+    color: var(--ui-color-surface, #fff);
+    box-shadow: none;
+    font-weight: 600;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-filter-group {
+    gap: 5px;
+    margin-top: 12px;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-filter-group:first-of-type {
+    margin-top: 0;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-filter-label {
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-chip-row.is-segmented {
+    gap: 2px;
+    padding: 2px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--ui-color-neutral-soft, #f1f1ef);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-chip-row.is-segmented .mini-btn {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    height: 28px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 4px;
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-chip-row.is-segmented .mini-btn::after {
+    display: none;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-chip-row.is-segmented .mini-btn:hover {
+    background: color-mix(in srgb, var(--ui-color-surface, #fff) 72%, transparent);
+    color: var(--ui-color-text, #202124);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-chip-row.is-segmented .mini-btn.is-active {
+    background: var(--ui-color-surface, #fff);
+    color: var(--ui-color-text, #202124);
+    box-shadow: 0 1px 2px rgba(15, 15, 15, 0.08);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-select-field,
+  #appShell .calls-performance-sidebar .attendance-manager-search {
+    min-height: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--ui-color-neutral-soft, #f1f1ef);
+    box-shadow: none;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-select-field:hover,
+  #appShell .calls-performance-sidebar .attendance-manager-search:hover {
+    background: var(--ui-color-surface-hover, #e9e9e7);
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-select-field:focus-within,
+  #appShell .calls-performance-sidebar .attendance-manager-search:focus-within {
+    background: var(--ui-color-surface, #fff);
+    box-shadow: var(--ui-focus-ring, 0 0 0 2px rgba(32, 33, 36, 0.22));
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-select-field select,
+  #appShell .calls-performance-sidebar .attendance-manager-search input {
+    color: var(--ui-color-text, #202124);
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-select-field select {
+    height: 32px;
+    padding-left: 10px;
+  }
+
+  #appShell .calls-performance-sidebar .attendance-manager-select-field i,
+  #appShell .calls-performance-sidebar .attendance-manager-search i {
+    color: var(--ui-color-text-muted, #787774);
+  }
+
+  #appShell .calls-performance-main {
+    display: grid;
+    gap: 24px;
+    min-width: 0;
+  }
+
+  .calls-performance-overview-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 42px;
+  }
+
+  .calls-performance-overview-copy {
+    min-width: 0;
+  }
+
+  .calls-performance-overview-copy h2 {
+    margin: 0;
+    color: var(--ui-color-text, #202124);
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .calls-performance-overview-copy p {
+    margin: 3px 0 0;
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .calls-performance-period-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .calls-performance-period-nav button {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ui-color-text-secondary, #52514d);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .calls-performance-period-nav button:hover {
+    background: var(--ui-color-surface-hover, #f1f1ef);
+    color: var(--ui-color-text, #202124);
+  }
+
+  .calls-performance-period-nav button:focus-visible,
+  .calls-performance-clear:focus-visible {
+    outline: 2px solid var(--ui-color-text, #202124);
+    outline-offset: 2px;
+  }
+
+  #appShell .calls-performance-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    border: 0;
+  }
+
+  #appShell .calls-performance-kpi-card {
+    gap: 9px;
+    padding: 13px 14px;
+    border: 0;
+    border-right: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .calls-performance-kpi-card:last-child {
+    border-right: 0;
+  }
+
+  #appShell .calls-performance-kpi-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--ui-color-neutral-soft, #f1f1ef) !important;
+    color: var(--ui-color-text-secondary, #52514d) !important;
+    font-size: 11px;
+  }
+
+  #appShell .calls-performance-kpi-copy span {
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 10px;
+  }
+
+  #appShell .calls-performance-kpi-copy strong {
+    color: var(--ui-color-text, #202124);
+    font-size: 17px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .calls-performance-grid {
+    gap: 36px;
+    border: 0;
+  }
+
+  #appShell .calls-performance-card,
+  #appShell .calls-performance-table-shell {
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .calls-performance-card {
+    padding: 0 0 20px;
+  }
+
+  #appShell .calls-performance-grid > .calls-performance-card:first-child {
+    padding-left: 0;
+  }
+
+  #appShell .calls-performance-grid > .calls-performance-card + .calls-performance-card {
+    border-left: 0;
+  }
+
+  #appShell .calls-performance-card-head .task-title {
+    color: var(--ui-color-text, #202124);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #appShell .calls-performance-card-head .task-meta {
+    max-width: 72ch;
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 11px;
+  }
+
+  #appShell .calls-performance-chart-empty {
+    min-height: 190px;
+    color: var(--ui-color-text-muted, #787774);
+    font-size: 12px;
+  }
+
+  #appShell .calls-performance-table-card {
+    gap: 10px;
+    padding: 0;
+  }
+
+  #appShell .calls-performance-table-shell table {
+    border-collapse: collapse;
+  }
+
+  #appShell .calls-performance-table-shell :is(th, td) {
+    border-color: var(--ui-color-border, #eeeeec);
+  }
+
+  #appShell .calls-performance-table-shell table {
+    border: 0;
+  }
+
+  #appShell .calls-performance-action-btn {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .calls-performance-action-btn:hover {
+    background: var(--ui-color-surface-hover, #f1f1ef);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1180px) {
+  #appShell .calls-performance-shell.attendance-manager-shell {
+    grid-template-columns: 204px minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  #appShell .calls-performance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #appShell .calls-performance-kpi-card:nth-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
+:root[data-theme="dark"] .calls-performance-sidebar,
+:root[data-theme="dark"] .calls-performance-card {
+  background: transparent;
+}

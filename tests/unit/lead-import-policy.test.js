@@ -5,30 +5,52 @@ import {
   LEAD_IMPORT_MODE_UPDATE,
   assertLeadImportFileLimits,
   inferLeadImportMode,
+  isJoynoSyncLeadExport,
   resolveImportedStatus,
   validateManualLeadIdentity
 } from "../../public/src/modules/lead-import-policy.js";
 
-test("round-trip files are detected by immutable Lead ID", () => {
-  assert.equal(inferLeadImportMode(["Lead ID", "Lead Name", "Status"]), LEAD_IMPORT_MODE_UPDATE);
+test("JoynoSync round-trip files require the export signature", () => {
+  assert.equal(inferLeadImportMode(["Lead ID", "Updated At", "Lead Name", "Status"]), LEAD_IMPORT_MODE_UPDATE);
+  assert.equal(isJoynoSyncLeadExport(["Lead ID", "Updated At", "Lead Name", "Email"]), true);
+  assert.equal(inferLeadImportMode(["Lead ID", "Lead Name", "Status"]), LEAD_IMPORT_MODE_NEW);
+  assert.equal(inferLeadImportMode(["ID", "Updated At", "Lead Name", "Status"]), LEAD_IMPORT_MODE_NEW);
   assert.equal(inferLeadImportMode(["Lead Name", "Status"]), LEAD_IMPORT_MODE_NEW);
 });
 
 test("blank statuses default to New only for new-lead imports", () => {
   assert.deepEqual(resolveImportedStatus("", { mode: LEAD_IMPORT_MODE_NEW }), {
     value: "New",
-    provided: true,
-    warning: ""
+    provided: false,
+    warning: "",
+    error: ""
   });
   assert.deepEqual(resolveImportedStatus("", { mode: LEAD_IMPORT_MODE_UPDATE }), {
     value: "",
     provided: false,
-    warning: ""
+    warning: "",
+    error: ""
   });
+});
+
+test("unknown statuses are blocked instead of silently resetting a lead", () => {
+  const result = resolveImportedStatus("Called - no answer", { mode: LEAD_IMPORT_MODE_NEW });
+  assert.equal(result.value, "");
+  assert.equal(result.provided, false);
+  assert.match(result.error, /Unknown status/);
 });
 
 test("blank update statuses can be explicitly reset", () => {
   const result = resolveImportedStatus("", { mode: LEAD_IMPORT_MODE_UPDATE, resetBlankStatus: true });
+  assert.equal(result.value, "New");
+  assert.equal(result.provided, true);
+});
+
+test("restart workflow overrides an exported status for every matched lead", () => {
+  const result = resolveImportedStatus("Contacted", {
+    mode: LEAD_IMPORT_MODE_UPDATE,
+    resetBlankStatus: true
+  });
   assert.equal(result.value, "New");
   assert.equal(result.provided, true);
 });

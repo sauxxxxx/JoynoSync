@@ -35,11 +35,19 @@ This is not product status. For current shipped state, use [Project_state.md](Pr
   - Leads, Contacts, Accounts, Deals rendering
   - CRM table layout
   - row menus, filters, bulk bar markup
+- [public/src/views/lead-archive.js](public\src\views\lead-archive.js)
+  - admin-only archived leads table and restore/delete controls
 - [public/src/views/messenger.js](public\src\views\messenger.js)
   - Messenger route rendering
   - standalone owner for Messenger view markup
-- [public/src/views/work.js](public\src\views\work.js)
-  - dashboard/work tables, task calendar, kanban, projects
+- [public/src/views/calendar.js](public\src\views\calendar.js)
+  - task calendar and agenda views
+- [public/src/views/kanban.js](public\src\views\kanban.js)
+  - task board and table views
+- [public/src/views/projects.js](public\src\views\projects.js)
+  - project workspace views
+- [public/src/views/notifications.js](public\src\views\notifications.js)
+  - notification center, filters, and pagination states
 - [public/src/views/attendance-upgrade.js](public\src\views\attendance-upgrade.js)
   - attendance route rendering
   - team attendance table
@@ -73,8 +81,14 @@ This is not product status. For current shipped state, use [Project_state.md](Pr
   - attendance manual modal render/preview/save flow
 - [public/src/modules/lead-archive-actions.js](public\src\modules\lead-archive-actions.js)
   - single and bulk lead archive flows
+- [public/src/modules/lead-archive-page.js](public\src\modules\lead-archive-page.js)
+  - archived lead paging, filtering, restore, and permanent deletion orchestration
+- [public/src/supabase/lead-archive.js](public\src\supabase\lead-archive.js)
+  - archived lead queries and admin-only archive RPC calls
 - [public/src/modules/lead-import-policy.js](public\src\modules\lead-import-policy.js)
   - lead import modes, field contracts, blank-status policy, and safety limits
+- [public/src/modules/lead-import-status-view.js](public\src\modules\lead-import-status-view.js)
+  - Notion-style lead import processing and completion states
 - [public/src/modules/lead-export-roundtrip.js](public\src\modules\lead-export-roundtrip.js)
   - enriches filtered exports with complete ID-based round-trip fields
 - [public/src/modules/attendance-core.js](public\src\modules\attendance-core.js)
@@ -87,6 +101,10 @@ This is not product status. For current shipped state, use [Project_state.md](Pr
   - owner for Messenger refresh batching and fallback polling
 - [public/src/modules/messenger-customization.js](public\src\modules\messenger-customization.js)
   - Messenger theme presets and customization labels
+- [public/src/modules/messenger-workflow.js](public\src\modules\messenger-workflow.js)
+  - history paging, failed-send retry, message pinning, and group management actions
+- [public/src/modules/messenger-workflow-view.js](public\src\modules\messenger-workflow-view.js)
+  - read receipts, retry rows, history controls, and group-management affordances
 - [public/src/modules/integration-marketplace.js](public\src\modules\integration-marketplace.js)
   - available integration catalog data, cards, search, and category filtering
 
@@ -103,6 +121,8 @@ This is not product status. For current shipped state, use [Project_state.md](Pr
   - attendance tables
   - bulk bars
   - many shared operational table surfaces
+- [public/styles/sections/lead-archive.css](public\styles\sections\lead-archive.css)
+  - Archived Leads route, states, table actions, and responsive behavior
 - [public/styles/sections/dashboard-work.css](public\styles\sections\dashboard-work.css)
   - dashboard
   - work/calendar/kanban/projects
@@ -113,6 +133,10 @@ This is not product status. For current shipped state, use [Project_state.md](Pr
 - [public/styles/sections/messenger.css](public\styles\sections\messenger.css)
   - Messenger route layout
   - Messenger thread list, composer, and thread UI
+- [public/styles/sections/messenger-notion.css](public\styles\sections\messenger-notion.css)
+  - compact neutral Messenger workspace overrides
+- [public/styles/sections/messenger-workflow-dialog.css](public\styles\sections\messenger-workflow-dialog.css)
+  - selective group creation and group-management modal styles
 - [public/styles/sections/modals.css](public\styles\sections\modals.css)
   - modal shells
   - confirm modals
@@ -177,6 +201,11 @@ This is not product status. For current shipped state, use [Project_state.md](Pr
 
 ## Product Rules To Preserve
 
+- [design-system/MASTER.md](design-system\MASTER.md) is the canonical UI/UX
+  standard for every interface. Read it before designing, reviewing, or changing
+  any page or component.
+- Page-specific design rules may live under `design-system/pages/`; they override
+  only the rules they explicitly replace. Accessibility rules are never optional.
 - Table = list only
 - Drawer/profile = details only
 - Archive = soft archive, not hard delete

@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
     let leftUnassigned = 0;
 
     for (const row of rows) {
-      const assignedMember = row.result === "ready" ? nextAssignment() : null;
+      const assignedMember = row.result === "ready" || row.result === "update" ? nextAssignment() : null;
       const result = await processLeadImportRow(serviceClient, {
         workspaceId,
         callerMember,
@@ -112,7 +112,8 @@ Deno.serve(async (req) => {
         batchId,
         nowIso,
         importMode,
-        restoreArchived: Boolean(payload.restoreArchived)
+        restoreArchived: Boolean(payload.restoreArchived),
+        resetStatusToNew: Boolean(payload.resetBlankStatus)
       });
       created += result.created;
       updated += result.updated;

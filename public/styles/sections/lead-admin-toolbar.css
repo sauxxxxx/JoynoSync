@@ -1,0 +1,324 @@
+/* Approved Admin Leads workspace header: compact, flat, and table-aligned. */
+@media (min-width: 1025px) {
+  .crm-leads-list.is-admin-view {
+    --lead-toolbar-border: #dfe7f1;
+    --lead-toolbar-border-strong: #cfdae8;
+    --lead-toolbar-text: #10213e;
+    --lead-toolbar-muted: #61728b;
+    --lead-toolbar-blue: #1467ed;
+    gap: 14px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-shell {
+    z-index: 12;
+    margin: 0;
+    padding: 5px 8px 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-main {
+    min-height: 54px;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-group {
+    gap: 5px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-row {
+    gap: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-row .block-title {
+    color: var(--lead-toolbar-text);
+    font-size: 22px;
+    font-weight: 650;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-total-badge {
+    min-width: 0;
+    height: 20px;
+    padding: 0 7px;
+    border: 1px solid #dce4ee;
+    color: #29415f;
+    background: #f5f7fa;
+    font-size: 9.5px;
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-meta {
+    gap: 8px;
+    color: var(--lead-toolbar-muted);
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-sync-btn {
+    width: 20px;
+    height: 20px;
+    color: #657892;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-actions {
+    gap: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action,
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more,
+  .crm-leads-list.is-admin-view .lead-admin-primary-more,
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn,
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    border-color: var(--lead-toolbar-border-strong);
+    border-radius: 8px;
+    color: var(--lead-toolbar-text);
+    font-size: 11.5px;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(16, 33, 62, 0.025);
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action {
+    min-height: 36px;
+    max-height: 36px;
+    gap: 7px;
+    padding: 0 11px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action i {
+    color: #425b7b;
+    font-size: 12px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-action-chevron {
+    margin-left: 1px;
+    color: #657892;
+    font-size: 9px !important;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-action > .crm-lead-admin-action {
+    padding-inline: 11px;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more {
+    width: 32px;
+    min-height: 36px;
+    max-height: 36px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-split > .table-ops-columns-btn {
+    min-width: 108px;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0 13px;
+    border-radius: 8px 0 0 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    box-shadow: 0 5px 13px rgba(20, 103, 237, 0.16);
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-more {
+    width: 34px;
+    min-height: 36px;
+    max-height: 36px;
+    border-color: var(--lead-toolbar-blue);
+    border-left-color: rgba(255, 255, 255, 0.26);
+    border-radius: 0 8px 8px 0;
+    color: #fff;
+    background: var(--lead-toolbar-blue);
+    box-shadow: 0 5px 13px rgba(20, 103, 237, 0.16);
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar {
+    z-index: 10;
+    min-height: 50px;
+    padding: 0 4px;
+    border: 0;
+    border-top: 1px solid var(--lead-toolbar-border);
+    border-bottom: 1px solid var(--lead-toolbar-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tabs {
+    gap: 6px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab {
+    min-height: 49px;
+    gap: 7px;
+    padding: 0 10px;
+    color: #334963;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab::after {
+    right: 4px;
+    bottom: -1px;
+    left: 4px;
+    height: 2px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab small {
+    min-width: 18px;
+    height: 17px;
+    padding: 0 5px;
+    color: #536780;
+    background: #eef2f7;
+    font-size: 8.5px;
+    font-weight: 600;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab.is-active small {
+    color: #075bd7;
+    background: #e8f1ff;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar-actions {
+    gap: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn {
+    min-width: 122px;
+    gap: 7px;
+    padding: 0 10px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    width: 36px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1500px) {
+  .crm-leads-list.is-admin-view .crm-lead-header-actions {
+    gap: 7px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action {
+    padding-inline: 9px;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 850px) {
+  .crm-leads-list.is-admin-view .crm-lead-header-shell {
+    padding: 5px 8px 12px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-actions {
+    gap: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action,
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more,
+  .crm-leads-list.is-admin-view .lead-admin-primary-more,
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn,
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    font-size: 11.5px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action {
+    gap: 7px;
+    padding-inline: 11px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action i {
+    font-size: 12px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more {
+    width: 32px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-split > .table-ops-columns-btn {
+    min-width: 108px;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding-inline: 13px;
+    font-size: 11.5px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-more {
+    width: 34px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar {
+    min-height: 50px;
+    padding-inline: 4px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tabs {
+    gap: 6px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab {
+    min-height: 49px;
+    gap: 7px;
+    padding-inline: 10px;
+    font-size: 11.5px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab small {
+    min-width: 18px;
+    height: 17px;
+    padding-inline: 5px;
+    font-size: 8.5px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar-actions {
+    gap: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn {
+    min-width: 122px;
+    gap: 7px;
+    padding-inline: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    width: 36px;
+  }
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view {
+  --lead-toolbar-border: #353535;
+  --lead-toolbar-border-strong: #454545;
+  --lead-toolbar-text: #f2f2f2;
+  --lead-toolbar-muted: #a9a9a9;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .crm-lead-total-badge {
+  border-color: #404040;
+  color: #d5d5d5;
+  background: #2a2a2a;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-viewbar {
+  background: transparent;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-view-tab {
+  color: #c4c4c4;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-view-tab:hover,
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-view-tab.is-active {
+  color: #8db8ff;
+}

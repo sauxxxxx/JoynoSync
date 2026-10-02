@@ -80,15 +80,36 @@ async function callNotificationsRpc(functionName, args = {}) {
 }
 
 export async function fetchSupabaseNotificationsSnapshot(workspaceId, options = {}) {
-  const data = await callNotificationsRpc("get_notifications_snapshot", {
+  const data = await callNotificationsRpc("get_notifications_page", {
     p_workspace_id: normalizeText(workspaceId),
-    p_limit: Math.max(1, Math.min(50, normalizeNumber(options.limit, 12)))
+    p_filter: "unread",
+    p_limit: Math.max(1, Math.min(50, normalizeNumber(options.limit, 12))),
+    p_offset: 0
   });
   const snapshot = normalizeObject(data);
   return {
     enabled: normalizeBoolean(snapshot.enabled, true),
     unreadCount: Math.max(0, normalizeNumber(snapshot.unreadCount, 0)),
     notifications: normalizeArray(snapshot.notifications).map(mapNotification)
+  };
+}
+
+export async function fetchSupabaseNotificationsPage(workspaceId, options = {}) {
+  const data = await callNotificationsRpc("get_notifications_page", {
+    p_workspace_id: normalizeText(workspaceId),
+    p_filter: ["unread", "read"].includes(normalizeText(options.filter).toLowerCase())
+      ? normalizeText(options.filter).toLowerCase()
+      : "all",
+    p_limit: Math.max(1, Math.min(50, normalizeNumber(options.limit, 24))),
+    p_offset: Math.max(0, normalizeNumber(options.offset, 0))
+  });
+  const page = normalizeObject(data);
+  return {
+    enabled: normalizeBoolean(page.enabled, true),
+    totalCount: Math.max(0, normalizeNumber(page.totalCount, 0)),
+    unreadCount: Math.max(0, normalizeNumber(page.unreadCount, 0)),
+    hasMore: normalizeBoolean(page.hasMore, false),
+    notifications: normalizeArray(page.notifications).map(mapNotification)
   };
 }
 
@@ -104,6 +125,13 @@ export async function markSupabaseNotificationsRead(workspaceId, notificationIds
   return Math.max(0, normalizeNumber(data, 0));
 }
 
+export async function markAllSupabaseNotificationsRead(workspaceId) {
+  const data = await callNotificationsRpc("mark_all_notifications_read", {
+    p_workspace_id: normalizeText(workspaceId)
+  });
+  return Math.max(0, normalizeNumber(data, 0));
+}
+
 export async function markSupabaseEntityNotificationsRead(workspaceId, entityType, entityId) {
   const data = await callNotificationsRpc("mark_entity_notifications_read", {
     p_workspace_id: normalizeText(workspaceId),
@@ -115,6 +143,14 @@ export async function markSupabaseEntityNotificationsRead(workspaceId, entityTyp
 
 export async function dismissSupabaseNotification(workspaceId, notificationId) {
   const data = await callNotificationsRpc("dismiss_notification", {
+    p_workspace_id: normalizeText(workspaceId),
+    p_notification_id: normalizeText(notificationId)
+  });
+  return Boolean(data);
+}
+
+export async function restoreSupabaseNotification(workspaceId, notificationId) {
+  const data = await callNotificationsRpc("restore_notification", {
     p_workspace_id: normalizeText(workspaceId),
     p_notification_id: normalizeText(notificationId)
   });

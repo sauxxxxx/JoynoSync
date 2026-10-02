@@ -1,3 +1,5 @@
+import { createMessengerWorkflow } from "./messenger-workflow.js";
+
 export const MESSENGER_ROUTE_ID = "comms-messenger";
 
 const MESSENGER_TEMPLATE_TEXT = "Quick update: on track. Next checkpoint tomorrow.";
@@ -70,14 +72,36 @@ export function createMessengerController(options = {}) {
     deleteSupabaseMessengerMessage,
     editSupabaseMessengerMessage,
     sendSupabaseMessengerMessage,
+    setSupabaseMessengerMessagePinned,
+    updateSupabaseGroupConversation,
+    leaveSupabaseGroupConversation,
     appendInternalMessage,
     setSupabaseTyping,
     isSupabaseMessengerEnabled,
     openConfirmModal,
+    closeModal,
+    showToast,
     showFormFeedback,
     deleteById,
     saveUiPrefs
   } = options;
+
+  const messengerWorkflow = createMessengerWorkflow({
+    state,
+    conversationKey,
+    parseConversationOption,
+    getConversationEntity,
+    getSelectedConversationRef,
+    refreshSupabaseMessengerData,
+    setSupabaseMessengerMessagePinned,
+    updateSupabaseGroupConversation,
+    leaveSupabaseGroupConversation,
+    sendSupabaseMessengerMessage,
+    openConfirmModal,
+    closeModal,
+    showToast,
+    renderRoute
+  });
 
   function isInternalMode() {
     return String(state?.commsMode || "").trim() === "internal";
@@ -321,6 +345,9 @@ export function createMessengerController(options = {}) {
   }
 
   function canHandleAction(action) {
+    if (messengerWorkflow.canHandleAction(action)) {
+      return true;
+    }
     if (!MESSENGER_ACTIONS.has(String(action || ""))) {
       return false;
     }
@@ -403,6 +430,9 @@ export function createMessengerController(options = {}) {
     const normalizedAction = String(action || "").trim();
     if (!canHandleAction(normalizedAction)) {
       return false;
+    }
+    if (messengerWorkflow.canHandleAction(normalizedAction)) {
+      return messengerWorkflow.handleAction(normalizedAction, id, sourceEl);
     }
 
     if (normalizedAction === "comm-select-conversation") {
@@ -560,7 +590,7 @@ export function createMessengerController(options = {}) {
           });
           renderRoute();
         } catch (error) {
-          window.alert(`Messenger update failed: ${String(error?.message || error || "Unknown error")}`);
+          showToast?.(`Messenger update failed: ${String(error?.message || error || "Unknown error")}`, { tone: "danger" });
         }
         return true;
       }
@@ -644,7 +674,7 @@ export function createMessengerController(options = {}) {
             removeConversationLocally(normalizedTargetType, normalizedTargetId);
             persistDataAndRefresh();
           } catch (error) {
-            window.alert(`Delete conversation failed: ${String(error?.message || error || "Unknown error")}`);
+            showToast?.(`Delete conversation failed: ${String(error?.message || error || "Unknown error")}`, { tone: "danger" });
           }
         }
       });
@@ -724,7 +754,7 @@ export function createMessengerController(options = {}) {
         });
         renderRoute();
       } catch (error) {
-        window.alert(`Reaction update failed: ${String(error?.message || error || "Unknown error")}`);
+        showToast?.(`Reaction update failed: ${String(error?.message || error || "Unknown error")}`, { tone: "danger" });
       }
       return true;
     }
@@ -740,7 +770,7 @@ export function createMessengerController(options = {}) {
           window.open(signedUrl, "_blank", "noopener,noreferrer");
         }
       } catch (error) {
-        window.alert(`Attachment open failed: ${String(error?.message || error || "Unknown error")}`);
+        showToast?.(`Attachment open failed: ${String(error?.message || error || "Unknown error")}`, { tone: "danger" });
       }
       return true;
     }
@@ -761,7 +791,7 @@ export function createMessengerController(options = {}) {
           });
           renderRoute();
         } catch (error) {
-          window.alert(`Delete message failed: ${String(error?.message || error || "Unknown error")}`);
+          showToast?.(`Delete message failed: ${String(error?.message || error || "Unknown error")}`, { tone: "danger" });
         }
         return true;
       }
@@ -850,8 +880,29 @@ export function createMessengerController(options = {}) {
       } catch (error) {
         state.messengerSending = false;
         setComposerSendingState(form, false, { isEditingMessage: Boolean(editingMessageId) });
-        restoreComposerDraft(form, draftConversationKey, pendingDraftText);
-        showFormFeedback(form, `Messenger send failed: ${String(error?.message || error || "Unknown error")}`);
+        if (editingMessageId) {
+          restoreComposerDraft(form, draftConversationKey, pendingDraftText);
+          showFormFeedback(form, `Message update failed: ${String(error?.message || error || "Unknown error")}`);
+        } else {
+          messengerWorkflow.recordFailedSend({
+            id: createId("failed-message"),
+            conversationKey: draftConversationKey,
+            conversationId: selectedRef.targetId,
+            targetType: selectedRef.targetType,
+            workspaceId,
+            body: pendingDraftText,
+            files: attachmentFiles,
+            error: String(error?.message || error || "Message could not be sent.")
+          });
+          clearComposerDraft(draftConversationKey);
+          const attachInput = form.querySelector("#commAttachInput");
+          if (attachInput) {
+            attachInput.value = "";
+          }
+          syncAttachmentUi(form);
+          showToast?.("Message was not sent. Retry it from the thread.", { tone: "danger" });
+          renderRoute();
+        }
         return true;
       }
       stopTyping(selectedRef.targetId);

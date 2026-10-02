@@ -1,0 +1,327 @@
+/* Native 1672x943 desktop treatment for the approved Admin Leads reference. */
+@media (min-width: 1600px) and (min-height: 850px) {
+  .app-shell.no-waiting:has(.crm-leads-list.is-admin-view),
+  .app-shell.is-waiting-collapsed:has(.crm-leads-list.is-admin-view) {
+    grid-template-columns: 235px minmax(0, 1fr);
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .sidebar {
+    padding: 14px 14px 98px;
+    gap: 8px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .brand-head {
+    min-height: 42px;
+    margin-bottom: 8px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .brand-mark {
+    width: 34px;
+    height: 34px;
+    padding: 3px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .brand-title {
+    font-size: 16px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .panel-toggle-btn-sidebar {
+    top: 17px;
+    right: 14px;
+    bottom: auto;
+    left: auto;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .panel-toggle-btn-sidebar::after {
+    display: none;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .sidebar-section-toggle {
+    min-height: 19px;
+    padding: 1px 7px 0;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .sidebar-section-title {
+    font-size: 10px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .nav-item {
+    min-height: 36px;
+    padding: 6px 7px;
+    gap: 8px;
+    border-radius: 7px;
+    font-size: 13px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .nav-item-icon {
+    width: 21px;
+    min-width: 21px;
+    height: 21px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .nav-item-icon i {
+    font-size: 14px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .sidebar-user-card {
+    position: absolute;
+    right: 14px;
+    bottom: 16px;
+    left: 14px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 16px;
+    min-height: 80px;
+    align-items: center;
+    gap: 9px;
+    padding: 10px;
+    border: 1px solid #e0e7f0;
+    border-radius: 9px;
+    color: #12213a;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .sidebar-user-avatar {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 50%;
+    color: #19294a;
+    background: #eef1ff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .sidebar-user-copy {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+  }
+
+  .sidebar-user-copy strong,
+  .sidebar-user-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebar-user-copy strong {
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .sidebar-user-copy small,
+  .sidebar-user-presence {
+    font-size: 10px;
+  }
+
+  .sidebar-user-presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #12924f;
+  }
+
+  .sidebar-user-presence i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #18b96b;
+  }
+
+  .sidebar-user-chevron {
+    font-size: 11px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .topbar {
+    height: 56px;
+    min-height: 56px;
+    padding: 7px 26px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .topbar-search-wrap {
+    flex-basis: 430px;
+    width: min(430px, 100%);
+    max-width: 430px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .topbar-search-shell {
+    height: 38px;
+    min-height: 38px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .view-content {
+    padding: 18px 26px 18px;
+  }
+
+  .crm-leads-list.is-admin-view {
+    min-height: calc(100dvh - 106px);
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-shell {
+    padding: 5px 4px 12px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-main {
+    min-height: 54px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-row {
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-row .block-title {
+    font-size: 22px;
+    font-weight: 650;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-total-badge {
+    min-width: 0;
+    height: 23px;
+    padding: 0 9px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-actions {
+    gap: 18px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action,
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more,
+  .crm-leads-list.is-admin-view .lead-admin-primary-more,
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn,
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action {
+    gap: 8px;
+    padding-inline: 20px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-filter-btn {
+    padding-inline: 17px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-actions > .crm-lead-admin-action[data-action="lead-import-open"] {
+    padding-inline: 18px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-ownership-manager"] {
+    padding-inline: 17px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-action > .crm-lead-admin-action {
+    padding-inline: 9px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action i {
+    font-size: 15px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more {
+    width: 38px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-split > .table-ops-columns-btn {
+    min-width: 126px;
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    padding-inline: 17px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-more {
+    width: 40px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar {
+    min-height: 60px;
+    padding-inline: 12px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tabs {
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab {
+    min-height: 58px;
+    gap: 9px;
+    padding-inline: 12px;
+    font-size: 11.5px;
+    font-weight: 550;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab small {
+    min-width: 24px;
+    height: 20px;
+    padding-inline: 7px;
+    font-size: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar-actions {
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn {
+    min-width: 142px;
+    gap: 9px;
+    padding-inline: 13px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    width: 42px;
+  }
+
+  .crm-leads-list.is-admin-view > .data-table-shell {
+    flex: 0 0 610px;
+    min-height: 610px;
+    max-height: 610px;
+  }
+
+  .crm-leads-list.is-admin-view .data-table td {
+    height: 62px;
+  }
+
+  .crm-leads-list.is-admin-view .table-col-check { width: 42px; }
+  .crm-leads-list.is-admin-view .crm-col-lead { width: 200px; }
+  .crm-leads-list.is-admin-view .crm-col-progress { width: 108px; }
+  .crm-leads-list.is-admin-view .crm-col-phone { width: 153px; }
+  .crm-leads-list.is-admin-view .crm-col-timezone { width: 124px; }
+  .crm-leads-list.is-admin-view .crm-col-interest { width: 182px; }
+  .crm-leads-list.is-admin-view .crm-col-status { width: 119px; }
+  .crm-leads-list.is-admin-view .crm-col-owner { width: 144px; }
+  .crm-leads-list.is-admin-view .crm-col-last-touch { width: 137px; }
+  .crm-leads-list.is-admin-view .crm-col-next-followup { width: 143px; }
+  .crm-leads-list.is-admin-view .crm-col-admin-actions { width: 44px; }
+
+  .crm-leads-list.is-admin-view .lead-admin-table-footer {
+    margin-top: 4px;
+  }
+
+  :root[data-theme="dark"] .sidebar-user-card {
+    border-color: #3b3b3b;
+    color: #f2f2f2;
+    background: #242424;
+  }
+
+  :root[data-theme="dark"] .sidebar-user-avatar {
+    color: #e7edff;
+    background: #30374a;
+  }
+}

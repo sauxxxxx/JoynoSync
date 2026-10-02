@@ -1,0 +1,219 @@
+/* Compact, Notion-style controls shared by lead import review and confirmation. */
+.modal-card.is-lead-import .lead-import-assignment-toolbar {
+  grid-template-columns: minmax(220px, 320px) auto;
+  justify-content: space-between;
+}
+
+.modal-card.is-lead-import .lead-import-assignee-search {
+  min-height: 30px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #787c82;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.modal-card.is-lead-import .lead-import-assignee-search:hover {
+  background: #f5f5f4;
+}
+
+.modal-card.is-lead-import .lead-import-assignee-search:focus-within {
+  background: #f5f5f4;
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.18);
+}
+
+.modal-card.is-lead-import .lead-import-assignee-search input {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.modal-card.is-lead-import .lead-import-assignment-actions button {
+  min-height: 28px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-import .lead-import-footer-action[data-action="close-modal"],
+.modal-card.is-lead-import .lead-import-footer-action[data-action="lead-import-back-review"] {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+  color: #65686c;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-import .lead-import-footer-action[data-action="close-modal"]:hover,
+.modal-card.is-lead-import .lead-import-footer-action[data-action="lead-import-back-review"]:hover {
+  background: #f1f1ef;
+  color: #202124;
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .lead-import-map-control,
+.modal-card.is-lead-import .lead-import-notion-setting-row .lead-import-map-control {
+  min-width: 0;
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger,
+.modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger {
+  min-height: 30px;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger:hover,
+.modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger:hover,
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger.is-open,
+.modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger.is-open {
+  background: #f1f1ef;
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger:focus-visible,
+.modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.18);
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger > span,
+.modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger > span {
+  color: #202124;
+  font-size: 10.5px;
+  font-weight: 450;
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger.is-unmapped > span {
+  color: #8a8e94;
+}
+
+.modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger > i,
+.modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger > i {
+  color: #9a9da1;
+  font-size: 9px;
+}
+
+.modal-card.is-lead-import .lead-import-map-popover {
+  top: calc(100% + 4px);
+  right: 0;
+  left: auto;
+  width: min(300px, calc(100vw - 64px));
+  max-height: 280px;
+  overflow: hidden;
+  padding: 4px;
+  border: 1px solid rgba(15, 15, 15, 0.12);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(15, 15, 15, 0.12), 0 1px 3px rgba(15, 15, 15, 0.08);
+}
+
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-list {
+  max-height: 270px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-option {
+  position: relative;
+  display: grid;
+  min-height: 38px;
+  gap: 1px;
+  padding: 6px 30px 6px 8px;
+  border-radius: 4px;
+  background: transparent;
+  color: #202124;
+  font-size: 10.5px;
+  font-weight: 450;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-option:hover,
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-option:focus-visible {
+  outline: 0;
+  background: #f1f1ef;
+}
+
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-option.is-selected {
+  background: #f5f5f4;
+  color: #202124;
+}
+
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-option.is-selected::after {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  color: #2383e2;
+  content: "\2713";
+  font-size: 12px;
+  font-weight: 700;
+  transform: translateY(-50%);
+}
+
+.modal-card.is-lead-import .lead-import-map-popover .contact-picker-option small {
+  margin: 0;
+  color: #8a8e94;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+@media (max-width: 680px) {
+  .modal-card.is-lead-import .lead-import-assignment-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-card.is-lead-import .lead-import-assignee-search {
+    width: 100%;
+    max-width: none;
+  }
+
+  .modal-card.is-lead-import .lead-import-map-popover {
+    right: auto;
+    left: 0;
+    width: min(300px, calc(100vw - 48px));
+  }
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignee-search,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-footer-action[data-action="close-modal"],
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-footer-action[data-action="lead-import-back-review"] {
+  border: 0;
+  background: transparent;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignee-search:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignee-search:focus-within,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger.is-open,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-footer-action[data-action="close-modal"]:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-footer-action[data-action="lead-import-back-review"]:hover {
+  background: #2b2b2b;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-notion-map-row .contact-picker-trigger > span,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-notion-setting-row .contact-picker-trigger > span {
+  color: #ededed;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-map-popover {
+  border-color: #424242;
+  background: #252525;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-map-popover .contact-picker-option {
+  color: #ededed;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-map-popover .contact-picker-option:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-map-popover .contact-picker-option:focus-visible,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-map-popover .contact-picker-option.is-selected {
+  background: #333;
+}

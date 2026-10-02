@@ -1,0 +1,212 @@
+#modalOverlay:has(.modal-card.is-profile-avatar) {
+  background: rgba(15, 15, 15, 0.38);
+}
+
+.modal-card.is-profile-avatar {
+  width: min(420px, 100%);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--ui-radius-overlay);
+  background: var(--ui-color-surface);
+  box-shadow: var(--ui-shadow-overlay);
+}
+
+.modal-card.is-profile-avatar .modal-head {
+  min-height: 52px;
+  margin: 0;
+  padding: 12px 12px 10px 16px;
+  border-bottom: 1px solid var(--ui-color-border);
+}
+
+.modal-card.is-profile-avatar .modal-head h3 {
+  color: var(--ui-color-text);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.modal-card.is-profile-avatar .icon-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-color-text-secondary);
+  background: transparent;
+  font-size: 13px;
+}
+
+.modal-card.is-profile-avatar .icon-btn:hover {
+  color: var(--ui-color-text);
+  background: var(--ui-color-surface-hover);
+}
+
+.modal-card.is-profile-avatar .icon-btn:focus-visible,
+.profile-avatar-modal-upload:focus-within,
+.profile-avatar-modal-secondary:focus-visible,
+.profile-avatar-modal-cancel:focus-visible,
+.profile-avatar-modal-save:focus-visible {
+  outline: 2px solid #787774;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.modal-card.is-profile-avatar .modal-form {
+  gap: 0;
+}
+
+.profile-avatar-modal {
+  padding: 20px 16px;
+}
+
+.profile-avatar-modal-head {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.profile-avatar-modal-preview {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--ui-color-border);
+  border-radius: 50%;
+  background: var(--ui-color-surface-subtle);
+}
+
+.profile-avatar-modal-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-avatar-modal-copy > p:first-child {
+  margin: 0;
+  color: var(--ui-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.profile-avatar-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.profile-avatar-modal-upload,
+.profile-avatar-modal-secondary,
+.profile-avatar-modal-cancel,
+.profile-avatar-modal-save {
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--ui-radius-control);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background-color var(--ui-motion-fast) var(--ui-ease-standard),
+    border-color var(--ui-motion-fast) var(--ui-ease-standard),
+    color var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.profile-avatar-modal-upload {
+  position: relative;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--ui-color-text);
+  background: var(--ui-color-surface);
+  overflow: hidden;
+}
+
+.profile-avatar-modal-upload:hover,
+.profile-avatar-modal-cancel:hover {
+  background: var(--ui-color-surface-hover);
+}
+
+.profile-avatar-modal-upload input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.profile-avatar-modal-secondary {
+  border-color: transparent;
+  color: var(--ui-color-text-secondary);
+  background: transparent;
+}
+
+.profile-avatar-modal-secondary:hover {
+  color: var(--ui-color-danger);
+  background: var(--ui-color-danger-soft);
+}
+
+.profile-avatar-modal-status {
+  min-height: 17px;
+  margin: 0;
+  color: var(--ui-color-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.modal-card.is-profile-avatar .form-feedback {
+  margin: 12px 16px 0;
+}
+
+.profile-avatar-modal-footer {
+  margin: 0;
+  padding: 10px 12px;
+  border-top: 1px solid var(--ui-color-border);
+  background: var(--ui-color-surface-subtle);
+}
+
+.profile-avatar-modal-cancel {
+  color: var(--ui-color-text-secondary);
+  background: transparent;
+}
+
+.profile-avatar-modal-save {
+  border-color: #2f3437;
+  color: #ffffff;
+  background: #2f3437;
+}
+
+.profile-avatar-modal-save:hover {
+  border-color: #202124;
+  background: #202124;
+}
+
+:root[data-theme="dark"] #modalOverlay:has(.modal-card.is-profile-avatar) {
+  background: rgba(0, 0, 0, 0.62);
+}
+
+:root[data-theme="dark"] .profile-avatar-modal-save {
+  border-color: #f1f1ef;
+  color: #202124;
+  background: #f1f1ef;
+}
+
+:root[data-theme="dark"] .profile-avatar-modal-save:hover {
+  border-color: #ffffff;
+  background: #ffffff;
+}
+
+@media (max-width: 620px) {
+  .profile-avatar-modal-head {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .profile-avatar-modal-preview {
+    width: 64px;
+    height: 64px;
+  }
+}

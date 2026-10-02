@@ -1,4 +1,5 @@
 import { escapeHtml } from "../utils/text.js";
+import { renderAttendanceSkeleton } from "../modules/attendance-skeleton.js";
 import {
   defaultAttendancePolicy,
   formatAttendanceDuration,
@@ -82,7 +83,12 @@ function attendanceFormatMetricClock(totalSeconds) {
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
   const seconds = safe % 60;
-  return `${hours} Hr ${String(minutes).padStart(2, "0")} Mins ${String(seconds).padStart(2, "0")} Secs`;
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days}d ${String(remainingHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 function attendanceFormatTodayClockTime(value, timeZone = "") {
@@ -601,10 +607,13 @@ export function renderAttendanceUpgrade(data, context) {
     ? String(context.attendanceTeamFilter || "all")
     : "all";
   const allMembers = Array.isArray(data.teamMembers) ? data.teamMembers : [];
+  const activeMembers = allMembers.filter(
+    (member) => String(member?.status || "").trim().toLowerCase() === "active"
+  );
   const teamSearch = String(context.attendanceTeamSearch || "").trim();
   const teamSearchLower = teamSearch.toLowerCase();
   const teamDepartmentValue = String(context.attendanceTeamDepartment || "all").trim() || "all";
-  const departmentOptions = [...new Set(allMembers.map((member) => attendanceMemberDepartment(member)).filter(Boolean))].sort((left, right) =>
+  const departmentOptions = [...new Set(activeMembers.map((member) => attendanceMemberDepartment(member)).filter(Boolean))].sort((left, right) =>
     left.localeCompare(right)
   );
   const currentMember =
@@ -683,12 +692,12 @@ export function renderAttendanceUpgrade(data, context) {
       return Date.parse(String(left.startAt || "")) - Date.parse(String(right.startAt || ""));
     });
   const currentTimeLabel = attendanceFormatTodayClockTime(nowIso, resolvedTimeZone);
-  const clockSecond = nowDate.getSeconds();
-  const clockHour = nowParts?.hour ?? nowDate.getHours();
-  const clockMinute = nowParts?.minute ?? nowDate.getMinutes();
-  const clockHourDeg = ((clockHour % 12) + clockMinute / 60) * 30;
-  const clockMinuteDeg = (clockMinute + clockSecond / 60) * 6;
-  const clockSecondDeg = clockSecond * 6;
+  const currentDateLabel = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    timeZone: resolvedTimeZone || undefined
+  }).format(nowDate);
   const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const workDays = (Array.isArray(policy.workDays) ? policy.workDays : [1, 2, 3, 4, 5])
     .map((day) => Number(day))
@@ -699,6 +708,7 @@ export function renderAttendanceUpgrade(data, context) {
     .map((day) => dayLabels[day] || "")
     .filter(Boolean)
     .join(", ");
+  const compactWorkDaysLabel = workDays.join(",") === "1,2,3,4,5" ? "Mon–Fri" : workDaysLabel;
   const clockOutButtonLabel = currentStatusRaw === "on-break" ? "End Break + Clock Out" : "Clock Out";
   const hasShiftRecord = Boolean(summaryRecord);
   const isClockedOutState = currentStatusRaw === "off" && Boolean(summaryRecord?.clockOutAt);
@@ -708,7 +718,7 @@ export function renderAttendanceUpgrade(data, context) {
       : currentStatusRaw === "on-break"
         ? `${currentOpenBreakType?.label || "Break"} ${formatAttendanceDuration(currentOpenBreakMinutes)}`
         : `${formatAttendanceDuration(totalWorked)} worked`;
-  const todayShiftLabel = `${policy.shiftStart} - ${policy.shiftEnd}`;
+  const todayShiftLabel = `${policy.shiftStart}–${policy.shiftEnd}`;
   const todayPrimaryActionIcon = attendanceActionIcon(currentPrimaryAction.id);
   const todayHeadline =
     !hasShiftRecord
@@ -750,6 +760,9 @@ export function renderAttendanceUpgrade(data, context) {
 
   const matchesManagerMember = (member) => {
     if (!member) {
+      return false;
+    }
+    if (String(member.status || "").trim().toLowerCase() !== "active") {
       return false;
     }
     const memberValue = String(member.id || member.name || "").trim();
@@ -795,53 +808,33 @@ export function renderAttendanceUpgrade(data, context) {
       const usageRatio = allowedMinutes > 0 ? Math.min(1, usedMinutes / allowedMinutes) : 0;
       const toneClass = attendanceBreakTone(index);
       const iconClass = attendanceBreakIcon(index);
+      const usageLabel = overMinutes > 0 ? "Over limit" : usage.count > 0 ? `Used ${usage.count}/${entry.maxPerDay}` : "Not used";
       return `
-        <div class="attendance-break-row ${toneClass}">
-          <div class="attendance-break-row-main">
-            <div class="attendance-break-row-headline">
-              <div class="attendance-break-row-title">
-                <span class="attendance-break-row-icon ${toneClass}">
-                  <i class="${iconClass}" aria-hidden="true"></i>
-                </span>
-                <div class="attendance-break-row-copy">
-                  <strong>${escapeHtml(entry.label)}</strong>
-                  <p>${escapeHtml(`${entry.durationMinutes} min | ${entry.paid ? "Paid" : "Unpaid"}`)}</p>
-                </div>
-              </div>
-              <div class="attendance-break-row-meta">
-                <span class="attendance-break-chip">${escapeHtml(`${entry.windowStart}-${entry.windowEnd}`)}</span>
-                <span class="attendance-break-chip">${escapeHtml(`Used ${usage.count}/${entry.maxPerDay}`)}</span>
-                <span class="attendance-break-chip ${overMinutes > 0 ? "is-over" : ""}">${escapeHtml(
-                  overMinutes > 0 ? `Over ${formatAttendanceDuration(overMinutes)}` : formatAttendanceDuration(usedMinutes)
-                )}</span>
-              </div>
-            </div>
-            <div class="attendance-break-row-progress">
-              <span style="width:${usageRatio * 100}%"></span>
-            </div>
-          </div>
+        <div class="attendance-break-row ${toneClass} ${usage.count > 0 ? "is-used" : "is-unused"}" style="--attendance-break-progress:${usageRatio * 100}%">
+          <span class="attendance-break-row-icon ${toneClass}">
+            <i class="${iconClass}" aria-hidden="true"></i>
+          </span>
+          <strong class="attendance-break-row-name">${escapeHtml(entry.label)}</strong>
+          <span class="attendance-break-row-window">${escapeHtml(`${entry.windowStart}–${entry.windowEnd}`)}</span>
+          <span class="attendance-break-row-allowance">${escapeHtml(`${entry.durationMinutes} min · ${entry.paid ? "Paid" : "Unpaid"}`)}</span>
+          <span class="attendance-break-row-status ${overMinutes > 0 ? "is-over" : ""}"><i aria-hidden="true"></i>${escapeHtml(usageLabel)}</span>
+          <span class="attendance-break-row-usage">${escapeHtml(overMinutes > 0 ? `+${formatAttendanceDuration(overMinutes)}` : `${Math.round(usedMinutes)}m`)}</span>
         </div>
       `;
     })
     .join("");
 
   const breakPlanRows = breakTypes
-    .map((entry) => {
-      const usage = breakUsageSummary.get(entry.id) || { count: 0, minutes: 0 };
-      const remaining = Math.max(0, Number(entry.maxPerDay || 1) - Number(usage.count || 0));
-      const inWindow = isAttendanceWithinWindow(nowMinutes, entry.windowStart, entry.windowEnd);
+    .map((entry, index) => {
+      const iconClass = ["bi-cup-hot", "bi-cup-straw", "bi-moon-stars"][index] || "bi-clock";
       return `
-        <div class="attendance-break-row">
-          <div>
-            <strong>${escapeHtml(entry.label)}</strong>
-            <p>${escapeHtml(`${entry.durationMinutes} min | ${entry.paid ? "Paid" : "Unpaid"}`)}</p>
-          </div>
-          <div class="attendance-break-row-meta">
-            <span class="attendance-break-chip">${escapeHtml(`${entry.windowStart}-${entry.windowEnd}`)}</span>
-            <span class="attendance-break-chip">${escapeHtml(`Used ${usage.count}/${entry.maxPerDay}`)}</span>
-            <span class="attendance-break-chip ${inWindow ? "is-open" : ""}">${inWindow ? "Window Open" : "Window Closed"}</span>
-            <small>${remaining > 0 ? `${remaining} left` : "No remaining"}</small>
-          </div>
+        <div class="attendance-policy-break-row">
+          <span class="attendance-policy-property-icon"><i class="bi ${iconClass}" aria-hidden="true"></i></span>
+          <strong>${escapeHtml(entry.label)}</strong>
+          <span>${escapeHtml(`${entry.windowStart}-${entry.windowEnd}`)}</span>
+          <span>${escapeHtml(`${entry.durationMinutes} min`)}</span>
+          <span>${entry.paid ? "Paid" : "Unpaid"}</span>
+          <span>${escapeHtml(compactWorkDaysLabel || "Mon-Fri")}</span>
         </div>
       `;
     })
@@ -1276,6 +1269,10 @@ export function renderAttendanceUpgrade(data, context) {
         { label: "Late", value: managerSummary.late, detail: "Late or half-day starts" },
         { label: "On Leave", value: managerSummary.onLeave, detail: "Approved leave coverage" }
       ];
+  const managerActiveFilterCount =
+    Number(teamFilter !== "all") +
+    Number(historyMemberValue !== "all") +
+    Number(teamDepartmentValue !== "all");
   const renderAttendanceManagerHistoryRows = (rows) =>
     rows.length
       ? rows
@@ -1338,11 +1335,22 @@ export function renderAttendanceUpgrade(data, context) {
       }))
     .slice()
     .sort((left, right) => Date.parse(String(right.createdAt || "")) - Date.parse(String(left.createdAt || "")));
+  const requestCounts = visibleRequests.reduce(
+    (counts, entry) => {
+      const status = String(entry.status || "Pending").trim().toLowerCase();
+      if (Object.hasOwn(counts, status)) counts[status] += 1;
+      return counts;
+    },
+    { pending: 0, approved: 0, rejected: 0 }
+  );
+  const requestRowIndexes = { pending: 0, approved: 0, rejected: 0 };
+  const requestPageSize = 8;
 
   const availableTabs = managerMode ? ["today", "team", "requests", "policy"] : ["today", "requests", "policy"];
   const requestedTab = String(context.attendanceTab || "today").toLowerCase();
   const activeTab =
     requestedTab === "history" && managerMode ? "team" : availableTabs.includes(requestedTab) ? requestedTab : "today";
+  const attendanceLoading = Boolean(context.attendanceSnapshotLoading);
 
   return {
     title: "Attendance",
@@ -1367,75 +1375,49 @@ export function renderAttendanceUpgrade(data, context) {
         <div class="attendance-v2-panels">
           ${
             activeTab === "today"
-              ? `
-                <section class="attendance-today-workspace">
-                  <div class="attendance-today-topgrid">
-                    <section class="attendance-panel attendance-today-dashboard-card is-${attendanceStatusClass(currentStatus)}">
-                      <div class="attendance-today-dashboard-shell">
-                        <div class="attendance-today-clock-block">
-                        <div
-                          class="attendance-today-clock-face"
-                          data-attendance-today-clock
-                          style="--attendance-clock-hour:${clockHourDeg}deg; --attendance-clock-minute:${clockMinuteDeg}deg; --attendance-clock-second:${clockSecondDeg}deg;"
-                          aria-hidden="true"
-                        >
-                            <span class="attendance-today-clock-hand is-hour"></span>
-                            <span class="attendance-today-clock-hand is-minute"></span>
-                            <span class="attendance-today-clock-hand is-second"></span>
-                            <span class="attendance-today-clock-center"></span>
-                          </div>
-                          <strong class="attendance-today-clock-digital" data-attendance-today-time>${escapeHtml(currentTimeLabel)}</strong>
-                        </div>
-                        <div class="attendance-today-dashboard-main">
-                          <div class="attendance-today-dashboard-grid">
-                            <article class="attendance-today-mini-card">
-                              <span>Working Hours</span>
-                              <strong data-attendance-today-worked>${escapeHtml(attendanceFormatMetricClock(totalWorkedSeconds))}</strong>
-                            </article>
-                            <article class="attendance-today-mini-card">
-                              <span>Break Hours</span>
-                              <strong data-attendance-today-break>${escapeHtml(attendanceFormatMetricClock(totalBreakSeconds))}</strong>
-                            </article>
-                            <article class="attendance-today-shift-card">
-                              <i class="bi bi-moon-stars" aria-hidden="true"></i>
-                              <div>
-                                <strong>${escapeHtml(todayHeroLabel)}</strong>
-                                <p>${escapeHtml(todayHeadline)}</p>
-                                <small>${escapeHtml(todayStatusCardNote)}</small>
-                              </div>
-                            </article>
-                          </div>
-                          <div class="attendance-today-action-row">
-                            <button class="attendance-today-cta" type="button" data-action="attendance-primary" data-id="${currentPrimaryAction.id}">
-                              <i class="${todayPrimaryActionIcon}" aria-hidden="true"></i>
-                              <span>${escapeHtml(currentPrimaryAction.label)}</span>
-                            </button>
-                          </div>
-                          <div class="attendance-today-subactions">
-                            <button type="button" class="mini-btn" data-action="attendance-clock-out" ${
-                              currentStatusRaw === "working" || currentStatusRaw === "on-break" ? "" : "disabled"
-                            }>${escapeHtml(clockOutButtonLabel)}</button>
-                            <button type="button" class="mini-btn" data-action="attendance-request-create">Request Fix</button>
-                          </div>
+              ? attendanceLoading
+                ? renderAttendanceSkeleton("today")
+                : `
+                <section class="attendance-today-workspace attendance-timeline-notion">
+                  <section class="attendance-today-hero is-${attendanceStatusClass(currentStatus)}">
+                    <div class="attendance-today-hero-main">
+                      <div class="attendance-today-time-block">
+                        <strong data-attendance-today-time>${escapeHtml(currentTimeLabel)}</strong>
+                        <span>${escapeHtml(currentDateLabel)}</span>
+                      </div>
+                      <div class="attendance-today-status-block">
+                        <strong>${escapeHtml(todayHeroLabel)}</strong>
+                        <span>${escapeHtml(`Shift ${todayShiftLabel} · ${compactWorkDaysLabel || "Mon–Fri"}`)}</span>
+                      </div>
+                      <div class="attendance-today-actions-block">
+                        <button class="attendance-today-cta" type="button" data-action="attendance-primary" data-id="${currentPrimaryAction.id}">
+                          <i class="${todayPrimaryActionIcon}" aria-hidden="true"></i>
+                          <span>${escapeHtml(currentPrimaryAction.label)}</span>
+                        </button>
+                        <div class="attendance-today-secondary-actions">
+                          <button type="button" data-action="attendance-clock-out" ${
+                            currentStatusRaw === "working" || currentStatusRaw === "on-break" ? "" : "hidden disabled"
+                          }>${escapeHtml(clockOutButtonLabel)}</button>
+                          <button type="button" data-action="attendance-request-create">Request fix</button>
                         </div>
                       </div>
-                    </section>
+                    </div>
+                    <div class="attendance-today-metrics" aria-label="Today's attendance totals">
+                      <div><i class="bi bi-stopwatch" aria-hidden="true"></i><span>Worked</span><strong data-attendance-today-worked>${escapeHtml(attendanceFormatMetricClock(totalWorkedSeconds))}</strong></div>
+                      <div><i class="bi bi-cup-hot" aria-hidden="true"></i><span>Break</span><strong data-attendance-today-break>${escapeHtml(attendanceFormatMetricClock(totalBreakSeconds))}</strong></div>
+                    </div>
+                  </section>
 
-                    <section class="attendance-panel attendance-today-break-card">
-                      <header class="attendance-panel-head">
-                        <p class="attendance-card-eyebrow">Break Tracking</p>
-                      </header>
-                      <div class="attendance-break-plan">
-                        ${breakTrackingRows || "<p class='task-meta'>No break activity yet today.</p>"}
-                      </div>
-                    </section>
-                  </div>
+                  <section class="attendance-today-break-section">
+                    <h2>Break tracking</h2>
+                    <div class="attendance-break-plan">
+                      ${breakTrackingRows || "<p class='task-meta'>No breaks configured.</p>"}
+                    </div>
+                  </section>
 
-                  <section class="attendance-panel attendance-today-timeline-card">
-                    <header class="attendance-panel-head">
-                      <p class="attendance-card-eyebrow">Timeline</p>
-                    </header>
-                    <div class="data-table-shell attendance-today-timeline-shell">
+                  <section class="attendance-today-timeline-section">
+                    <h2>Timeline</h2>
+                    <div class="data-table-shell attendance-today-timeline-shell ${timelineRows.length ? "" : "is-empty"}">
                       <table class="data-table attendance-today-timeline-table">
                         <thead>
                           <tr>
@@ -1472,7 +1454,17 @@ export function renderAttendanceUpgrade(data, context) {
                                     `
                                   )
                                   .join("")
-                              : "<tr><td colspan='5' class='task-meta'>No attendance history yet.</td></tr>"
+                              : `
+                                <tr class="attendance-today-empty-row">
+                                  <td colspan="5">
+                                    <div class="attendance-today-empty-state">
+                                      <i class="bi bi-calendar2-week" aria-hidden="true"></i>
+                                      <strong>No attendance history yet</strong>
+                                      <span>Your shifts and breaks will appear here after you clock in.</span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              `
                           }
                         </tbody>
                       </table>
@@ -1484,7 +1476,9 @@ export function renderAttendanceUpgrade(data, context) {
           }
           ${
             activeTab === "team" && managerMode
-              ? `
+              ? attendanceLoading
+                ? renderAttendanceSkeleton("team")
+                : `
                 <section class="attendance-manager-shell">
                   <aside class="attendance-manager-sidebar">
                     <section class="attendance-panel attendance-manager-side-card">
@@ -1556,7 +1550,12 @@ export function renderAttendanceUpgrade(data, context) {
                         <span>Agent</span>
                         <select data-attendance-team-member>
                           <option value="all">All members</option>
-                          ${allMembers
+                          ${activeMembers
+                            .filter(
+                              (member) =>
+                                teamDepartmentValue === "all" ||
+                                attendanceMemberDepartment(member).toLowerCase() === teamDepartmentValue.toLowerCase()
+                            )
                             .map((member) => {
                               const optionValue = String(member.id || member.name || "").trim();
                               return `<option value="${escapeHtml(optionValue)}" ${
@@ -1574,7 +1573,7 @@ export function renderAttendanceUpgrade(data, context) {
                             .map(
                               (department) =>
                                 `<option value="${escapeHtml(department)}" ${
-                                  department === teamDepartmentValue ? "selected" : ""
+                                  department.toLowerCase() === teamDepartmentValue.toLowerCase() ? "selected" : ""
                                 }>${escapeHtml(department)}</option>`
                             )
                             .join("")}
@@ -1587,20 +1586,75 @@ export function renderAttendanceUpgrade(data, context) {
                     <section class="attendance-panel attendance-manager-topbar-panel">
                       <div class="attendance-manager-topbar">
                         <div class="attendance-manager-topbar-copy">
-                          <p class="attendance-card-eyebrow">Team Attendance</p>
                           <strong>${escapeHtml(managerTopbarTitle)}</strong>
                           ${managerTopbarRangeLabel ? `<span>${escapeHtml(managerTopbarRangeLabel)}</span>` : ""}
                         </div>
                         <div class="attendance-manager-topbar-actions">
+                          <div class="attendance-manager-compact-controls">
+                            <div class="attendance-manager-range-tabs" aria-label="Attendance range">
+                              <button type="button" class="mini-btn ${historyWindow.range === "today" ? "is-active" : ""}" data-action="attendance-history-range" data-id="today">Today</button>
+                              <button type="button" class="mini-btn ${historyWindow.range === "week" ? "is-active" : ""}" data-action="attendance-history-range" data-id="week">Week</button>
+                              <button type="button" class="mini-btn ${historyWindow.range === "month" ? "is-active" : ""}" data-action="attendance-history-range" data-id="month">Month</button>
+                              <button type="button" class="mini-btn" data-action="attendance-range-modal" data-id="filter">Custom</button>
+                            </div>
+                            <details class="attendance-manager-filter-menu">
+                              <summary class="mini-btn">
+                                <i class="bi bi-funnel" aria-hidden="true"></i>
+                                <span>Filters</span>
+                                ${managerActiveFilterCount ? `<span class="attendance-manager-filter-count">${managerActiveFilterCount}</span>` : ""}
+                              </summary>
+                              <div class="attendance-manager-filter-popover">
+                                <div class="attendance-manager-filter-group">
+                                  <span class="attendance-manager-filter-label">Status</span>
+                                  <div class="attendance-manager-chip-row">
+                                    <button type="button" class="mini-btn ${teamFilter === "all" ? "is-active" : ""}" data-action="attendance-team-filter" data-id="all">All</button>
+                                    <button type="button" class="mini-btn ${teamFilter === "late" ? "is-active" : ""}" data-action="attendance-team-filter" data-id="late">Late</button>
+                                    <button type="button" class="mini-btn ${teamFilter === "overbreak" ? "is-active" : ""}" data-action="attendance-team-filter" data-id="overbreak">Overbreak</button>
+                                    <button type="button" class="mini-btn ${teamFilter === "absent" ? "is-active" : ""}" data-action="attendance-team-filter" data-id="absent">Absent</button>
+                                    <button type="button" class="mini-btn ${teamFilter === "leave" ? "is-active" : ""}" data-action="attendance-team-filter" data-id="leave">On Leave</button>
+                                  </div>
+                                </div>
+                                <label class="attendance-history-field attendance-manager-select-field">
+                                  <span>Agent</span>
+                                  <select data-attendance-team-member>
+                                    <option value="all">All members</option>
+                                    ${activeMembers
+                                      .filter(
+                                        (member) =>
+                                          teamDepartmentValue === "all" ||
+                                          attendanceMemberDepartment(member).toLowerCase() === teamDepartmentValue.toLowerCase()
+                                      )
+                                      .map((member) => {
+                                        const optionValue = String(member.id || member.name || "").trim();
+                                        return `<option value="${escapeHtml(optionValue)}" ${
+                                          optionValue === historyMemberValue ? "selected" : ""
+                                        }>${escapeHtml(String(member.name || optionValue || "Member"))}</option>`;
+                                      })
+                                      .join("")}
+                                  </select>
+                                </label>
+                                <label class="attendance-history-field attendance-manager-select-field">
+                                  <span>Department</span>
+                                  <select data-attendance-team-department>
+                                    <option value="all">All departments</option>
+                                    ${departmentOptions
+                                      .map(
+                                        (department) =>
+                                          `<option value="${escapeHtml(department)}" ${
+                                            department.toLowerCase() === teamDepartmentValue.toLowerCase() ? "selected" : ""
+                                          }>${escapeHtml(department)}</option>`
+                                      )
+                                      .join("")}
+                                  </select>
+                                </label>
+                              </div>
+                            </details>
+                          </div>
                           <label class="attendance-manager-search">
                             <i class="bi bi-search" aria-hidden="true"></i>
-                            <input id="attendanceTeamSearchInput" type="search" placeholder="Search by name or email" value="${escapeHtml(teamSearch)}" />
+                            <input id="attendanceTeamSearchInput" type="search" placeholder="Search members" value="${escapeHtml(teamSearch)}" />
                           </label>
                           <div class="attendance-manager-secondary-actions">
-                            <button type="button" class="mini-btn" data-action="attendance-range-modal" data-id="filter">
-                              <i class="bi bi-calendar-range" aria-hidden="true"></i>
-                              <span>Range</span>
-                            </button>
                             <button type="button" class="mini-btn" data-action="attendance-range-modal" data-id="export">
                               <i class="bi bi-download" aria-hidden="true"></i>
                               <span>Export CSV</span>
@@ -1802,12 +1856,40 @@ export function renderAttendanceUpgrade(data, context) {
           }
           ${
             activeTab === "requests"
-              ? `
-                <section class="attendance-panel">
-                  <header class="attendance-panel-head">
-                    <p class="attendance-card-eyebrow">${managerMode ? "Adjustment Requests" : "My Requests"}</p>
+              ? attendanceLoading
+                ? renderAttendanceSkeleton("requests")
+                : `
+                <section class="attendance-panel attendance-requests-notion" data-request-filter="pending" data-request-page="1" data-request-page-size="${requestPageSize}">
+                  <header class="attendance-requests-head">
+                    <div>
+                      <div class="attendance-requests-title-row">
+                        <h1>${managerMode ? "Adjustment requests" : "My requests"}</h1>
+                        <span>${visibleRequests.length}</span>
+                      </div>
+                      <p>${managerMode ? "Review attendance corrections from your team" : "Track your attendance correction requests"}</p>
+                    </div>
+                    <label class="attendance-requests-search">
+                      <i class="bi bi-search" aria-hidden="true"></i>
+                      <span class="sr-only">Search requests</span>
+                      <input type="search" placeholder="Search requests..." data-attendance-request-search />
+                    </label>
                   </header>
-                  <div class="data-table-shell">
+                  <nav class="attendance-request-tabs" aria-label="Request status">
+                    ${["pending", "approved", "rejected"]
+                      .map(
+                        (status) => `
+                          <button
+                            type="button"
+                            class="attendance-request-tab ${status === "pending" ? "is-active" : ""}"
+                            data-action="attendance-request-filter"
+                            data-id="${status}"
+                            aria-selected="${status === "pending" ? "true" : "false"}"
+                          >${status[0].toUpperCase()}${status.slice(1)} <span>${requestCounts[status]}</span></button>
+                        `
+                      )
+                      .join("")}
+                  </nav>
+                  <div class="data-table-shell attendance-requests-table-shell">
                     <table class="data-table">
                       <thead>
                         <tr>
@@ -1826,10 +1908,21 @@ export function renderAttendanceUpgrade(data, context) {
                                 .map((entry) => {
                                   const status = String(entry.status || "Pending");
                                   const statusTone = status.toLowerCase().replaceAll(" ", "-");
+                                  const statusIndex = requestRowIndexes[statusTone] ?? 0;
+                                  if (Object.hasOwn(requestRowIndexes, statusTone)) requestRowIndexes[statusTone] += 1;
+                                  const memberName = String(entry.userName || "-");
+                                  const initials = memberName
+                                    .split(/\s+/)
+                                    .filter(Boolean)
+                                    .slice(0, 2)
+                                    .map((part) => part[0])
+                                    .join("")
+                                    .toUpperCase();
+                                  const searchValue = `${entry.date || ""} ${memberName} ${entry.type || ""} ${entry.reason || ""} ${status}`.toLowerCase();
                                   return `
-                                    <tr>
+                                    <tr data-attendance-request-row data-status="${escapeHtml(statusTone)}" data-search="${escapeHtml(searchValue)}" ${statusTone !== "pending" || statusIndex >= requestPageSize ? "hidden" : ""}>
                                       <td>${escapeHtml(String(entry.date || "-"))}</td>
-                                      <td>${escapeHtml(String(entry.userName || "-"))}</td>
+                                      <td><span class="attendance-request-member"><span>${escapeHtml(initials || "?")}</span>${escapeHtml(memberName)}</span></td>
                                       <td>${escapeHtml(String(entry.type || "Missing Punch"))}</td>
                                       <td>${escapeHtml(String(entry.reason || "-"))}</td>
                                       <td><span class="attendance-status-pill is-${escapeHtml(statusTone)}">${escapeHtml(status)}</span></td>
@@ -1841,8 +1934,11 @@ export function renderAttendanceUpgrade(data, context) {
                                                 status === "Pending"
                                                   ? `
                                                     <div class="attendance-request-actions">
-                                                      <button type="button" class="mini-btn" data-action="attendance-request-approve" data-id="${escapeHtml(String(entry.id || ""))}">Approve</button>
-                                                      <button type="button" class="mini-btn mini-btn-danger" data-action="attendance-request-reject" data-id="${escapeHtml(String(entry.id || ""))}">Reject</button>
+                                                      <button type="button" class="attendance-request-approve" data-action="attendance-request-approve" data-id="${escapeHtml(String(entry.id || ""))}">Approve</button>
+                                                      <details class="attendance-request-overflow">
+                                                        <summary aria-label="More request actions"><i class="bi bi-three-dots" aria-hidden="true"></i></summary>
+                                                        <button type="button" data-action="attendance-request-reject" data-id="${escapeHtml(String(entry.id || ""))}">Reject request</button>
+                                                      </details>
                                                     </div>
                                                   `
                                                   : "<span class='task-meta'>Reviewed</span>"
@@ -1855,35 +1951,64 @@ export function renderAttendanceUpgrade(data, context) {
                                   `;
                                 })
                                 .join("")
-                            : `<tr><td colspan="${managerMode ? "6" : "5"}" class="task-meta">No requests yet.</td></tr>`
+                            : ""
                         }
                       </tbody>
                     </table>
+                    <div class="attendance-request-empty" data-attendance-request-empty ${requestCounts.pending ? "hidden" : ""}>
+                      <strong>No matching requests</strong>
+                      <span>Try another status or search.</span>
+                    </div>
                   </div>
+                  <footer class="attendance-requests-footer">
+                    <span data-attendance-request-count>Showing ${Math.min(requestCounts.pending, requestPageSize)} of ${requestCounts.pending} requests</span>
+                    <div class="attendance-request-page-controls">
+                      <button type="button" data-action="attendance-request-page" data-id="previous" aria-label="Previous request page" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                      <span data-attendance-request-page-label>1 / ${Math.max(1, Math.ceil(requestCounts.pending / requestPageSize))}</span>
+                      <button type="button" data-action="attendance-request-page" data-id="next" aria-label="Next request page" ${requestCounts.pending <= requestPageSize ? "disabled" : ""}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    </div>
+                  </footer>
                 </section>
               `
               : ""
           }
           ${
             activeTab === "policy"
-              ? `
-                <section class="attendance-panel">
-                  <header class="attendance-panel-head">
-                    <p class="attendance-card-eyebrow">Attendance Policy</p>
-                    ${managerMode ? `<button type="button" class="mini-btn" data-action="attendance-policy-edit">Set Work Time</button>` : ""}
+              ? attendanceLoading
+                ? renderAttendanceSkeleton("policy")
+                : `
+                <section class="attendance-panel attendance-policy-notion">
+                  <header class="attendance-policy-head">
+                    <div>
+                      <h1>Attendance policy</h1>
+                      <p>Work schedule and attendance rules</p>
+                    </div>
+                    ${managerMode ? `<button type="button" class="attendance-policy-edit" data-action="attendance-policy-edit">Edit policy</button>` : ""}
                   </header>
-                  <div class="attendance-policy-grid">
-                    <p><span>Shift</span><strong>${escapeHtml(policy.shiftStart)} - ${escapeHtml(policy.shiftEnd)}</strong></p>
-                    <p><span>Late After</span><strong>${escapeHtml(`${lateAfterMinutes} min`)}</strong></p>
-                    <p><span>Half-day</span><strong>${escapeHtml(`${halfDayAfterMinutes} min`)}</strong></p>
-                    <p><span>Auto Absent</span><strong>${autoAbsentAfterMinutes > 0 ? escapeHtml(`${autoAbsentAfterMinutes} min`) : "Disabled"}</strong></p>
-                    <p><span>Unpaid Break</span><strong>${escapeHtml(`${policy.breakMinutes} min`)}</strong></p>
-                    <p><span>Work Days</span><strong>${escapeHtml(workDaysLabel || "Mon-Fri")}</strong></p>
-                    <p><span>Timezone</span><strong>${escapeHtml(policy.timezone || "Local")}</strong></p>
-                  </div>
-                  <div class="attendance-break-plan">
+                  <section class="attendance-policy-section">
+                    <h2>Work schedule</h2>
+                    <div class="attendance-policy-properties">
+                      <p><span class="attendance-policy-property-icon"><i class="bi bi-clock" aria-hidden="true"></i></span><span>Shift</span><strong>${escapeHtml(policy.shiftStart)}-${escapeHtml(policy.shiftEnd)}</strong></p>
+                      <p><span class="attendance-policy-property-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span><span>Work days</span><strong>${escapeHtml(compactWorkDaysLabel || "Mon-Fri")}</strong></p>
+                      <p><span class="attendance-policy-property-icon"><i class="bi bi-globe2" aria-hidden="true"></i></span><span>Timezone</span><strong>${escapeHtml(policy.timezone || "Local")}</strong></p>
+                    </div>
+                  </section>
+                  <section class="attendance-policy-section">
+                    <h2>Attendance rules</h2>
+                    <div class="attendance-policy-properties">
+                      <p><span class="attendance-policy-property-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span><span>Late after</span><strong>${escapeHtml(`${lateAfterMinutes} min`)}</strong></p>
+                      <p><span class="attendance-policy-property-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span><span>Half-day after</span><strong>${escapeHtml(`${halfDayAfterMinutes} min`)}</strong></p>
+                      <p><span class="attendance-policy-property-icon"><i class="bi bi-person-x" aria-hidden="true"></i></span><span>Auto absent</span><strong>${autoAbsentAfterMinutes > 0 ? escapeHtml(`${autoAbsentAfterMinutes} min`) : "Disabled"}</strong></p>
+                    </div>
+                  </section>
+                  <section class="attendance-policy-section attendance-policy-breaks">
+                    <h2>Break schedule</h2>
+                    <div class="attendance-policy-break-head" aria-hidden="true">
+                      <span>Break</span><span>Window</span><span>Allowance</span><span>Payment</span><span>Availability</span>
+                    </div>
                     ${breakPlanRows}
-                  </div>
+                  </section>
+                  <p class="attendance-policy-meta">Current workspace policy</p>
                 </section>
               `
               : ""

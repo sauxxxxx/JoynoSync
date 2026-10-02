@@ -1,20 +1,11 @@
-const SOURCE_ICONS = {
-  Inbound: "bi-box-arrow-in-right",
-  Referral: "bi-people",
-  Outbound: "bi-send",
-  Event: "bi-calendar-event"
-};
-
 function renderSegmentButtons(options, selectedValue, action, dataAttribute, escapeText) {
   return options
     .map((option) => {
       const selected = option === selectedValue;
-      const icon = SOURCE_ICONS[option] || "bi-circle";
       return `
         <button type="button" class="lead-source-btn ${selected ? "is-active" : ""}"
           data-action="${action}" data-id="${escapeText(option)}" ${dataAttribute}
           aria-pressed="${selected ? "true" : "false"}">
-          ${dataAttribute === "data-lead-source" ? `<i class="bi ${icon}" aria-hidden="true"></i>` : ""}
           <span>${escapeText(option)}</span>
         </button>`;
     })
@@ -41,14 +32,11 @@ export function renderLeadComposerMarkup(model) {
     <section class="lead-compose-shell" aria-labelledby="leadComposeHeading">
       <header class="lead-compose-header">
         <div class="lead-compose-heading">
-          <span class="lead-compose-mark" aria-hidden="true"><i class="bi bi-person-plus-fill"></i></span>
           <div>
-            <h2 id="leadComposeHeading">${isEditing ? "Edit lead" : "Add lead"}</h2>
-            <p>${isEditing ? "Update the lead, ownership, and next move." : "Capture the lead, route ownership, and set the next move."}</p>
+            <h2 id="leadComposeHeading">${isEditing ? "Edit lead" : "New lead"}</h2>
           </div>
         </div>
         <div class="lead-compose-header-actions">
-          <span class="lead-status-badge"><span>Status:</span><strong>${escapeText(values.status)}</strong></span>
           <button type="button" class="lead-compose-close" data-action="close-modal" aria-label="Close lead dialog">
             <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
@@ -57,10 +45,10 @@ export function renderLeadComposerMarkup(model) {
 
       <div class="lead-compose-workspace">
         <section class="lead-compose-details" aria-labelledby="leadDetailsHeading">
-          <h3 id="leadDetailsHeading" class="lead-compose-eyebrow">Lead details</h3>
+          <h3 id="leadDetailsHeading" class="sr-only">Lead details</h3>
           <label class="form-field lead-name-field">
-            <span>Lead name <b aria-hidden="true">*</b></span>
-            <input type="text" name="name" required autocomplete="name" value="${escapeText(values.name)}" placeholder="Enter lead name" />
+            <span class="sr-only">Lead name</span>
+            <input type="text" name="name" required autocomplete="name" value="${escapeText(values.name)}" placeholder="Untitled lead" />
           </label>
           <div class="lead-compose-detail-grid">
             <label class="form-field"><span>Interest</span><input type="text" name="interest" value="${escapeText(values.interest)}" placeholder="Book title or product interest" /></label>
@@ -77,7 +65,7 @@ export function renderLeadComposerMarkup(model) {
         </section>
 
         <aside class="lead-compose-routing" aria-labelledby="leadRoutingHeading">
-          <h3 id="leadRoutingHeading" class="lead-compose-eyebrow">Routing &amp; next move</h3>
+          <h3 id="leadRoutingHeading" class="sr-only">Routing and next move</h3>
           <div class="form-field lead-owner-field">
             <span>Owner</span>
             <div class="task-assignee-control" data-lead-owner-control>
@@ -104,12 +92,6 @@ export function renderLeadComposerMarkup(model) {
 
           <div class="lead-followup-card">
             <span class="lead-followup-label">Next follow-up</span>
-            <div class="lead-followup-presets" role="group" aria-label="Follow-up date shortcuts">
-              <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="today" data-lead-followup-preset>Today</button>
-              <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="tomorrow" data-lead-followup-preset>Tomorrow</button>
-              <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="late-week" data-lead-followup-preset>This week</button>
-              <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="custom" data-lead-followup-preset>Custom</button>
-            </div>
             <div class="task-deadline-control lead-followup-control" data-lead-followup-control>
               <input type="hidden" name="nextFollowUp" required value="${escapeText(values.nextFollowUp)}" />
               <button type="button" class="task-compose-deadline-preview task-deadline-trigger lead-followup-trigger" data-action="lead-followup-toggle" data-id="toggle" data-lead-followup-trigger aria-haspopup="dialog">
@@ -118,6 +100,12 @@ export function renderLeadComposerMarkup(model) {
                 <i class="bi bi-chevron-down" aria-hidden="true"></i>
               </button>
               <div class="task-deadline-picker lead-followup-picker" data-lead-followup-picker hidden>
+                <div class="lead-followup-presets" role="group" aria-label="Follow-up date shortcuts">
+                  <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="today" data-lead-followup-preset>Today</button>
+                  <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="tomorrow" data-lead-followup-preset>Tomorrow</button>
+                  <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="late-week" data-lead-followup-preset>This week</button>
+                  <button type="button" class="lead-followup-chip" data-action="lead-compose-followup-preset" data-id="custom" data-lead-followup-preset>Custom</button>
+                </div>
                 <div class="task-deadline-picker-main">
                   <div class="task-cal-head">
                     <button type="button" class="task-cal-nav" data-action="lead-followup-nav" data-id="prev" aria-label="Previous month"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
@@ -148,9 +136,8 @@ export function renderLeadComposerMarkup(model) {
 
       <section class="lead-more-card">
         <button type="button" class="lead-more-toggle" data-action="lead-compose-more-toggle" data-id="toggle" data-lead-more-toggle aria-expanded="${detailsOpen ? "true" : "false"}">
-          <i class="bi bi-card-list" aria-hidden="true"></i>
+          <i class="bi bi-chevron-right lead-more-chevron" aria-hidden="true"></i>
           <span class="lead-more-copy"><strong>More details</strong><small>Email, secondary phone, role, tags, and notes</small></span>
-          <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="lead-more-body" data-lead-more-body ${detailsOpen ? "" : "hidden"}>
           <div class="lead-compose-detail-grid">
@@ -165,8 +152,7 @@ export function renderLeadComposerMarkup(model) {
 
       <footer class="lead-compose-actions">
         <button type="button" class="lead-compose-cancel" data-action="close-modal">Cancel</button>
-        <span class="lead-compose-security"><i class="bi bi-shield-check" aria-hidden="true"></i> Saved securely to your workspace</span>
-        <button type="submit" class="btn btn-accent lead-compose-submit" data-intent="create" name="submitIntent" value="create" data-submit-default-label="${submitLabel}" data-submit-busy-label="${busyLabel}"><span>${submitLabel}</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+        <button type="submit" class="btn btn-accent lead-compose-submit" data-intent="create" name="submitIntent" value="create" data-submit-default-label="${submitLabel}" data-submit-busy-label="${busyLabel}"><span>${submitLabel}</span></button>
       </footer>
     </section>`;
 }

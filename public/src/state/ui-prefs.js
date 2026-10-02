@@ -6,7 +6,7 @@ export function createDefaultUiPrefs() {
     sidebarCollapsed: false,
     waitingCollapsed: false,
     commsContextCollapsed: false,
-    messengerInfoOpen: true,
+    messengerInfoOpen: false,
     messengerThemeByConversationKey: {},
     messengerNicknamesByConversationKey: {},
     calendarMiniCollapsed: false,
@@ -36,7 +36,7 @@ export function loadUiPrefs() {
       sidebarCollapsed: Boolean(parsed.sidebarCollapsed),
       waitingCollapsed: Boolean(parsed.waitingCollapsed),
       commsContextCollapsed: Boolean(parsed.commsContextCollapsed),
-      messengerInfoOpen: parsed.messengerInfoOpen === undefined ? true : Boolean(parsed.messengerInfoOpen),
+      messengerInfoOpen: Boolean(parsed.messengerInfoOpen),
       messengerThemeByConversationKey:
         parsed.messengerThemeByConversationKey && typeof parsed.messengerThemeByConversationKey === "object"
           ? parsed.messengerThemeByConversationKey

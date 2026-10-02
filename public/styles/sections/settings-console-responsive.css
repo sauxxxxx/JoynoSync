@@ -1,0 +1,149 @@
+@media (max-width: 900px) {
+  .workspace:has(.settings-console-v2),
+  .view-content:has(> .settings-console-v2) {
+    overflow: visible !important;
+  }
+
+  .settings-console-v2 {
+    padding: 24px 28px 64px;
+  }
+
+  .settings-console-layout {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .settings-console-sidebar {
+    z-index: 3;
+    top: 64px;
+    margin-inline: -28px;
+    padding: 7px 28px;
+    border-bottom: 1px solid var(--ui-color-border);
+    background: var(--ui-color-surface);
+  }
+
+  .settings-console-nav {
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .settings-console-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-console-nav > p {
+    display: none;
+  }
+
+  .settings-console-nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 620px) {
+  .settings-console-v2 {
+    padding: 20px 18px 56px;
+  }
+
+  .settings-console-header {
+    margin-bottom: 20px;
+  }
+
+  .settings-console-layout {
+    gap: 22px;
+  }
+
+  .settings-console-sidebar {
+    top: 60px;
+    margin-inline: -18px;
+    padding-inline: 18px;
+  }
+
+  .settings-console-content {
+    gap: 30px;
+  }
+
+  .settings-console-section {
+    padding-bottom: 30px;
+  }
+
+  .settings-summary-trigger {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 12px;
+    min-height: 56px;
+  }
+
+  .settings-summary-copy {
+    display: grid;
+    gap: 2px;
+  }
+
+  .settings-summary-copy small {
+    white-space: normal;
+  }
+
+  .settings-summary-edit {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .settings-inline-editor {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 10px;
+    padding: 12px 8px 16px;
+  }
+
+  .settings-inline-label {
+    grid-column: 1 / -1;
+  }
+
+  .settings-inline-control {
+    grid-column: 1;
+  }
+
+  .settings-inline-actions > div {
+    grid-column: 2;
+  }
+
+  .settings-inline-field-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-field input:not([type="color"]),
+  .settings-field select,
+  .settings-field textarea {
+    font-size: 16px;
+  }
+
+  .settings-inline-actions > div {
+    justify-content: flex-end;
+  }
+}
+
+@media (pointer: coarse) {
+  .settings-console-nav-item,
+  .settings-cancel-action,
+  .settings-save-action,
+  .settings-day-choice span {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-console-nav-item,
+  .settings-summary-edit {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .settings-console-nav-item.is-current,
+  .settings-day-choice input:checked + span,
+  .settings-save-action {
+    border: 1px solid ButtonText;
+  }
+}

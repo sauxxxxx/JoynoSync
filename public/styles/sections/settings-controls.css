@@ -1,0 +1,278 @@
+.settings-console-v2 {
+  --settings-control-hover: #f5f5f3;
+  --settings-control-active: #efefec;
+  --settings-control-border: #dededb;
+  --settings-focus: #787774;
+}
+
+:root[data-theme="dark"] .settings-console-v2 {
+  --settings-control-hover: #2c2c2a;
+  --settings-control-active: #333330;
+  --settings-control-border: #484844;
+  --settings-focus: #b5b5b2;
+}
+
+.settings-console-v2 .settings-console-nav-item:hover,
+.settings-console-v2 .settings-console-nav-item.is-current,
+.settings-console-v2 .settings-summary-trigger:hover,
+.settings-console-v2 .settings-choice:hover,
+.settings-console-v2 .settings-summary-edit,
+.settings-console-v2 .settings-inline-editor {
+  background: var(--settings-control-hover);
+}
+
+#appShell .view-content .settings-console-v2 button:focus-visible,
+#appShell .view-content .settings-console-v2 input:focus-visible,
+#appShell .view-content .settings-console-v2 textarea:focus-visible {
+  outline: 2px solid var(--settings-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+#appShell .view-content .settings-console-v2 .settings-field :where(input:not([type="color"]), textarea):focus-visible {
+  border-color: var(--settings-focus);
+  outline: 2px solid var(--settings-control-active);
+  outline-offset: 0;
+  box-shadow: 0 0 0 1px var(--settings-focus);
+}
+
+.settings-console-v2 .settings-field :where(input:not([type="color"]), textarea) {
+  caret-color: var(--ui-color-text);
+}
+
+.settings-picker {
+  position: relative;
+  min-width: 0;
+}
+
+.settings-picker-trigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--ui-color-border-strong);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-color-text);
+  background: var(--ui-color-surface);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: start;
+  cursor: pointer;
+}
+
+.settings-picker-trigger:hover,
+.settings-picker.is-open .settings-picker-trigger {
+  border-color: var(--settings-control-border);
+  background: var(--settings-control-hover);
+}
+
+#appShell .view-content .settings-console-v2 .settings-picker-trigger:focus-visible {
+  border-color: var(--settings-focus);
+  outline: 2px solid var(--settings-control-active);
+  outline-offset: 0;
+  box-shadow: 0 0 0 1px var(--settings-focus);
+}
+
+.settings-picker-trigger > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-picker-trigger > i {
+  flex: 0 0 auto;
+  color: var(--ui-color-text-muted);
+  font-size: 10px;
+  transition: transform var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.settings-picker.is-open .settings-picker-trigger > i {
+  transform: rotate(180deg);
+}
+
+.settings-picker-menu {
+  position: absolute;
+  z-index: 90;
+  top: calc(100% + 5px);
+  right: 0;
+  left: 0;
+  display: grid;
+  max-height: min(240px, 42vh);
+  padding: 5px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--settings-control-border);
+  border-radius: 6px;
+  background: var(--ui-color-surface);
+  box-shadow: var(--ui-shadow-menu);
+  scrollbar-color: var(--ui-color-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.settings-picker-menu[hidden] {
+  display: none;
+}
+
+.settings-picker.is-upward .settings-picker-menu {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+
+.settings-picker-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ui-color-text);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+}
+
+.settings-picker-option > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-picker-option > i {
+  color: var(--ui-color-text-secondary);
+  font-size: 12px;
+  opacity: 0;
+}
+
+.settings-picker-option:hover,
+#appShell .view-content .settings-console-v2 .settings-picker-option:focus-visible {
+  outline: 0;
+  background: var(--settings-control-hover);
+  box-shadow: none;
+}
+
+.settings-picker-option.is-selected {
+  font-weight: 600;
+  background: var(--settings-control-active);
+}
+
+.settings-picker-option.is-selected > i {
+  opacity: 1;
+}
+
+.settings-picker.is-time .settings-picker-trigger,
+.settings-picker.is-time .settings-picker-option {
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-picker.is-time .settings-picker-menu {
+  min-width: 138px;
+}
+
+.settings-inline-action-group {
+  position: relative;
+}
+
+.settings-save-confirm {
+  position: absolute;
+  z-index: 95;
+  right: 0;
+  bottom: calc(100% + 7px);
+  width: max-content;
+  min-width: 188px;
+  padding: 10px;
+  border: 1px solid var(--settings-control-border);
+  border-radius: 6px;
+  background: var(--ui-color-surface);
+  box-shadow: var(--ui-shadow-menu);
+}
+
+.settings-save-confirm[hidden] {
+  display: none;
+}
+
+.settings-save-confirm p {
+  margin: 0 0 9px;
+  color: var(--ui-color-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.settings-save-confirm > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.settings-save-confirm button {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ui-color-text-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-save-confirm button:hover {
+  color: var(--ui-color-text);
+  background: var(--settings-control-hover);
+}
+
+.settings-save-confirm button.is-confirm {
+  color: var(--ui-color-surface);
+  background: var(--ui-color-text);
+}
+
+.settings-save-confirm button.is-confirm:hover {
+  opacity: 0.88;
+}
+
+.settings-save-action.is-loading {
+  color: var(--ui-color-text-secondary);
+  background: var(--settings-control-active);
+}
+
+.settings-save-spinner {
+  animation: settings-save-spin 700ms linear infinite;
+}
+
+@keyframes settings-save-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#appShell .view-content .settings-console-v2 .settings-day-choice input:focus-visible + span {
+  outline: 2px solid var(--settings-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.settings-console-v2 ::selection {
+  color: var(--ui-color-text);
+  background: var(--settings-control-active);
+}
+
+@media (forced-colors: active) {
+  .settings-picker-trigger,
+  .settings-picker-option:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+}

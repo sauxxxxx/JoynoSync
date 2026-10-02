@@ -1,0 +1,467 @@
+/* Final Notion-style Admin Leads composition. Loaded after earlier reference layers. */
+@media (min-width: 1025px) {
+  .app-shell:has(.crm-leads-list.is-admin-view) {
+    background: #fff;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .sidebar,
+  .app-shell:has(.crm-leads-list.is-admin-view) .topbar,
+  .app-shell:has(.crm-leads-list.is-admin-view) .workspace {
+    background: #fff;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .sidebar {
+    border-right-color: #e1e2e0;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .topbar {
+    border-bottom: 1px solid #e1e2e0;
+    box-shadow: none;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .main,
+  .app-shell:has(.crm-leads-list.is-admin-view) .view-content {
+    background: #fff;
+  }
+
+  .app-shell:has(.crm-leads-list.is-admin-view) .view-content {
+    padding: 32px 40px 22px;
+  }
+
+  .crm-leads-list.is-admin-view {
+    --lead-admin-accent: #24272d;
+    --lead-admin-text: #24262b;
+    --lead-admin-muted: #73777f;
+    --lead-admin-border: #e1e2e0;
+    --lead-admin-border-soft: #e8e9e7;
+    min-height: calc(100dvh - 110px);
+    gap: 0;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-shell {
+    padding: 8px 0 32px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-main {
+    min-height: 68px;
+    align-items: center;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-group {
+    gap: 9px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-row {
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-row .block-title {
+    color: #202226;
+    font-size: 27px;
+    font-weight: 650;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-total-badge {
+    min-width: 22px;
+    height: 21px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 6px;
+    color: #61656c;
+    background: #ededeb;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-title-meta {
+    gap: 9px;
+    color: #686d75;
+    font-size: 12px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-sync-btn {
+    color: #68707a;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-actions {
+    gap: 7px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action,
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more,
+  .crm-leads-list.is-admin-view .lead-admin-primary-more {
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    border-color: #dedfdd;
+    border-radius: 6px;
+    color: #3b3f45;
+    background: #fff;
+    font-size: 10.5px;
+    font-weight: 500;
+    box-shadow: 0 1px 1px rgba(15, 15, 15, 0.025);
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action {
+    gap: 6px;
+    padding-inline: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action i {
+    color: #575d66;
+    font-size: 11.5px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-action > .crm-lead-admin-action {
+    border-radius: 6px 0 0 6px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more {
+    width: 29px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-split > .table-ops-columns-btn {
+    min-width: 96px;
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    padding-inline: 11px;
+    border-color: #272a30;
+    border-radius: 6px 0 0 6px;
+    color: #fff;
+    background: #272a30;
+    font-size: 10.5px;
+    font-weight: 550;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-more {
+    width: 31px;
+    border-color: #272a30;
+    border-left-color: #4b4e53;
+    border-radius: 0 6px 6px 0;
+    color: #fff;
+    background: #272a30;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-admin-action:hover,
+  .crm-leads-list.is-admin-view .crm-lead-admin-split-more:hover {
+    border-color: #c9cac7;
+    color: #202226;
+    background: #f7f7f6;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-primary-split > .table-ops-columns-btn:hover,
+  .crm-leads-list.is-admin-view .lead-admin-primary-more:hover {
+    border-color: #17191d;
+    color: #fff;
+    background: #17191d;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar {
+    min-height: 58px;
+    padding: 0 0;
+    border: solid #dedfdd;
+    border-width: 1px 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tabs {
+    gap: 18px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab {
+    min-height: 57px;
+    gap: 8px;
+    padding: 0 6px;
+    color: #5a6068;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab::after {
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: transparent;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab:hover,
+  .crm-leads-list.is-admin-view .lead-admin-view-tab.is-active {
+    color: #202226;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab.is-active::after {
+    background: #202226;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-tab small,
+  .crm-leads-list.is-admin-view .lead-admin-view-tab.is-active small {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border: 0;
+    color: #656a72;
+    background: #eeeeec;
+    font-size: 8.5px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-viewbar-actions {
+    gap: 14px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn,
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    border: 0;
+    border-radius: 5px;
+    color: #5a6068;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn {
+    min-width: 120px;
+    padding-inline: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-view-settings {
+    width: 34px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-saved-views-btn:hover,
+  .crm-leads-list.is-admin-view .lead-admin-view-settings:hover {
+    color: #25282d;
+    background: #efefed;
+  }
+
+  .crm-leads-list.is-admin-view > .data-table-shell {
+    flex: 1 1 auto;
+    min-height: 430px;
+    max-height: calc(100dvh - 310px);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .data-table {
+    min-width: 1120px !important;
+  }
+
+  .crm-leads-list.is-admin-view .data-table thead,
+  .crm-leads-list.is-admin-view .data-table th {
+    background: #fff;
+  }
+
+  .crm-leads-list.is-admin-view .data-table th {
+    height: 54px;
+    padding: 8px 10px;
+    border-bottom-color: #dfe0de;
+    color: #666b73;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-admin-view .data-table td {
+    height: 66px;
+    padding: 9px 10px;
+    border-bottom-color: #e4e5e3;
+    color: #41464d;
+    font-size: 10.5px;
+  }
+
+  .crm-leads-list.is-admin-view .data-table tbody tr:hover,
+  .crm-leads-list.is-admin-view .data-table tbody tr:focus-within {
+    background: #f4f4f2;
+  }
+
+  .crm-leads-list.is-admin-view .data-table tbody tr.is-selected {
+    background: #efefec;
+  }
+
+  .crm-leads-list.is-admin-view .crm-inline-avatar {
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    font-size: 9px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-name-cell {
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-name-text {
+    color: #292d33;
+    font-size: 11px;
+    font-weight: 550;
+  }
+
+  .crm-leads-list.is-admin-view .crm-name-sub,
+  .crm-leads-list.is-admin-view .crm-table-meta,
+  .crm-leads-list.is-admin-view .crm-owner-text {
+    color: #747982;
+    font-size: 9.5px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-phone-value {
+    color: #51565e;
+    font-size: 10.5px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-owner-cell .crm-name-text {
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-admin-view .crm-owner-cell .crm-inline-avatar {
+    width: 25px;
+    min-width: 25px;
+    height: 25px;
+    font-size: 8px;
+  }
+
+  .crm-leads-list.is-admin-view .lead-status-trigger {
+    font-size: 9.5px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-admin-view .crm-last-touch-cell > .crm-table-meta::before {
+    width: 5px;
+    height: 5px;
+    margin-right: 7px;
+    background: #18a96c;
+  }
+
+  .crm-leads-list.is-admin-view .crm-col-admin-actions > button:hover {
+    color: #25282d;
+    background: #ececea;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-table-footer {
+    min-height: 58px;
+    margin: 0;
+    padding: 10px 10px;
+    border: solid #dedfdd;
+    border-width: 1px 0 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-table-footer .crm-page-size-trigger,
+  .crm-leads-list.is-admin-view .lead-admin-table-footer .table-ops-pages button {
+    border-color: #dedfdd;
+    border-radius: 5px;
+    color: #565c64;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-table-footer > .task-meta,
+  .crm-leads-list.is-admin-view .lead-admin-page-summary {
+    color: #686d75;
+    font-size: 10px;
+    font-weight: 450;
+  }
+
+  .crm-leads-list.is-admin-view .lead-admin-quick-actions {
+    border-color: #dedfdd;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(20, 20, 20, 0.1);
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 850px) {
+  .app-shell:has(.crm-leads-list.is-admin-view) .view-content {
+    padding: 34px 50px 22px;
+  }
+
+  .crm-leads-list.is-admin-view .crm-lead-header-shell {
+    padding: 8px 0 34px;
+  }
+
+  .crm-leads-list.is-admin-view > .data-table-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .crm-leads-list.is-admin-view .data-table td {
+    height: 70px;
+  }
+}
+
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view),
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .sidebar,
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .topbar,
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .workspace,
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .main,
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .view-content,
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .data-table thead,
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .data-table th {
+  background: #202020;
+}
+
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .sidebar {
+  border-right-color: #3b3b3b;
+}
+
+:root[data-theme="dark"] .app-shell:has(.crm-leads-list.is-admin-view) .topbar {
+  border-bottom-color: #3b3b3b;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view {
+  --lead-admin-accent: #f1f1f1;
+  --lead-admin-text: #ededed;
+  --lead-admin-muted: #aaa;
+  --lead-admin-border: #3b3b3b;
+  --lead-admin-border-soft: #343434;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-viewbar,
+:root[data-theme="dark"] .crm-leads-list.is-admin-view > .data-table-shell,
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-table-footer {
+  border-color: #3b3b3b;
+  background: transparent;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-view-tab.is-active::after {
+  background: #f1f1f1;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-primary-split > .table-ops-columns-btn,
+:root[data-theme="dark"] .crm-leads-list.is-admin-view .lead-admin-primary-more {
+  border-color: #e5e5e5;
+  color: #171717;
+  background: #e5e5e5;
+}
+
+/* Keep secondary lead actions quiet and borderless. */
+@media (min-width: 1025px) {
+  #appShell .crm-leads-list.is-admin-view .crm-lead-filter-btn,
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-import-open"],
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-export-leads"],
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-split-more,
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-ownership-manager"] {
+    border: 0;
+    box-shadow: none;
+  }
+
+  #appShell .crm-leads-list.is-admin-view .crm-lead-filter-btn:hover,
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-import-open"]:hover,
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-export-leads"]:hover,
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-split-more:hover,
+  #appShell .crm-leads-list.is-admin-view .crm-lead-admin-action[data-action="lead-ownership-manager"]:hover {
+    border: 0;
+  }
+}

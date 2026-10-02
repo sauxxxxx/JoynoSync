@@ -24,8 +24,10 @@ export const seedData = {
     },
     notifications: {
       inApp: true,
-      email: true,
-      sms: false
+      messages: true,
+      tasks: true,
+      crm: true,
+      calls: true
     },
     security: {
       activeSessions: 1,
@@ -329,7 +331,7 @@ export const seedData = {
       id: "wait_03",
       title: "Create onboarding template",
       owner: "Sven",
-      linkedType: "Project"
+      linkedType: "Task"
     }
   ],
   callLogs: [],
@@ -337,34 +339,12 @@ export const seedData = {
   callQueues: [],
   agentPresence: {},
   telephonyIdentity: {},
-  projects: [
-    {
-      id: "proj_01",
-      name: "Enterprise Rollout",
-      owner: "Nadia",
-      progress: 62,
-      status: "On Track"
-    },
-    {
-      id: "proj_02",
-      name: "Sales Process Refresh",
-      owner: "Ken",
-      progress: 38,
-      status: "Needs Focus"
-    },
-    {
-      id: "proj_03",
-      name: "CS Handoff Framework",
-      owner: "Sven",
-      progress: 74,
-      status: "On Track"
-    }
-  ],
   leads: [
     {
       id: "lead_1001",
       name: "Morgan Hill",
       company: "ACME Components",
+      phone: "+1-415-555-0101",
       source: "Inbound",
       status: "New",
       owner: "Nadia",
@@ -375,6 +355,7 @@ export const seedData = {
       crmConversationId: "crmconv_01",
       name: "Janelle Cruz",
       company: "Blue Pine Foods",
+      phone: "+1-415-555-0112",
       source: "Referral",
       status: "Qualified",
       owner: "Ken",
@@ -384,6 +365,7 @@ export const seedData = {
       id: "lead_1003",
       name: "Arif Patel",
       company: "Northstar Robotics",
+      phone: "+1-415-555-0123",
       source: "Outbound",
       status: "Contacted",
       owner: "Sven",
@@ -680,7 +662,7 @@ export const seedData = {
       text: "I need final approval on the implementation timeline.",
       messageType: "Question",
       important: true,
-      linkedType: "Project",
+      linkedType: "Task",
       linkedLabel: "Enterprise Rollout",
       createdAt: "2026-03-02T10:05:00.000Z"
     },
@@ -692,7 +674,7 @@ export const seedData = {
       text: "Approved. Share the final version in Sales War Room after posting.",
       messageType: "Update",
       important: false,
-      linkedType: "Project",
+      linkedType: "Task",
       linkedLabel: "Enterprise Rollout",
       createdAt: "2026-03-02T10:14:00.000Z"
     }

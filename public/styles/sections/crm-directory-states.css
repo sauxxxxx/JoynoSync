@@ -1,0 +1,35 @@
+/* Full-height CRM directory loading and empty states. */
+@media (min-width: 1025px) {
+  #appShell .crm-list-v2:has(.crm-table-skeleton-row) {
+    display: flex;
+    min-height: calc(100dvh - 92px);
+    flex-direction: column;
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .crm-list-v2:has(.crm-table-skeleton-row) > .data-table-shell {
+    flex: 1 1 auto;
+  }
+
+  #appShell .data-table-shell:has(.crm-table-empty-row) {
+    position: relative;
+  }
+
+  #appShell .crm-table-empty-row,
+  #appShell .crm-table-empty-row > td {
+    position: static;
+  }
+
+  #appShell .crm-table-empty-state {
+    position: absolute;
+    inset: 44px 0 0;
+    width: auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  #appShell .crm-list-v2 .data-table tbody .crm-table-empty-row:hover,
+  #appShell .crm-list-v2 .data-table tbody .crm-table-empty-row:hover > td {
+    background: transparent;
+  }
+}

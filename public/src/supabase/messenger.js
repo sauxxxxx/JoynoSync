@@ -1,6 +1,8 @@
 import { initSupabase } from "./init.js";
+import { runMessengerRequest } from "../modules/messenger-request.js";
 
 const MESSENGER_ATTACHMENT_BUCKET = "messenger-attachments";
+const MESSENGER_RPC_TIMEOUT_MS = 15000;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set([
   "image/png",
@@ -117,6 +119,14 @@ function mapMessengerMessage(entry) {
     createdAt: normalizeIso(entry?.createdAt),
     editedAt: normalizeIso(entry?.editedAt),
     deletedAt: normalizeIso(entry?.deletedAt),
+    pinned: Boolean(entry?.pinned),
+    pinnedAt: normalizeIso(entry?.pinnedAt),
+    pinnedByMemberId: normalizeText(entry?.pinnedByMemberId),
+    readBy: normalizeArray(entry?.readBy).map((receipt) => ({
+      memberId: normalizeText(receipt?.memberId),
+      name: normalizeText(receipt?.name, "Unknown"),
+      readAt: normalizeIso(receipt?.readAt)
+    })),
     attachments: normalizeArray(entry?.attachments).map(mapMessengerAttachment),
     reactions: normalizeArray(entry?.reactions).map(mapMessengerReaction)
   };
@@ -154,7 +164,10 @@ function mapMessengerConversation(entry) {
 
 async function callMessengerRpc(functionName, args = {}) {
   const client = getClient();
-  const { data, error } = await client.rpc(functionName, args);
+  const { data, error } = await runMessengerRequest(
+    () => client.rpc(functionName, args),
+    { timeoutMs: MESSENGER_RPC_TIMEOUT_MS }
+  );
   if (error) {
     throw error;
   }
@@ -176,6 +189,22 @@ export async function fetchSupabaseMessengerMessages(conversationId, options = {
   };
   const data = await callMessengerRpc("get_messages", payload);
   return normalizeArray(data?.messages || data).map(mapMessengerMessage);
+}
+
+export async function fetchSupabaseMessengerMessagePage(conversationId, options = {}) {
+  const requestedLimit = Math.max(1, Math.min(100, normalizeNumber(options.limit, 40)));
+  const payload = {
+    p_conversation_id: normalizeText(conversationId),
+    p_limit: requestedLimit + 1,
+    p_before: options.before || null,
+    p_search: normalizeText(options.search)
+  };
+  const data = await callMessengerRpc("get_messages", payload);
+  const rows = normalizeArray(data?.messages || data).map(mapMessengerMessage);
+  return {
+    messages: rows.slice(Math.max(0, rows.length - requestedLimit)),
+    hasMore: rows.length > requestedLimit
+  };
 }
 
 export async function createSupabaseDirectConversation(memberId) {
@@ -212,6 +241,21 @@ export async function updateSupabaseConversationPrefs(conversationId, prefs = {}
 
 export async function deleteSupabaseMessengerConversation(conversationId) {
   return callMessengerRpc("delete_conversation", {
+    p_conversation_id: normalizeText(conversationId)
+  });
+}
+
+export async function updateSupabaseGroupConversation(conversationId, title, memberIds = []) {
+  const data = await callMessengerRpc("update_group_conversation", {
+    p_conversation_id: normalizeText(conversationId),
+    p_title: normalizeText(title),
+    p_member_ids: normalizeArray(memberIds).map((value) => normalizeText(value)).filter(Boolean)
+  });
+  return mapMessengerConversation(data || {});
+}
+
+export async function leaveSupabaseGroupConversation(conversationId) {
+  return callMessengerRpc("leave_group_conversation", {
     p_conversation_id: normalizeText(conversationId)
   });
 }
@@ -327,6 +371,14 @@ export async function editSupabaseMessengerMessage(messageId, body) {
 export async function deleteSupabaseMessengerMessage(messageId) {
   const data = await callMessengerRpc("delete_message", {
     p_message_id: normalizeText(messageId)
+  });
+  return mapMessengerMessage(data || {});
+}
+
+export async function setSupabaseMessengerMessagePinned(messageId, pinned = true) {
+  const data = await callMessengerRpc("set_message_pinned", {
+    p_message_id: normalizeText(messageId),
+    p_pinned: Boolean(pinned)
   });
   return mapMessengerMessage(data || {});
 }

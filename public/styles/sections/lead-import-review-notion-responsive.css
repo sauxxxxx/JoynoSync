@@ -1,0 +1,135 @@
+/* Responsive and dark states for the focused import Review step. */
+@media (max-width: 760px) {
+  .lead-import-notion-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lead-import-notion-stats > span:nth-child(3) {
+    border-left: 0;
+  }
+
+  .lead-import-notion-stats > span:nth-child(n + 3) {
+    border-top: 1px solid #e6e9ee;
+  }
+
+  .lead-import-notion-disclosure > span:first-child {
+    display: grid;
+    gap: 2px;
+  }
+
+  .lead-import-notion-map-head,
+  .lead-import-notion-map-row {
+    grid-template-columns: minmax(110px, 0.8fr) 14px minmax(150px, 1.2fr);
+    gap: 8px;
+  }
+
+  .lead-import-notion-setting-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 4px;
+  }
+}
+
+@media (max-width: 520px) {
+  .lead-import-notion-file-row {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .lead-import-notion-file-row > .lead-import-notion-text-action {
+    grid-column: 2;
+    justify-self: start;
+    margin-left: -7px;
+  }
+
+  .lead-import-notion-disclosure {
+    grid-template-columns: minmax(0, 1fr) 16px;
+  }
+
+  .lead-import-notion-disclosure .lead-import-notion-state {
+    display: none;
+  }
+
+  .lead-import-notion-warning-preview {
+    margin-left: 0;
+  }
+
+  .lead-import-notion-behavior-row summary {
+    grid-template-columns: minmax(0, 1fr) 16px;
+  }
+
+  .lead-import-notion-row-value {
+    grid-column: 1;
+    text-align: left;
+  }
+
+  .lead-import-notion-behavior-row summary > i {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .lead-import-notion-map-head {
+    display: none;
+  }
+
+  .lead-import-notion-map-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 10px 4px;
+  }
+
+  .lead-import-notion-map-row > i {
+    display: none;
+  }
+
+  .lead-import-notion-warning-row {
+    grid-template-columns: 18px minmax(0, 1fr);
+  }
+
+  .lead-import-notion-warning-row > :last-child {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+:root[data-theme="dark"] .lead-import-notion-file-icon,
+:root[data-theme="dark"] .lead-import-notion-map-row .contact-picker-trigger,
+:root[data-theme="dark"] .lead-import-notion-setting-row .contact-picker-trigger {
+  background: #292929;
+}
+
+:root[data-theme="dark"] .lead-import-notion-file-row,
+:root[data-theme="dark"] .lead-import-notion-stats,
+:root[data-theme="dark"] .lead-import-notion-stats > span + span,
+:root[data-theme="dark"] .lead-import-notion-disclosure,
+:root[data-theme="dark"] .lead-import-notion-warning-preview,
+:root[data-theme="dark"] .lead-import-notion-warning-row,
+:root[data-theme="dark"] .lead-import-notion-behavior-row,
+:root[data-theme="dark"] .lead-import-notion-subview > header,
+:root[data-theme="dark"] .lead-import-notion-map-row,
+:root[data-theme="dark"] .lead-import-notion-settings,
+:root[data-theme="dark"] .lead-import-notion-setting-row,
+:root[data-theme="dark"] .lead-import-notion-warning-tools,
+:root[data-theme="dark"] .lead-import-notion-warning-list {
+  border-color: #3b3b3b;
+}
+
+:root[data-theme="dark"] .lead-import-notion-file-row > div > strong,
+:root[data-theme="dark"] .lead-import-notion-stats strong,
+:root[data-theme="dark"] .lead-import-notion-overview > h4,
+:root[data-theme="dark"] .lead-import-notion-behavior > h4,
+:root[data-theme="dark"] .lead-import-notion-subview h4,
+:root[data-theme="dark"] .lead-import-notion-disclosure,
+:root[data-theme="dark"] .lead-import-notion-warning-row strong,
+:root[data-theme="dark"] .lead-import-notion-behavior-row strong,
+:root[data-theme="dark"] .lead-import-notion-restore-row strong,
+:root[data-theme="dark"] .lead-import-notion-map-source span,
+:root[data-theme="dark"] .lead-import-notion-setting-row strong {
+  color: #ededed;
+}
+
+:root[data-theme="dark"] .lead-import-notion-disclosure:hover:not(:disabled),
+:root[data-theme="dark"] .lead-import-notion-text-action:hover,
+:root[data-theme="dark"] .lead-import-notion-back:hover,
+:root[data-theme="dark"] .modal-card.is-lead-import[data-import-step="review"] .lead-import-actions-start .lead-import-footer-action:hover {
+  background: #292929;
+}

@@ -598,7 +598,7 @@
   }
 
   .crm-lead-header-actions .table-ops-columns-btn,
-  .crm-lead-header-actions .crm-lead-import-btn {
+.crm-lead-header-actions .crm-lead-import-btn {
     flex: 1 1 0;
     justify-content: center;
   }
@@ -608,9 +608,9 @@
   }
 
   .crm-lead-tabbar,
-  .crm-lead-toolbar-controls,
-  .crm-lead-inline-filter,
-  .crm-lead-select-wrap {
+.crm-lead-toolbar-controls,
+.crm-lead-inline-filter,
+.crm-lead-select-wrap {
     width: 100%;
   }
 
@@ -1894,9 +1894,9 @@
   }
 
   .lead-record-page .lead-record-hero-main,
-  .lead-record-page .lead-record-focus-rail,
-  .lead-record-page .lead-record-block,
-  .lead-record-page .lead-record-side-panel {
+.lead-record-page .lead-record-focus-rail,
+.lead-record-page .lead-record-block,
+.lead-record-page .lead-record-side-panel {
     padding: 12px;
   }
 
@@ -4485,7 +4485,7 @@
   }
 
   .attendance-manager-calendar-weekdays,
-  .attendance-manager-calendar-grid {
+.attendance-manager-calendar-grid {
     gap: 3px;
   }
 
@@ -4512,7 +4512,7 @@
 
 @media (max-width: 760px) {
   .attendance-manager-topbar-actions,
-  .attendance-manager-topbar-copy {
+.attendance-manager-topbar-copy {
     width: 100%;
   }
 
@@ -4690,64 +4690,6 @@
   margin: 3px 0 0;
   font-size: 12px;
   color: #6f8498;
-}
-
-.table-ops-controls {
-  display: grid;
-  grid-template-columns: auto auto minmax(220px, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 8px 10px;
-  box-shadow: 0 1px 0 rgba(10, 30, 45, 0.06);
-}
-
-.table-ops-field select {
-  min-width: 102px;
-  border: 0;
-  border-bottom: 1px solid #d6e1ea;
-  border-radius: 0;
-  background: #ffffff;
-  padding: 6px 4px;
-  font-size: 12px;
-  color: #2b465d;
-  height: 32px;
-}
-
-.table-ops-checkbox {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #4c6278;
-}
-
-.table-ops-search {
-  border: 0;
-  border-bottom: 1px solid #d6e1ea;
-  border-radius: 0;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 4px;
-  height: 32px;
-}
-
-.table-ops-search i {
-  color: #708599;
-  font-size: 12px;
-}
-
-.table-ops-search input {
-  border: 0;
-  background: transparent;
-  width: 100%;
-  height: 100%;
-  font-size: 12px;
-  color: #1f3a52;
-  outline: none;
 }
 
 .table-ops-columns-btn {
@@ -4946,19 +4888,6 @@
 .row-actions-table {
   position: relative;
   white-space: nowrap;
-}
-
-.table-bulk-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.table-bulk-toolbar .task-meta {
-  margin: 0;
 }
 
 .table-actions-menu {
@@ -5727,6 +5656,7 @@
   gap: 2px;
   margin-left: auto;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.14s ease;
 }
 
@@ -5752,12 +5682,22 @@
   border-radius: 999px;
 }
 
+.crm-phone-call-btn:focus-visible,
+.crm-phone-copy-btn:focus-visible {
+  color: #1f5b97;
+  background: rgba(31, 91, 151, 0.1);
+  border-radius: 999px;
+  outline: 2px solid rgba(31, 91, 151, 0.35);
+  outline-offset: 1px;
+}
+
 .lead-row:hover .crm-phone-actions,
 .crm-table-hover-row:hover .crm-phone-actions,
 .crm-phone-cell:focus-within .crm-phone-actions,
-.lead-record-phone-list .crm-phone-actions,
-.lead-record-detail-value .crm-phone-actions {
+.lead-record-phone-list .crm-phone-cell:hover .crm-phone-actions,
+.lead-record-detail-value .crm-phone-cell:hover .crm-phone-actions {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .crm-table-meta {
@@ -5943,7 +5883,7 @@
 
 @media (hover: none) {
   .lead-row-inline-actions,
-  .crm-row-inline-actions {
+.crm-row-inline-actions {
     opacity: 1;
     pointer-events: auto;
     width: 24px;
@@ -6664,7 +6604,7 @@
   }
 
   .crm-lead-title-meta,
-  .crm-lead-inline-filter span {
+.crm-lead-inline-filter span {
     font-size: 11px;
   }
 
@@ -6703,12 +6643,12 @@
   }
 
   .crm-list-v2 .data-table th,
-  .crm-list-v2 .data-table td {
+.crm-list-v2 .data-table td {
     padding: 8px 9px;
   }
 
   .crm-list-v2 .data-table thead tr::after,
-  .crm-list-v2 .data-table tbody tr::after {
+.crm-list-v2 .data-table tbody tr::after {
     left: 9px;
     right: 9px;
   }
@@ -6723,27 +6663,27 @@
   }
 
   .crm-name-sub,
-  .crm-owner-text,
-  .crm-table-meta,
-  .crm-phone-subline .crm-phone-value {
+.crm-owner-text,
+.crm-table-meta,
+.crm-phone-subline .crm-phone-value {
     font-size: 10.5px;
   }
 
   .crm-phone-call-btn,
-  .crm-phone-copy-btn {
+.crm-phone-copy-btn {
     width: 22px;
     height: 22px;
   }
 
   .lead-record-hero,
-  .lead-record-surface,
-  .lead-profile-empty-state {
+.lead-record-surface,
+.lead-profile-empty-state {
     padding: 12px;
   }
 
   .lead-record-section-subtitle,
-  .lead-record-inline-meta,
-  .lead-more-actions-meta {
+.lead-record-inline-meta,
+.lead-more-actions-meta {
     font-size: 11px;
   }
 
@@ -6811,7 +6751,7 @@
   }
 
   .deal-pipeline-card-value,
-  .deal-pipeline-card-meta {
+.deal-pipeline-card-meta {
     font-size: 11px;
   }
 }
@@ -6839,7 +6779,7 @@
   }
 
   .crm-lead-title-meta,
-  .crm-lead-inline-filter span {
+.crm-lead-inline-filter span {
     font-size: 10.5px;
   }
 
@@ -6887,7 +6827,7 @@
   }
 
   .crm-list-v2 .data-table thead tr::after,
-  .crm-list-v2 .data-table tbody tr::after {
+.crm-list-v2 .data-table tbody tr::after {
     left: 8px;
     right: 8px;
   }
@@ -6908,9 +6848,9 @@
   }
 
   .crm-name-sub,
-  .crm-owner-text,
-  .crm-table-meta,
-  .crm-phone-subline .crm-phone-value {
+.crm-owner-text,
+.crm-table-meta,
+.crm-phone-subline .crm-phone-value {
     font-size: 10.5px;
   }
 
@@ -6925,7 +6865,7 @@
   }
 
   .crm-phone-call-btn,
-  .crm-phone-copy-btn {
+.crm-phone-copy-btn {
     width: 20px;
     height: 20px;
   }
@@ -6937,7 +6877,7 @@
   }
 
   .attendance-policy-break-card label > span,
-  .attendance-inline-field > span {
+.attendance-inline-field > span {
     font-size: 9px;
   }
 
@@ -6946,30 +6886,30 @@
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-shell,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-grid {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-grid {
     gap: 8px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-trigger,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger {
     min-height: 38px;
     padding: 8px 10px;
     border-radius: 8px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-trigger > span,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger > span {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger > span {
     font-size: 12.5px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-popover,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-popover {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-popover {
     border-radius: 10px;
     padding: 5px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-option,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-option {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-option {
     padding: 6px 7px;
     font-size: 11px;
   }
@@ -6981,14 +6921,14 @@
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .form-field input,
-  .modal-form[data-mode="attendance-policy-compose"] .form-field textarea {
+.modal-form[data-mode="attendance-policy-compose"] .form-field textarea {
     border-radius: 8px;
     font-size: 12px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-card,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-workdays,
-  .attendance-break-option {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-workdays,
+.attendance-break-option {
     border-radius: 8px;
   }
 
@@ -7010,24 +6950,11 @@
     font-size: 11px;
   }
 
-  .table-ops-controls {
-    gap: 7px;
-    padding: 7px 9px;
-  }
-
-  .table-ops-field select,
-  .table-ops-search,
   .table-ops-columns-btn {
     height: 30px;
     font-size: 11px;
   }
 
-  .table-ops-field select {
-    min-width: 96px;
-  }
-
-  .table-ops-search input,
-  .table-ops-checkbox,
   .projects-search input {
     font-size: 11px;
   }
@@ -7040,26 +6967,26 @@
 
 @media (min-width: 1180px) {
   .lead-profile-page-view,
-  .lead-profile-page-shell,
-  .lead-record-main,
-  .lead-record-side,
-  .lead-record-notes,
-  .lead-record-related-block {
+.lead-profile-page-shell,
+.lead-record-main,
+.lead-record-side,
+.lead-record-notes,
+.lead-record-related-block {
     gap: 8px;
   }
 
   .lead-profile-page-toolbar,
-  .lead-profile-page-actions,
-  .lead-record-section-head,
-  .lead-record-inline-meta,
-  .lead-profile-subline,
-  .lead-profile-list-meta {
+.lead-profile-page-actions,
+.lead-record-section-head,
+.lead-record-inline-meta,
+.lead-profile-subline,
+.lead-profile-list-meta {
     gap: 8px;
   }
 
   .lead-record-hero,
-  .lead-record-surface,
-  .lead-profile-empty-state {
+.lead-record-surface,
+.lead-profile-empty-state {
     padding: 11px;
   }
 
@@ -7090,10 +7017,10 @@
   }
 
   .lead-record-summary-text,
-  .lead-record-section-subtitle,
-  .lead-record-inline-meta,
-  .lead-more-actions-meta,
-  .lead-profile-empty-state p {
+.lead-record-section-subtitle,
+.lead-record-inline-meta,
+.lead-more-actions-meta,
+.lead-profile-empty-state p {
     font-size: 11px;
   }
 
@@ -7102,7 +7029,7 @@
   }
 
   .lead-record-surface,
-  .lead-profile-empty-state {
+.lead-profile-empty-state {
     gap: 8px;
   }
 
@@ -7146,28 +7073,28 @@
   }
 
   .lead-profile-page-view .lead-profile-list-row,
-  .lead-profile-page-view .lead-profile-timeline-item {
+.lead-profile-page-view .lead-profile-timeline-item {
     padding: 9px 0;
   }
 }
 
 @media (min-width: 1180px) {
   .projects-workspace-shell,
-  .projects-workspace,
-  .projects-sidebar,
-  .projects-sidebar-controls,
-  .projects-list,
-  .projects-detail,
-  .projects-detail-pane,
-  .projects-detail-scroll,
-  .project-team-stack,
-  .project-activity-stack {
+.projects-workspace,
+.projects-sidebar,
+.projects-sidebar-controls,
+.projects-list,
+.projects-detail,
+.projects-detail-pane,
+.projects-detail-scroll,
+.project-team-stack,
+.project-activity-stack {
     gap: 8px;
   }
 
   .projects-workspace-shell,
-  .projects-sidebar-controls,
-  .projects-detail {
+.projects-sidebar-controls,
+.projects-detail {
     padding: 9px;
   }
 
@@ -7186,14 +7113,14 @@
   }
 
   .projects-sort span,
-  .project-list-meta,
-  .project-list-foot,
-  .projects-detail-note,
-  .projects-detail-section-head span,
-  .projects-detail-progress-head,
-  .projects-detail-progress-head strong,
-  .project-activity-time,
-  .projects-stat-card .task-meta {
+.project-list-meta,
+.project-list-foot,
+.projects-detail-note,
+.projects-detail-section-head span,
+.projects-detail-progress-head,
+.projects-detail-progress-head strong,
+.project-activity-time,
+.projects-stat-card .task-meta {
     font-size: 11px;
   }
 
@@ -7225,9 +7152,9 @@
   }
 
   .project-list-title,
-  .projects-detail-title,
-  .project-task-title,
-  .project-activity-title {
+.projects-detail-title,
+.project-task-title,
+.project-activity-title {
     font-size: 12px;
   }
 
@@ -7292,7 +7219,7 @@
   }
 
   .project-team-row,
-  .project-activity-row {
+.project-activity-row {
     gap: 8px;
   }
 
@@ -7309,12 +7236,11 @@
 
 @media (min-width: 1180px) {
   .crm-filter-row,
-  .crm-lead-toolbar,
-  .crm-lead-tabbar,
-  .crm-lead-toolbar-controls,
-  .crm-lead-inline-filter,
-  .table-bulk-toolbar,
-  .row-actions {
+.crm-lead-toolbar,
+.crm-lead-tabbar,
+.crm-lead-toolbar-controls,
+.crm-lead-inline-filter,
+.row-actions {
     gap: 6px;
   }
 
@@ -7330,11 +7256,9 @@
   }
 
   .crm-lead-tab small,
-  .crm-lead-inline-filter span,
-  .table-bulk-toolbar .task-meta,
-  .table-ops-page-size,
-  .table-ops-pages,
-  .table-ops-checkbox {
+.crm-lead-inline-filter span,
+.table-ops-page-size,
+.table-ops-pages {
     font-size: 11px;
   }
 
@@ -7354,62 +7278,36 @@
   }
 
   .crm-list-v2 .data-table-shell,
-  .table-ops-wrap,
-  .attendance-panel .data-table-shell {
+.table-ops-wrap,
+.attendance-panel .data-table-shell {
     border-radius: 9px;
   }
 
   .crm-list-v2 .data-table,
-  .table-ops-wrap .data-table,
-  .attendance-view .data-table {
+.table-ops-wrap .data-table,
+.attendance-view .data-table {
     font-size: 11.5px;
   }
 
   .crm-list-v2 .data-table th,
-  .crm-list-v2 .data-table td,
-  .table-ops-wrap .data-table th,
-  .table-ops-wrap .data-table td,
-  .attendance-view .data-table th,
-  .attendance-view .data-table td {
+.crm-list-v2 .data-table td,
+.table-ops-wrap .data-table th,
+.table-ops-wrap .data-table td,
+.attendance-view .data-table th,
+.attendance-view .data-table td {
     padding: 7px 8px;
   }
 
   .crm-list-v2 .data-table thead tr::after,
-  .crm-list-v2 .data-table tbody tr::after,
-  .table-ops-wrap .data-table thead tr::after,
-  .table-ops-wrap .data-table tbody tr::after {
+.crm-list-v2 .data-table tbody tr::after,
+.table-ops-wrap .data-table thead tr::after,
+.table-ops-wrap .data-table tbody tr::after {
     left: 8px;
     right: 8px;
   }
 
-  .table-ops-controls {
-    grid-template-columns: auto auto minmax(190px, 1fr) auto;
-    gap: 6px;
-    padding: 6px 8px;
-    border-radius: 9px;
-  }
-
-  .table-ops-field select,
-  .table-ops-search,
   .table-ops-columns-btn {
     height: 28px;
-    font-size: 10.5px;
-  }
-
-  .table-ops-field select {
-    min-width: 88px;
-    padding: 5px 4px;
-  }
-
-  .table-ops-search {
-    gap: 5px;
-  }
-
-  .table-ops-search i {
-    font-size: 11px;
-  }
-
-  .table-ops-search input {
     font-size: 10.5px;
   }
 
@@ -7441,10 +7339,6 @@
     font-size: 10.5px;
   }
 
-  .table-bulk-toolbar {
-    margin-bottom: 4px;
-  }
-
   .table-actions-dropdown {
     min-width: 176px;
     border-radius: 10px;
@@ -7461,11 +7355,11 @@
 
 @media (min-width: 1180px) {
   .crm-lead-total-badge,
-  .team-tag,
-  .team-status-chip,
-  .attendance-status-pill,
-  .attendance-break-chip,
-  .attendance-late-flag {
+.team-tag,
+.team-status-chip,
+.attendance-status-pill,
+.attendance-break-chip,
+.attendance-late-flag {
     font-size: 9px;
   }
 
@@ -7476,7 +7370,7 @@
   }
 
   .team-tag,
-  .team-status-chip {
+.team-status-chip {
     padding: 2px 7px;
   }
 
@@ -7505,57 +7399,57 @@
   }
 
   .attendance-view,
-  .attendance-layout,
-  .attendance-v2,
-  .attendance-v2-panels,
-  .attendance-today-workspace,
-  .attendance-summary-grid,
-  .attendance-policy-grid,
-  .attendance-break-plan,
-  .attendance-timeline-list,
-  .attendance-team-filters,
-  .attendance-request-actions {
+.attendance-layout,
+.attendance-v2,
+.attendance-v2-panels,
+.attendance-today-workspace,
+.attendance-summary-grid,
+.attendance-policy-grid,
+.attendance-break-plan,
+.attendance-timeline-list,
+.attendance-team-filters,
+.attendance-request-actions {
     gap: 7px;
   }
 
   .attendance-card,
-  .attendance-panel,
-  .attendance-policy-break-card {
+.attendance-panel,
+.attendance-policy-break-card {
     padding: 9px 10px;
     border-radius: 9px;
   }
 
   .attendance-card-head,
-  .attendance-panel-head {
+.attendance-panel-head {
     gap: 7px;
     padding-bottom: 7px;
   }
 
   .attendance-card-eyebrow,
-  .attendance-panel .attendance-card-eyebrow,
-  .attendance-policy-break-card label > span,
-  .attendance-inline-field > span {
+.attendance-panel .attendance-card-eyebrow,
+.attendance-policy-break-card label > span,
+.attendance-inline-field > span {
     font-size: 9px;
   }
 
   .attendance-status-pill,
-  .attendance-break-chip,
-  .attendance-late-flag {
+.attendance-break-chip,
+.attendance-late-flag {
     padding: 2px 7px;
   }
 
   .attendance-summary-grid p,
-  .attendance-break-row p,
-  .attendance-timeline-item p,
-  .attendance-timeline-item span,
-  .attendance-compliance {
+.attendance-break-row p,
+.attendance-timeline-item p,
+.attendance-timeline-item span,
+.attendance-compliance {
     font-size: 10.5px;
   }
 
   .attendance-summary-grid strong,
-  .attendance-policy-grid strong,
-  .attendance-break-row strong,
-  .attendance-timeline-item strong {
+.attendance-policy-grid strong,
+.attendance-break-row strong,
+.attendance-timeline-item strong {
     font-size: 12px;
   }
 
@@ -7575,12 +7469,12 @@
   }
 
   .attendance-live-summary,
-  .attendance-history-filters {
+.attendance-history-filters {
     grid-template-columns: 1fr;
   }
 
   .attendance-today-clock-digital,
-  .attendance-today-live-time {
+.attendance-today-live-time {
     font-size: 10.5px;
   }
 
@@ -7597,7 +7491,7 @@
   }
 
   .attendance-today-shift-card p,
-  .attendance-today-shift-card small {
+.attendance-today-shift-card small {
     font-size: 10.5px;
   }
 
@@ -7623,34 +7517,34 @@
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-shell,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-grid,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-grid,
-  .attendance-break-picker {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-grid,
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-grid,
+.attendance-break-picker {
     gap: 8px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-trigger,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger {
     min-height: 38px;
     padding: 8px 10px;
     border-radius: 8px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-trigger > span,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger > span {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger > span {
     font-size: 12px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-popover,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-popover {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-popover {
     border-radius: 10px;
     padding: 4px;
   }
 
   .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-option,
-  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-option,
-  .attendance-break-option,
-  .attendance-day-option {
+.modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-option,
+.attendance-break-option,
+.attendance-day-option {
     font-size: 11px;
   }
 
@@ -7780,7 +7674,6 @@
 :root[data-theme="dark"] .lead-record-detail-label i,
 :root[data-theme="dark"] .lead-profile-timeline-title i,
 :root[data-theme="dark"] .crm-lead-select-wrap i,
-:root[data-theme="dark"] .table-ops-search i,
 :root[data-theme="dark"] .crm-page-size-trigger i,
 :root[data-theme="dark"] .lead-status-option i,
 :root[data-theme="dark"] .table-menu-item-icon,
@@ -7896,8 +7789,6 @@
 }
 
 :root[data-theme="dark"] .crm-lead-select-wrap select,
-:root[data-theme="dark"] .table-ops-field select,
-:root[data-theme="dark"] .table-ops-search,
 :root[data-theme="dark"] .table-ops-page-size select,
 :root[data-theme="dark"] .crm-page-size-trigger {
   border-color: var(--line);
@@ -7906,26 +7797,17 @@
 }
 
 :root[data-theme="dark"] .crm-lead-select-wrap select:focus,
-:root[data-theme="dark"] .table-ops-field select:focus,
-:root[data-theme="dark"] .table-ops-search:focus-within,
 :root[data-theme="dark"] .table-ops-page-size select:focus,
 :root[data-theme="dark"] .crm-page-size-trigger:focus-visible {
   border-color: rgba(123, 162, 255, 0.48);
   box-shadow: 0 0 0 1px rgba(123, 162, 255, 0.16);
 }
 
-:root[data-theme="dark"] .table-ops-search input,
-:root[data-theme="dark"] .table-ops-search input::placeholder {
-  color: var(--text-soft);
-}
-
-:root[data-theme="dark"] .table-ops-controls,
 :root[data-theme="dark"] .table-ops-footer {
   background: #202020;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
-:root[data-theme="dark"] .table-ops-checkbox,
 :root[data-theme="dark"] .table-ops-page-size,
 :root[data-theme="dark"] .table-ops-footer .task-meta,
 :root[data-theme="dark"] .table-ops-pages {

@@ -1,0 +1,36 @@
+.dashboard-command-toolbar-shell {
+  align-items: center;
+  padding: 12px 16px;
+  background: #ffffff;
+}
+
+.dashboard-command-toolbar-copy {
+  gap: 2px;
+}
+
+.dashboard-command-toolbar-copy h2 {
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-command-toolbar-copy p:last-child {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #637b95;
+}
+
+:root[data-theme="dark"] .dashboard-command-toolbar-shell {
+  background: #242424;
+}
+
+@media (max-width: 720px) {
+  .dashboard-command-toolbar-shell {
+    padding: 11px 13px;
+  }
+
+  .dashboard-command-toolbar-copy h2 {
+    font-size: 16px;
+  }
+}

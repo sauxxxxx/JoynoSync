@@ -1,0 +1,485 @@
+/* Agent Leads workspace: personal queue, next actions, and compact call workflow. */
+@media (min-width: 1025px) {
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar {
+    height: 56px;
+    min-height: 56px;
+    padding: 7px 22px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .toolbar {
+    gap: 14px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-search-wrap {
+    flex-basis: 380px;
+    width: min(380px, 100%);
+    max-width: 380px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-search-shell {
+    height: 38px;
+    min-height: 38px;
+    gap: 9px;
+    padding-inline: 12px;
+    border-radius: 9px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-search-icon {
+    font-size: 14px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .search {
+    min-height: 36px;
+    font-size: 12.5px;
+    font-weight: 400;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-actions,
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-tools {
+    gap: 4px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-attendance-btn {
+    height: 36px;
+    min-height: 36px;
+    padding: 0 10px;
+    border-radius: 9px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-attendance-copy strong {
+    font-size: 11px;
+    font-weight: 550;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-icon-btn,
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-avatar-btn {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .app-shell:has(.crm-leads-list.is-agent-view) .topbar-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 9.5px;
+  }
+
+  .crm-leads-list.is-agent-view {
+    --lead-agent-accent: #1467ed;
+    --lead-agent-text: #0d1d39;
+    --lead-agent-muted: #526987;
+    --lead-agent-border: #dbe4f0;
+    --lead-agent-border-soft: #e7edf5;
+    display: flex;
+    min-height: calc(100dvh - 88px);
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-header-shell {
+    z-index: 12;
+    margin: 0;
+    padding: 5px 4px 3px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-header-main {
+    min-height: 52px;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-title-group {
+    display: grid;
+    gap: 4px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-title-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-title-row .block-title {
+    margin: 0;
+    color: var(--lead-agent-text);
+    font-size: 22px;
+    font-weight: 650;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-total-badge {
+    display: inline-flex;
+    min-width: 34px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 7px;
+    border: 1px solid #d9e7ff;
+    border-radius: 999px;
+    color: #075ad7;
+    background: #e8f1ff;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-title-meta {
+    margin: 0;
+    color: var(--lead-agent-muted);
+    font-size: 11.5px;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-header-actions {
+    margin-left: auto;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-agent-action,
+  .crm-leads-list.is-agent-view .crm-lead-agent-primary,
+  .lead-agent-saved-views-btn,
+  .lead-agent-view-settings {
+    display: inline-flex;
+    height: 32px;
+    min-height: 32px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 10px;
+    border: 1px solid #d4dfed;
+    border-radius: 8px;
+    color: #162846;
+    background: #fff;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 35, 62, 0.035);
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-agent-primary {
+    min-width: 118px;
+    border-color: var(--lead-agent-accent);
+    color: #fff;
+    background: var(--lead-agent-accent);
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(20, 103, 237, 0.16);
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-agent-primary:hover {
+    border-color: #095ad5;
+    background: #095ad5;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-agent-primary:disabled {
+    border-color: #cbd8e8;
+    color: #70839b;
+    background: #e8eef6;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-agent-action:hover,
+  .lead-agent-saved-views-btn:hover,
+  .lead-agent-view-settings:hover {
+    border-color: #b8cae1;
+    color: #075bd7;
+    background: #f8fbff;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-agent-action:focus-visible,
+  .crm-leads-list.is-agent-view .crm-lead-agent-primary:focus-visible,
+  .lead-agent-saved-views-btn:focus-visible,
+  .lead-agent-view-settings:focus-visible {
+    outline: 3px solid rgba(20, 103, 237, 0.2);
+    outline-offset: 2px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-filter-btn.is-active {
+    border-color: #9fbee9;
+    color: #075bd7;
+    background: #edf4ff;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-filter-btn small {
+    display: inline-grid;
+    min-width: 16px;
+    height: 16px;
+    place-items: center;
+    padding: 0 4px;
+    border-radius: 999px;
+    color: #fff;
+    background: var(--lead-agent-accent);
+    font-size: 9px;
+  }
+
+  .lead-agent-viewbar {
+    z-index: 10;
+    display: flex;
+    min-height: 48px;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0 8px;
+    border: 1px solid var(--lead-agent-border);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 35, 62, 0.025);
+  }
+
+  .lead-agent-view-tabs {
+    display: flex;
+    min-width: 0;
+    align-items: stretch;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .lead-agent-view-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lead-agent-view-tab {
+    position: relative;
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    gap: 7px;
+    padding: 0 11px;
+    border: 0;
+    color: #344a68;
+    background: transparent;
+    font-size: 11.5px;
+    font-weight: 550;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .lead-agent-view-tab::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    bottom: -1px;
+    left: 8px;
+    height: 2px;
+    border-radius: 3px 3px 0 0;
+    background: transparent;
+  }
+
+  .lead-agent-view-tab:hover,
+  .lead-agent-view-tab.is-active {
+    color: #075bd7;
+  }
+
+  .lead-agent-view-tab.is-active::after {
+    background: var(--lead-agent-accent);
+  }
+
+  .lead-agent-view-tab small {
+    display: inline-flex;
+    min-width: 20px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    border-radius: 999px;
+    color: #405775;
+    background: #edf2f8;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .lead-agent-view-tab.is-active small {
+    color: #075bd7;
+    background: #e8f1ff;
+  }
+
+  .lead-agent-viewbar-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .lead-agent-menu-shell {
+    position: relative;
+  }
+
+  .lead-agent-menu-shell > summary {
+    list-style: none;
+  }
+
+  .lead-agent-menu-shell > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lead-agent-saved-views-btn {
+    min-width: 116px;
+  }
+
+  .lead-agent-view-settings {
+    width: 32px;
+    padding: 0;
+    font-size: 14px;
+  }
+
+  .lead-agent-action-menu {
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 0;
+    z-index: 60;
+    display: grid;
+    min-width: 170px;
+    gap: 3px;
+    padding: 7px;
+    border: 1px solid var(--lead-agent-border);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 16px 36px rgba(19, 42, 74, 0.16);
+  }
+
+  .lead-agent-action-menu.is-right {
+    right: 0;
+    left: auto;
+  }
+
+  .lead-agent-action-menu button {
+    min-height: 34px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 7px;
+    color: #213753;
+    background: transparent;
+    font-size: 11px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .lead-agent-action-menu button:hover,
+  .lead-agent-action-menu button:focus-visible {
+    color: #075bd7;
+    background: #edf4ff;
+    outline: none;
+  }
+
+}
+
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .crm-leads-list.is-agent-view .data-table {
+    min-width: 1050px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-header-main {
+    align-items: flex-start;
+  }
+
+  .crm-leads-list.is-agent-view .crm-lead-header-actions {
+    padding-top: 2px;
+  }
+
+  .lead-agent-saved-views-btn span,
+  .crm-leads-list.is-agent-view .crm-lead-agent-action span {
+    display: none;
+  }
+
+  .lead-agent-saved-views-btn,
+  .crm-leads-list.is-agent-view .crm-lead-agent-action {
+    width: 32px;
+    min-width: 32px;
+    padding: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .lead-agent-viewbar {
+    display: grid;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-bg);
+  }
+
+  .lead-agent-view-tabs {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .lead-agent-view-tab {
+    min-height: 38px;
+    padding: 0 10px;
+    border: 0;
+    color: var(--text-soft);
+    background: transparent;
+    white-space: nowrap;
+  }
+
+  .lead-agent-view-tab.is-active {
+    color: var(--accent);
+  }
+
+  .lead-agent-viewbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .lead-agent-workflow-hint {
+    margin: 0;
+    font-size: 11px;
+  }
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-agent-view,
+:root[data-theme="dark"] .lead-agent-viewbar,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view > .data-table-shell,
+:root[data-theme="dark"] .lead-agent-action-menu,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .lead-agent-quick-actions {
+  color: var(--text);
+  border-color: var(--line);
+  background: #191919;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .crm-lead-title-row .block-title,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .crm-name-text {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .crm-lead-agent-action,
+:root[data-theme="dark"] .lead-agent-saved-views-btn,
+:root[data-theme="dark"] .lead-agent-view-settings {
+  color: var(--text);
+  border-color: var(--line);
+  background: #202020;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .data-table thead {
+  background: #202020;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .data-table tbody tr:first-child,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .data-table tbody tr:hover,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .data-table tbody tr:focus-within {
+  background: #222222;
+}
+
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .crm-inline-avatar.is-person-tone {
+  color: hsl(var(--crm-avatar-hue, 214) 68% 84%);
+  background: hsl(var(--crm-avatar-hue, 214) 32% 25%);
+}
+
+:root[data-theme="dark"] .lead-agent-view-tab:not(.is-active),
+:root[data-theme="dark"] .lead-agent-workflow-hint,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .crm-name-sub,
+:root[data-theme="dark"] .crm-leads-list.is-agent-view .crm-table-meta {
+  color: var(--text-soft);
+}

@@ -2,7 +2,7 @@ const TASK_TYPE_CANONICAL_MAP = new Map([
   ["general", "General"],
   ["call", "Call"],
   ["callback", "Callback"],
-  ["project", "Project"],
+  ["project", "General"],
   ["recurring", "Recurring"],
   ["lead", "Lead"],
   ["contact", "Contact"],

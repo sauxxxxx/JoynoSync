@@ -1,0 +1,539 @@
+/* Task composer: compact, document-like task capture with progressive disclosure. */
+.modal-card.is-task-compose {
+  width: min(620px, calc(100vw - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 18px 44px rgba(15, 15, 15, 0.18);
+}
+
+.modal-card.is-task-compose .modal-head {
+  margin: 0;
+  padding: 18px 20px 8px;
+}
+
+.modal-card.is-task-compose .modal-head h3 {
+  color: #202124;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.modal-card.is-task-compose .modal-head .icon-btn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 5px;
+  color: #787774;
+  background: transparent;
+  font-size: 0;
+}
+
+.modal-card.is-task-compose .modal-head .icon-btn::before {
+  content: "\00d7";
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.modal-card.is-task-compose .modal-head .icon-btn:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+.modal-card.is-task-compose .modal-form {
+  gap: 0;
+}
+
+.modal-card.is-task-compose .task-compose-shell {
+  display: grid;
+  gap: 0;
+  padding: 0 20px 8px;
+}
+
+.modal-card.is-task-compose .task-compose-hero,
+.modal-card.is-task-compose .task-compose-deadline-card,
+.modal-card.is-task-compose .task-advanced-flat,
+.modal-card.is-task-compose .task-call-fields,
+.modal-card.is-task-compose .task-notes-editor {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.modal-card.is-task-compose .task-compose-hero {
+  gap: 16px;
+  padding: 8px 0 4px;
+}
+
+.modal-card.is-task-compose .task-compose-title-row {
+  gap: 8px;
+}
+
+.modal-card.is-task-compose .task-compose-title {
+  padding: 0;
+  border: 0;
+}
+
+.modal-card.is-task-compose .task-compose-title input {
+  min-height: 42px;
+  padding: 2px 0;
+  color: #202124;
+  background: transparent;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  caret-color: #202124;
+}
+
+.modal-card.is-task-compose .task-compose-title input::placeholder {
+  color: #9b9a97;
+  opacity: 1;
+}
+
+.modal-card.is-task-compose .task-priority-trigger {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 5px;
+  color: #787774;
+}
+
+.modal-card.is-task-compose .task-priority-trigger:hover {
+  background: #f1f1ef;
+}
+
+.modal-card.is-task-compose .task-compose-meta-grid {
+  display: block;
+}
+
+.modal-card.is-task-compose .task-compose-assignee-field,
+.modal-card.is-task-compose .task-compose-deadline-head {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #ececea;
+}
+
+.modal-card.is-task-compose .task-compose-shell .form-field > span,
+.modal-card.is-task-compose .task-compose-deadline-label,
+.modal-card.is-task-compose .task-call-label,
+.modal-card.is-task-compose .task-notes-editor > span {
+  color: #787774;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.modal-card.is-task-compose .task-assignee-trigger {
+  min-height: 40px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  color: #202124;
+  background: transparent;
+}
+
+.modal-card.is-task-compose .task-assignee-trigger:hover,
+.modal-card.is-task-compose .task-assignee-trigger.is-open {
+  background: #f7f7f5;
+  box-shadow: none;
+}
+
+.modal-card.is-task-compose .task-assignee-avatar {
+  width: 28px;
+  height: 28px;
+  color: #37352f;
+  background: #f1f1ef;
+  font-size: 10px;
+}
+
+.modal-card.is-task-compose .task-assignee-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.modal-card.is-task-compose .task-assignee-copy strong {
+  color: #202124;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.modal-card.is-task-compose .task-assignee-copy small {
+  overflow: hidden;
+  color: #787774;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-card.is-task-compose .task-compose-deadline-card {
+  padding: 0;
+}
+
+.modal-card.is-task-compose .task-compose-deadline-head {
+  justify-content: stretch;
+}
+
+.modal-card.is-task-compose .task-compose-deadline-preview {
+  width: 100%;
+  min-height: 40px;
+  justify-content: flex-start;
+  padding: 4px 6px;
+  border-radius: 5px;
+  color: #37352f;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.modal-card.is-task-compose .task-compose-deadline-preview:hover,
+.modal-card.is-task-compose .task-compose-deadline-preview.is-open {
+  background: #f7f7f5;
+}
+
+.modal-card.is-task-compose .task-compose-deadline-preview > i:last-child {
+  margin-left: auto;
+  color: #9b9a97;
+}
+
+.modal-card.is-task-compose .task-advanced-flat {
+  gap: 0;
+  padding: 0;
+}
+
+.modal-card.is-task-compose .task-chip-grid {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.modal-card.is-task-compose .task-chip-field {
+  min-height: 48px;
+  border-bottom: 1px solid #ececea;
+}
+
+.modal-card.is-task-compose .task-chip-btn {
+  min-height: 47px;
+  padding: 4px 6px;
+  display: grid;
+  grid-template-columns: 18px 82px minmax(0, 1fr) 14px;
+  gap: 12px;
+  border-radius: 5px;
+  color: #37352f;
+  background: transparent;
+  text-align: left;
+}
+
+.modal-card.is-task-compose .task-chip-btn:hover,
+.modal-card.is-task-compose .task-chip-field.is-open .task-chip-btn {
+  background: #f7f7f5;
+}
+
+.modal-card.is-task-compose .task-chip-btn > i:first-child,
+.modal-card.is-task-compose .task-chip-btn > i:last-child {
+  color: #9b9a97;
+}
+
+.modal-card.is-task-compose .task-chip-btn span {
+  color: #787774;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.modal-card.is-task-compose .task-chip-btn strong {
+  color: #37352f;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.modal-card.is-task-compose .task-advanced-toggle {
+  min-height: 44px;
+  width: 100%;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 5px;
+  color: #787774;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.modal-card.is-task-compose .task-advanced-toggle:hover {
+  color: #37352f;
+  background: #f7f7f5;
+}
+
+.modal-card.is-task-compose .task-advanced-toggle i {
+  font-size: 10px;
+  transition: transform 160ms ease;
+}
+
+.modal-card.is-task-compose .task-advanced-toggle.is-open i {
+  transform: rotate(90deg);
+}
+
+.modal-card.is-task-compose .task-advanced-body[hidden] {
+  display: none !important;
+}
+
+.modal-card.is-task-compose .task-advanced-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 0 12px 30px;
+}
+
+.modal-card.is-task-compose .task-secondary-properties {
+  border-top: 1px solid #ececea;
+}
+
+.modal-card.is-task-compose .task-notes-editor {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.modal-card.is-task-compose .task-notes-editor textarea,
+.modal-card.is-task-compose .task-call-field input {
+  min-height: 72px;
+  padding: 8px 10px;
+  border: 1px solid #dedede;
+  border-radius: 5px;
+  color: #202124;
+  background: #ffffff;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.modal-card.is-task-compose .task-call-field input {
+  min-height: 36px;
+}
+
+.modal-card.is-task-compose .task-notes-editor textarea:focus,
+.modal-card.is-task-compose .task-call-field input:focus {
+  outline: none;
+  border-color: #9b9a97;
+  box-shadow: 0 0 0 2px rgba(55, 53, 47, 0.12);
+}
+
+.modal-card.is-task-compose .task-call-fields {
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid #ececea;
+  border-bottom: 1px solid #ececea;
+}
+
+.modal-card.is-task-compose .task-call-fields[hidden] {
+  display: none !important;
+}
+
+.modal-card.is-task-compose .task-call-mode-btn,
+.modal-card.is-task-compose .task-chip-apply {
+  border-radius: 5px;
+  color: #50545a;
+  background: #f1f1ef;
+}
+
+.modal-card.is-task-compose .task-call-mode-btn.is-active,
+.modal-card.is-task-compose .task-chip-apply:hover {
+  color: #ffffff;
+  background: #202124;
+}
+
+.modal-card.is-task-compose .task-call-link-preview {
+  padding: 8px 10px;
+  border-radius: 5px;
+  background: #f7f7f5;
+}
+
+.modal-card.is-task-compose .task-assignee-popover,
+.modal-card.is-task-compose .task-chip-popover,
+.modal-card.is-task-compose .task-deadline-picker {
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 15, 15, 0.16);
+}
+
+.modal-card.is-task-compose .task-assignee-option:hover,
+.modal-card.is-task-compose .task-chip-option:hover,
+.modal-card.is-task-compose .task-preset-btn:hover,
+.modal-card.is-task-compose .task-cal-nav:hover,
+.modal-card.is-task-compose .task-cal-day:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+.modal-card.is-task-compose .task-assignee-option.is-selected,
+.modal-card.is-task-compose .task-chip-option.is-selected,
+.modal-card.is-task-compose .task-preset-btn.is-active {
+  color: #202124;
+  background: #e9e9e7;
+  box-shadow: none;
+}
+
+.modal-card.is-task-compose .task-deadline-picker {
+  top: calc(100% + 6px);
+  right: 0;
+  left: auto;
+  width: min(500px, calc(100vw - 64px));
+  padding: 8px;
+}
+
+.modal-card.is-task-compose .task-deadline-picker-main {
+  border-radius: 5px;
+  background: #f7f7f5;
+}
+
+.modal-card.is-task-compose .task-cal-day {
+  border-radius: 5px;
+  color: #37352f;
+}
+
+.modal-card.is-task-compose .task-cal-day.is-selected {
+  color: #ffffff;
+  background: #202124;
+}
+
+.modal-card.is-task-compose .task-cal-day.is-today:not(.is-selected) {
+  box-shadow: inset 0 0 0 1px #9b9a97;
+}
+
+.modal-card.is-task-compose .task-cal-time input {
+  border-radius: 5px;
+  color: #202124;
+  background: #ffffff;
+}
+
+.modal-card.is-task-compose .task-compose-actions {
+  margin: 0;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #ececea;
+}
+
+#appShell .modal-card.is-task-compose .task-compose-actions .btn {
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+#appShell .modal-card.is-task-compose .task-compose-actions .btn-light {
+  color: #50545a;
+  border-color: transparent;
+  background: transparent;
+}
+
+#appShell .modal-card.is-task-compose .task-compose-actions .btn-light:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+#appShell .modal-card.is-task-compose .task-compose-actions .btn-accent {
+  color: #ffffff;
+  border-color: #202124;
+  background: #202124;
+}
+
+#appShell .modal-card.is-task-compose .task-compose-actions .btn-accent:hover {
+  border-color: #343538;
+  background: #343538;
+  transform: none;
+}
+
+.modal-card.is-task-compose button:focus-visible,
+.modal-card.is-task-compose input:focus-visible,
+.modal-card.is-task-compose textarea:focus-visible {
+  outline: 2px solid #37352f;
+  outline-offset: 2px;
+}
+
+@media (min-width: 1025px) {
+  #appShell:not(:has(.nav-item[data-route="leads"].is-active))
+    .modal-card.is-task-compose
+    :where(button, input, textarea):focus-visible {
+    outline-color: #37352f;
+    box-shadow: none;
+  }
+
+  #appShell:not(:has(.nav-item[data-route="leads"].is-active))
+    .modal-card.is-task-compose
+    .task-compose-title
+    input:focus-visible {
+    border-radius: 0;
+    outline: none;
+    box-shadow: inset 0 -1px 0 #37352f;
+  }
+}
+
+:root[data-theme="dark"] .modal-card.is-task-compose {
+  color: #ededec;
+  background: #202020;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] .modal-card.is-task-compose .task-compose-assignee-field,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-compose-deadline-head,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-chip-field,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-compose-actions,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-secondary-properties,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-call-fields {
+  border-color: #373737;
+}
+
+:root[data-theme="dark"] .modal-card.is-task-compose .modal-head h3,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-compose-title input,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-assignee-copy strong,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-chip-btn strong,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-compose-deadline-preview {
+  color: #ededec;
+}
+
+:root[data-theme="dark"] .modal-card.is-task-compose .task-assignee-trigger:hover,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-compose-deadline-preview:hover,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-chip-btn:hover,
+:root[data-theme="dark"] .modal-card.is-task-compose .task-advanced-toggle:hover {
+  background: #2c2c2c;
+}
+
+@media (max-width: 700px) {
+  .modal-card.is-task-compose .task-compose-assignee-field,
+  .modal-card.is-task-compose .task-compose-deadline-head {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .modal-card.is-task-compose .task-advanced-body {
+    padding-left: 0;
+  }
+
+  .modal-card.is-task-compose .task-deadline-picker {
+    position: static;
+    width: 100%;
+    margin-top: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-card.is-task-compose .task-advanced-toggle i {
+    transition: none;
+  }
+}

@@ -16,11 +16,8 @@ export const PROFILE_SCOPE_OPTIONS = ["own", "team", "all"];
 export const PROFILE_PERMISSION_ACTIONS = ["view", "create", "edit", "delete", "export"];
 export const PROFILE_PERMISSION_MODULES = [
   { id: "dashboard", label: "Dashboard" },
-  { id: "my-work", label: "My Work" },
   { id: "calendar", label: "Calendar" },
-  { id: "kanban", label: "Kanban" },
-  { id: "table", label: "Table" },
-  { id: "projects", label: "Projects" },
+  { id: "kanban", label: "Tasks" },
   { id: "leads", label: "Leads" },
   { id: "contacts", label: "Contacts" },
   { id: "accounts", label: "Accounts" },

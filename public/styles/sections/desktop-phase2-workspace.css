@@ -1,0 +1,346 @@
+/* Phase 2: desktop Attendance and Settings. Mobile remains unchanged. */
+@media (min-width: 1025px) {
+  /* Attendance: make timekeeping read as one operational document. */
+  #appShell .attendance-view.attendance-v2 {
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-v2-tabs {
+    display: flex;
+    gap: var(--ui-space-5);
+    min-height: 42px;
+    padding: 0 var(--ui-space-1);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .attendance-tab-btn {
+    min-height: 42px;
+    padding: 0;
+    color: var(--ui-color-text-muted);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    font-weight: 500;
+  }
+
+  #appShell .attendance-tab-btn:hover {
+    color: var(--ui-color-text);
+    background: transparent;
+  }
+
+  #appShell .attendance-tab-btn.is-active {
+    color: var(--ui-color-text);
+    background: transparent;
+    border-bottom-color: var(--ui-color-primary);
+  }
+
+  #appShell .attendance-v2-panels {
+    padding-top: var(--ui-space-6);
+  }
+
+  #appShell .attendance-panel {
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-surface);
+    box-shadow: none;
+  }
+
+  #appShell .attendance-today-topgrid {
+    grid-template-columns: minmax(440px, 0.9fr) minmax(520px, 1.1fr);
+    gap: var(--ui-space-4);
+  }
+
+  #appShell .attendance-today-dashboard-card,
+  #appShell .attendance-today-break-card {
+    min-height: 218px;
+  }
+
+  #appShell .attendance-today-dashboard-shell {
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: var(--ui-space-5);
+    padding: var(--ui-space-5);
+  }
+
+  #appShell .attendance-today-clock-block {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-width: 0;
+    padding: var(--ui-space-5) var(--ui-space-3);
+    background: var(--ui-color-surface-subtle);
+    border-right: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .attendance-today-clock-face {
+    display: none;
+  }
+
+  #appShell .attendance-today-clock-digital {
+    color: var(--ui-color-text);
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-today-dashboard-grid {
+    gap: 0;
+    border-top: 1px solid var(--ui-color-border);
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .attendance-today-mini-card,
+  #appShell .attendance-today-shift-card {
+    min-height: 72px;
+    padding: var(--ui-space-3) var(--ui-space-4);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-today-shift-card {
+    border-right: 0;
+  }
+
+  #appShell .attendance-today-mini-card span,
+  #appShell .attendance-today-shift-card small,
+  #appShell .attendance-today-shift-card p {
+    color: var(--ui-color-text-muted);
+  }
+
+  #appShell .attendance-today-action-row,
+  #appShell .attendance-today-subactions {
+    margin-top: var(--ui-space-3);
+  }
+
+  #appShell .attendance-today-cta {
+    min-height: 38px;
+    border-radius: var(--ui-radius-control);
+    box-shadow: none;
+  }
+
+  #appShell .attendance-panel-head {
+    min-height: 48px;
+    padding: 0 var(--ui-space-4);
+    background: transparent;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .attendance-card-eyebrow {
+    color: var(--ui-color-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  #appShell .attendance-break-plan {
+    padding: var(--ui-space-2) var(--ui-space-4);
+  }
+
+  #appShell .attendance-break-row {
+    padding: var(--ui-space-3) 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell .attendance-break-row:last-child {
+    border-bottom: 0;
+  }
+
+  #appShell .attendance-break-chip,
+  #appShell .attendance-status-pill,
+  #appShell .attendance-flag-chip {
+    border-radius: var(--ui-radius-control);
+  }
+
+  #appShell .attendance-today-timeline-card {
+    margin-top: var(--ui-space-4);
+  }
+
+  #appShell .attendance-today-timeline-shell,
+  #appShell .attendance-manager-table-panel .data-table-shell {
+    border: 0;
+    border-radius: 0;
+  }
+
+  #appShell .attendance-manager-shell {
+    gap: var(--ui-space-4);
+  }
+
+  #appShell .attendance-manager-side-card,
+  #appShell .attendance-manager-topbar-panel,
+  #appShell .attendance-manager-table-panel {
+    box-shadow: none;
+  }
+
+  /* Settings: one continuous document with a quiet two-column rhythm. */
+  #appShell .settings-page.settings-console-view {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .settings-console-view .settings-page-head {
+    padding: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .settings-console-view .settings-route-switch {
+    gap: var(--ui-space-5);
+    padding: 0;
+  }
+
+  #appShell .settings-console-view .settings-route-switch button {
+    min-height: 42px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+  }
+
+  #appShell .settings-console-view .settings-route-switch button.is-active {
+    border-bottom-color: var(--ui-color-primary);
+  }
+
+  #appShell .settings-flat-form {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  #appShell .settings-flat-section {
+    display: grid;
+    grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+    gap: var(--ui-space-8);
+    padding: var(--ui-space-8) 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .settings-flat-section-copy {
+    padding: 0;
+  }
+
+  #appShell .settings-flat-section-copy h4 {
+    color: var(--ui-color-text);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  #appShell .settings-flat-section-copy p {
+    max-width: 34ch;
+    margin-top: var(--ui-space-2);
+    color: var(--ui-color-text-muted);
+    line-height: 1.55;
+  }
+
+  #appShell .settings-flat-section-body {
+    min-width: 0;
+    padding: 0;
+  }
+
+  #appShell .settings-profile-grid {
+    gap: var(--ui-space-4);
+  }
+
+  #appShell .settings-console-view .form-field > span {
+    color: var(--ui-color-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  #appShell .settings-console-view .form-field :is(input, select, textarea) {
+    min-height: 38px;
+    color: var(--ui-color-text);
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border-strong);
+    border-radius: var(--ui-radius-control);
+    box-shadow: none;
+  }
+
+  #appShell .settings-console-view .form-field textarea {
+    min-height: 92px;
+  }
+
+  #appShell .settings-appearance-grid {
+    grid-template-columns: repeat(2, minmax(0, 280px));
+    gap: var(--ui-space-3);
+  }
+
+  #appShell .settings-appearance-option {
+    padding: var(--ui-space-3);
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-control);
+    box-shadow: none;
+  }
+
+  #appShell .settings-appearance-option.is-active {
+    background: var(--ui-color-primary-soft);
+    border-color: var(--ui-color-primary);
+  }
+
+  #appShell .settings-appearance-preview {
+    height: 64px;
+    border-radius: 3px;
+  }
+
+  #appShell .settings-toggle-list {
+    gap: 0;
+    border-top: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .settings-toggle-line {
+    grid-template-columns: 20px minmax(170px, 220px) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-3) 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell .settings-toggle-line small {
+    color: var(--ui-color-text-muted);
+  }
+
+  #appShell .settings-inline-meta {
+    padding: var(--ui-space-3) 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+    border-radius: 0;
+  }
+
+  #appShell .settings-flat-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--ui-space-5) 0 var(--ui-space-8);
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .settings-check-item {
+    border-radius: var(--ui-radius-control);
+  }
+}

@@ -1,0 +1,38 @@
+.auth-signin-spinner {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0.82;
+  animation: authSigninSpin 0.7s linear infinite;
+}
+
+.auth-login-google:disabled,
+.auth-login-magic:disabled {
+  cursor: wait;
+  opacity: 0.82;
+}
+
+.auth-login-google:disabled {
+  color: #34506f;
+  background: #f7f9fc;
+}
+
+.auth-login-magic:disabled {
+  color: #ffffff;
+  background: linear-gradient(135deg, #1768ec, #2d67e6);
+}
+
+@keyframes authSigninSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-signin-spinner {
+    animation-duration: 1.4s;
+  }
+}

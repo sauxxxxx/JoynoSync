@@ -1,0 +1,432 @@
+/* Calls workspace — desktop-only visual refinement. No workflow behavior lives here. */
+@media (min-width: 1024px) {
+  #appShell .view-content:has(.calls-workspace-shell),
+  #appShell .calls-workspace-shell {
+    background: #fff;
+  }
+
+  #appShell .calls-subview-tabs .mini-btn {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .calls-workspace-shell :is(.btn-accent, .calls-start-call-btn) {
+    border-color: #202124;
+    background: #202124;
+    color: #fff;
+    box-shadow: none;
+    transform: none;
+  }
+
+  #appShell .calls-workspace-shell :is(.btn-accent, .calls-start-call-btn):hover:not(:disabled) {
+    border-color: #37352f;
+    background: #37352f;
+    color: #fff;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .view-content:has(.calls-workspace-shell) {
+    background: #fff;
+  }
+
+  .view-block.calls-workspace-shell {
+    gap: 0;
+    min-height: calc(100vh - 72px);
+    background: #fff;
+  }
+
+  .calls-subview-tabs {
+    gap: 26px;
+    min-height: 44px;
+    padding: 0 4px;
+    border-color: #e9e9e7;
+    background: #fff;
+  }
+
+  .calls-subview-tabs .mini-btn {
+    color: #787774;
+    font-size: 12px;
+    padding: 12px 0 11px;
+  }
+
+  .calls-subview-tabs .mini-btn:hover,
+  .calls-subview-tabs .mini-btn.is-active {
+    color: #202124;
+    background: transparent;
+  }
+
+  .calls-subview-tabs .mini-btn::after {
+    height: 2px;
+    background: #202124;
+  }
+
+  .calls-workspace-shell :is(.btn-accent, .calls-start-call-btn) {
+    border-color: #202124;
+    background: #202124;
+    color: #fff;
+    box-shadow: none;
+  }
+
+  .calls-workspace-shell :is(.btn-accent, .calls-start-call-btn):hover {
+    border-color: #37352f;
+    background: #37352f;
+    box-shadow: none;
+  }
+
+  /* Live — presentation only; all three columns and controls remain intact. */
+  .calls-live-lock-shell {
+    min-height: 0;
+  }
+
+  .calls-layout {
+    grid-template-columns: minmax(230px, 0.85fr) minmax(390px, 1.75fr) minmax(270px, 0.9fr);
+    gap: 0;
+    min-height: calc(100vh - 128px);
+    overflow: hidden;
+    border-bottom: 1px solid #e9e9e7;
+    background: #fff;
+  }
+
+  .calls-rail,
+  .calls-center,
+  .calls-dialer-card,
+  .calls-dialer-status-card,
+  .calls-active-panel {
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .calls-rail {
+    gap: 12px;
+    padding: 12px 10px;
+    border: 0;
+    border-right: 1px solid #e9e9e7;
+  }
+
+  .calls-center {
+    border: 0;
+    border-right: 1px solid #e9e9e7;
+  }
+
+  .calls-dialer-column {
+    gap: 0;
+    background: #fff;
+  }
+
+  .calls-dialer-card {
+    border: 0;
+    padding: 14px 16px;
+  }
+
+  .calls-list-tabs {
+    gap: 20px;
+    border-color: #e9e9e7;
+  }
+
+  .calls-list-tabs .mini-btn {
+    border: 0;
+    border-radius: 0;
+    color: #787774;
+    background: transparent;
+    box-shadow: inset 0 -2px transparent;
+  }
+
+  .calls-list-tabs .mini-btn:hover,
+  .calls-list-tabs .mini-btn.is-active {
+    color: #202124;
+    background: transparent;
+  }
+
+  .calls-list-tabs .mini-btn.is-active {
+    box-shadow: inset 0 -2px #202124;
+  }
+
+  .calls-list-head .search,
+  .calls-number-wrap {
+    border-color: transparent;
+    border-radius: 5px;
+    background: #f5f5f3;
+    box-shadow: none;
+  }
+
+  .calls-list-head .search:focus,
+  .calls-number-wrap:focus-within {
+    border-color: #a7a7a3;
+    background: #fff;
+    box-shadow: none;
+    outline: 2px solid #37352f;
+    outline-offset: 1px;
+  }
+
+  .calls-left-row {
+    padding: 4px 0;
+  }
+
+  .calls-left-row::before {
+    background: #eeeeec;
+  }
+
+  .calls-left-row-main {
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  .calls-left-row-main:hover {
+    background: #f7f7f5;
+  }
+
+  .calls-left-row.is-selected .calls-left-row-main {
+    background: #f1f1ef;
+    box-shadow: inset 2px 0 0 #37352f;
+  }
+
+  .calls-left-avatar {
+    background: #eeeeec;
+    color: #52514d;
+  }
+
+  .calls-left-row-head strong,
+  .calls-detail-hero-copy h3 {
+    color: #202124;
+  }
+
+  .calls-left-row-head small,
+  .calls-left-row-meta,
+  .calls-left-row-foot span:last-child {
+    color: #787774;
+  }
+
+  .calls-workspace-head {
+    min-height: 62px;
+    padding: 12px 16px;
+    border-color: #e9e9e7;
+  }
+
+  .calls-workspace-body {
+    padding: 14px 16px 20px;
+  }
+
+  .calls-detail-stack {
+    gap: 14px;
+  }
+
+  .calls-detail-hero,
+  .calls-detail-card,
+  .calls-workspace-card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 12px 0;
+  }
+
+  .calls-detail-hero,
+  .calls-detail-card + .calls-detail-card {
+    border-bottom: 1px solid #e9e9e7;
+  }
+
+  .calls-detail-card + .calls-detail-card {
+    border-top: 1px solid #e9e9e7;
+    border-bottom: 0;
+  }
+
+  .calls-detail-actions .mini-btn,
+  .calls-sync-btn,
+  .calls-dialer-icon-btn {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .calls-detail-actions .mini-btn:hover,
+  .calls-sync-btn:hover,
+  .calls-dialer-icon-btn:hover {
+    background: #f1f1ef;
+  }
+
+  .calls-keypad-grid {
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .calls-key-btn {
+    min-height: 58px;
+    border: 0;
+    border-radius: 4px;
+    background: #f7f7f5;
+    box-shadow: none;
+  }
+
+  .calls-key-btn:hover {
+    background: #eeeeec;
+  }
+
+  .calls-key-digit {
+    color: #202124;
+  }
+
+  /* Scheduler — same controls and calendar behavior, quieter grouping. */
+  .calls-scheduler-shell {
+    --calls-scheduler-day-head-height: 42px;
+    height: calc(100vh - 116px);
+    min-height: 560px;
+    border: 0;
+    background: #fff;
+  }
+
+  .calls-scheduler-toolbar {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 12px 4px 10px;
+    border-color: #e9e9e7;
+    background: #fff;
+  }
+
+  .calls-scheduler-toolbar-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .calls-scheduler-nav {
+    gap: 5px;
+  }
+
+  .calls-scheduler-nav strong {
+    margin-left: 6px;
+    color: #202124;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .calls-scheduler-nav .panel-toggle-btn {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .calls-scheduler-toolbar :is(.mini-btn, .panel-toggle-btn) {
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  #appShell .calls-scheduler-toolbar :is(.mini-btn, .panel-toggle-btn):hover:not(:disabled) {
+    border-color: transparent;
+    background: #f1f1ef;
+    color: #202124;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .calls-scheduler-nav .panel-toggle-btn:hover {
+    background: #f1f1ef;
+  }
+
+  .calls-scheduler-toggle {
+    gap: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .calls-scheduler-toggle .mini-btn {
+    min-height: 34px;
+    border-radius: 4px;
+    color: #787774;
+    padding: 0 9px;
+  }
+
+  .calls-scheduler-toggle .mini-btn:hover {
+    background: #f7f7f5;
+    color: #202124;
+  }
+
+  .calls-scheduler-toggle .mini-btn.is-active {
+    background: #f1f1ef;
+    color: #202124;
+    box-shadow: none;
+  }
+
+  .calls-scheduler-owner-select {
+    position: relative;
+  }
+
+  .calls-scheduler-owner-select::after {
+    content: "\F282";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #787774;
+    font-family: "bootstrap-icons";
+    font-size: 10px;
+    pointer-events: none;
+  }
+
+  .calls-scheduler-owner-select select {
+    min-height: 34px;
+    border-color: #dededb;
+    border-radius: 5px;
+    background: #fff;
+    color: #37352f;
+    padding: 0 30px 0 10px;
+    appearance: none;
+  }
+
+  .calls-scheduler-main {
+    border: 0;
+    overflow-y: auto;
+  }
+
+  .calls-scheduler-board,
+  .calls-scheduler-time-rail,
+  .calls-scheduler-time-rail-body {
+    background: #fff;
+  }
+
+  .calls-scheduler-time-rail,
+  .calls-scheduler-day,
+  .calls-scheduler-day-head,
+  .calls-scheduler-time-rail-head {
+    border-color: #e9e9e7;
+  }
+
+  .calls-scheduler-time-row {
+    color: #9b9a97;
+    font-weight: 400;
+  }
+
+  .calls-scheduler-slot {
+    border-color: #eeeeec;
+  }
+
+  .calls-scheduler-side {
+    border-color: #e9e9e7;
+    background: #fafaf9;
+  }
+
+  .calls-scheduler-side-card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .calls-scheduler-side-head span {
+    border-radius: 4px;
+    background: #eeeeec;
+    color: #52514d;
+  }
+
+  .calls-scheduler-event,
+  .calls-scheduler-queue-card,
+  .calls-scheduler-agenda-item {
+    border-radius: 4px;
+    box-shadow: none;
+  }
+
+}

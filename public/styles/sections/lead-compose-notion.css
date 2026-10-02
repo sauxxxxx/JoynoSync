@@ -1,0 +1,463 @@
+/* Lead composer: compact property editor aligned with the task composer. */
+.modal-card.is-lead-compose {
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(760px, calc(100dvh - 48px));
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 18px 44px rgba(15, 15, 15, 0.18);
+}
+
+.modal-card.is-lead-compose .modal-form {
+  max-height: min(758px, calc(100dvh - 50px));
+}
+
+.modal-card.is-lead-compose .lead-compose-header {
+  min-height: 58px;
+  padding: 18px 20px 8px;
+  border: 0;
+  background: #ffffff;
+}
+
+.modal-card.is-lead-compose .lead-compose-heading h2 {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.modal-card.is-lead-compose .lead-compose-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 5px;
+  color: #787774;
+  background: transparent;
+}
+
+.modal-card.is-lead-compose .lead-compose-close:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+.modal-card.is-lead-compose .lead-compose-workspace {
+  display: block;
+  padding: 0 20px 8px;
+  border: 0;
+}
+
+.modal-card.is-lead-compose .lead-compose-details,
+.modal-card.is-lead-compose .lead-compose-routing {
+  padding: 0;
+  border: 0;
+}
+
+.modal-card.is-lead-compose .lead-name-field {
+  margin: 0 0 8px !important;
+}
+
+.modal-card.is-lead-compose .lead-name-field input:not([type="hidden"]) {
+  min-height: 48px;
+  padding: 2px 0;
+  border: 0;
+  border-bottom: 1px solid #37352f;
+  border-radius: 0;
+  color: #202124;
+  background: transparent;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  caret-color: #202124;
+}
+
+.modal-card.is-lead-compose .lead-name-field input::placeholder {
+  color: #9b9a97;
+}
+
+.modal-card.is-lead-compose .lead-compose-detail-grid {
+  display: block;
+}
+
+.modal-card.is-lead-compose .lead-compose-detail-grid > .form-field,
+.modal-card.is-lead-compose .lead-source-field,
+.modal-card.is-lead-compose .lead-owner-field,
+.modal-card.is-lead-compose .lead-status-field,
+.modal-card.is-lead-compose .lead-followup-card,
+.modal-card.is-lead-compose .lead-task-option {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin: 0 !important;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid #ececea;
+  background: transparent;
+}
+
+.modal-card.is-lead-compose .form-field > span,
+.modal-card.is-lead-compose .form-field > legend,
+.modal-card.is-lead-compose .lead-followup-label {
+  color: #787774;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.modal-card.is-lead-compose .form-field > span em {
+  color: #9b9a97;
+  font-size: 10px;
+}
+
+.modal-card.is-lead-compose .form-field input:not([type="hidden"]),
+.modal-card.is-lead-compose .form-field textarea {
+  min-height: 40px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 5px;
+  color: #202124;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-compose .form-field input:not([type="hidden"]):hover,
+.modal-card.is-lead-compose .form-field textarea:hover,
+.modal-card.is-lead-compose .task-assignee-trigger:hover,
+.modal-card.is-lead-compose .lead-followup-trigger:hover {
+  background: #f7f7f5;
+}
+
+.modal-card.is-lead-compose .form-field input:focus,
+.modal-card.is-lead-compose .form-field textarea:focus {
+  border: 0;
+  outline: 2px solid #37352f;
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+.modal-card.is-lead-compose .lead-source-field,
+.modal-card.is-lead-compose .lead-status-field {
+  grid-template-areas: "label options";
+}
+
+.modal-card.is-lead-compose .lead-source-field legend,
+.modal-card.is-lead-compose .lead-status-field legend {
+  grid-area: label;
+}
+
+.modal-card.is-lead-compose .lead-source-segment {
+  grid-area: options;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.modal-card.is-lead-compose .lead-source-btn {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  color: #787774;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-compose .lead-source-btn:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+.modal-card.is-lead-compose .lead-source-btn.is-active,
+.modal-card.is-lead-compose .lead-source-btn[data-lead-source].is-active {
+  color: #202124;
+  background: #e9e9e7;
+}
+
+.modal-card.is-lead-compose .lead-owner-field .task-assignee-trigger,
+.modal-card.is-lead-compose .lead-followup-trigger {
+  width: 100%;
+  min-height: 40px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.modal-card.is-lead-compose .lead-owner-field .task-assignee-avatar {
+  width: 28px;
+  height: 28px;
+  color: #37352f;
+  background: #f1f1ef;
+  font-size: 10px;
+}
+
+.modal-card.is-lead-compose .lead-owner-field .task-assignee-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.modal-card.is-lead-compose .lead-owner-field .task-assignee-copy strong,
+.modal-card.is-lead-compose .lead-followup-trigger-copy strong {
+  color: #202124;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.modal-card.is-lead-compose .lead-owner-field .task-assignee-copy small,
+.modal-card.is-lead-compose .lead-followup-trigger-copy small {
+  color: #787774;
+  font-size: 11px;
+}
+
+.modal-card.is-lead-compose .lead-followup-trigger {
+  grid-template-columns: 18px minmax(0, 1fr) 14px;
+}
+
+.modal-card.is-lead-compose .lead-followup-trigger > i {
+  color: #9b9a97;
+  font-size: 13px;
+}
+
+.modal-card.is-lead-compose .lead-followup-control {
+  position: relative;
+}
+
+.modal-card.is-lead-compose .lead-followup-picker,
+.modal-card.is-lead-compose .task-assignee-popover {
+  top: calc(100% + 6px);
+  right: 0;
+  left: auto;
+  width: min(440px, calc(100vw - 64px));
+  padding: 8px;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 15, 15, 0.16);
+}
+
+.modal-card.is-lead-compose .lead-followup-presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.modal-card.is-lead-compose .lead-followup-chip {
+  min-height: 32px;
+  border: 0;
+  border-radius: 5px;
+  color: #50545a;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-compose .lead-followup-chip:hover,
+.modal-card.is-lead-compose .lead-followup-chip.is-active {
+  color: #202124;
+  background: #e9e9e7;
+}
+
+.modal-card.is-lead-compose .lead-task-option {
+  grid-template-columns: 112px 20px minmax(0, 1fr);
+  cursor: pointer;
+}
+
+.modal-card.is-lead-compose .lead-task-option::before {
+  content: "Task";
+  color: #787774;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-compose .lead-task-option > input {
+  position: absolute;
+}
+
+.modal-card.is-lead-compose .lead-task-option-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.modal-card.is-lead-compose .lead-task-option strong {
+  color: #202124;
+  font-size: 11px;
+}
+
+.modal-card.is-lead-compose .lead-task-option small {
+  color: #787774;
+  font-size: 10px;
+}
+
+.modal-card.is-lead-compose .lead-more-card {
+  border: 0;
+}
+
+.modal-card.is-lead-compose .lead-more-toggle {
+  min-height: 44px;
+  padding: 4px 26px;
+  gap: 10px;
+  border: 0;
+  color: #787774;
+  background: transparent;
+}
+
+.modal-card.is-lead-compose .lead-more-toggle:hover {
+  color: #202124;
+  background: #f7f7f5;
+}
+
+.modal-card.is-lead-compose .lead-more-copy {
+  gap: 10px;
+}
+
+.modal-card.is-lead-compose .lead-more-copy strong {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.modal-card.is-lead-compose .lead-more-copy small {
+  color: #9b9a97;
+  font-size: 10px;
+}
+
+.modal-card.is-lead-compose .lead-more-body {
+  gap: 0;
+  padding: 0 20px 12px 32px;
+  border: 0;
+}
+
+.modal-card.is-lead-compose .lead-more-body > .form-field {
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: start;
+  padding-top: 6px;
+}
+
+.modal-card.is-lead-compose .lead-more-body textarea {
+  min-height: 72px;
+  border: 1px solid #dedede;
+  background: #ffffff;
+}
+
+.modal-card.is-lead-compose .lead-duplicate-card {
+  margin: 8px 20px;
+  border: 0;
+  border-radius: 5px;
+}
+
+.modal-card.is-lead-compose .lead-compose-actions {
+  margin: 0;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #ececea;
+}
+
+#appShell .modal-card.is-lead-compose .lead-compose-actions button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+#appShell .modal-card.is-lead-compose .lead-compose-cancel {
+  color: #50545a;
+  background: transparent;
+}
+
+#appShell .modal-card.is-lead-compose .lead-compose-cancel:hover {
+  color: #202124;
+  background: #f1f1ef;
+}
+
+#appShell .modal-card.is-lead-compose .lead-compose-submit {
+  color: #ffffff;
+  border-color: #202124;
+  background: #202124;
+}
+
+#appShell .modal-card.is-lead-compose .lead-compose-submit:hover {
+  border-color: #343538;
+  background: #343538;
+  transform: none;
+}
+
+.modal-card.is-lead-compose button:focus-visible,
+.modal-card.is-lead-compose input:focus-visible,
+.modal-card.is-lead-compose textarea:focus-visible {
+  outline-color: #37352f;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-compose,
+:root[data-theme="dark"] .modal-card.is-lead-compose .lead-compose-header,
+:root[data-theme="dark"] .modal-card.is-lead-compose .lead-compose-shell {
+  color: #ededec;
+  background: #202020;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-compose :is(
+  .lead-compose-detail-grid > .form-field,
+  .lead-source-field,
+  .lead-owner-field,
+  .lead-status-field,
+  .lead-followup-card,
+  .lead-task-option,
+  .lead-compose-actions
+) {
+  border-color: #373737;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-compose :is(
+  .lead-compose-heading h2,
+  .lead-name-field input:not([type="hidden"]),
+  .form-field input:not([type="hidden"]),
+  .form-field textarea,
+  .task-assignee-copy strong,
+  .lead-followup-trigger-copy strong,
+  .lead-task-option strong
+) {
+  color: #ededec;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-compose :is(
+  .form-field input:not([type="hidden"]):hover,
+  .form-field textarea:hover,
+  .task-assignee-trigger:hover,
+  .lead-followup-trigger:hover,
+  .lead-more-toggle:hover
+) {
+  background: #2c2c2c;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-compose :is(.lead-followup-picker, .task-assignee-popover) {
+  border-color: #424242;
+  background: #252525;
+}
+
+@media (max-width: 700px) {
+  .modal-card.is-lead-compose .lead-compose-detail-grid > .form-field,
+  .modal-card.is-lead-compose .lead-source-field,
+  .modal-card.is-lead-compose .lead-owner-field,
+  .modal-card.is-lead-compose .lead-status-field,
+  .modal-card.is-lead-compose .lead-followup-card {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .modal-card.is-lead-compose .lead-task-option {
+    grid-template-columns: 88px 20px minmax(0, 1fr);
+  }
+
+  .modal-card.is-lead-compose .lead-followup-picker {
+    position: static;
+    width: 100%;
+    margin-top: 6px;
+  }
+}

@@ -1,0 +1,56 @@
+@media (min-width: 1025px) {
+  .messenger-view .messenger-load-error {
+    width: min(360px, calc(100% - 48px));
+    margin: auto;
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    color: #787774;
+    text-align: center;
+  }
+
+  .messenger-view .messenger-load-error > i {
+    margin-bottom: 3px;
+    color: #9b9a97;
+    font-size: 20px;
+  }
+
+  .messenger-view .messenger-load-error strong {
+    color: #37352f;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .messenger-view .messenger-load-error span {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .messenger-view .messenger-load-error button {
+    min-height: 30px;
+    margin-top: 5px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 5px;
+    background: #37352f;
+    color: #fff;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .messenger-view .messenger-load-error button:hover,
+  .messenger-view .messenger-load-error button:focus-visible {
+    background: #25241f;
+  }
+
+  :root[data-theme="dark"] .messenger-view .messenger-load-error strong {
+    color: #f1f1ef;
+  }
+
+  :root[data-theme="dark"] .messenger-view .messenger-load-error button {
+    background: #e7e7e4;
+    color: #25241f;
+  }
+}

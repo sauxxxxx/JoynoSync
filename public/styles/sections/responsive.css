@@ -188,10 +188,6 @@
     grid-template-columns: 1fr;
   }
 
-  .table-ops-controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .deal-stage-summary {
     grid-template-columns: repeat(5, minmax(140px, 1fr));
     overflow-x: auto;
@@ -217,10 +213,6 @@
   .team-head-actions {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .table-ops-search {
-    grid-column: 1 / -1;
   }
 
   .table-ops-columns-btn {
@@ -312,41 +304,6 @@
 
   .projects-detail-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .my-work-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .my-work-body {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .my-work-queue-panel {
-    border-right: 0;
-    border-bottom: 1px solid #e1e8ef;
-    padding-bottom: 8px;
-  }
-
-  .my-work-lanes {
-    grid-template-columns: repeat(5, minmax(220px, 1fr));
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .my-work-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .my-work-card-tasks.is-empty .my-work-task-list,
-  .my-work-task-list.is-empty .my-work-empty-state {
-    min-height: 208px;
-  }
-
-  .my-work-card-meetings.is-empty .my-work-meeting-list,
-  .my-work-meeting-list.is-empty .my-work-empty-state {
-    min-height: 148px;
   }
 
   .calendar-hybrid {
@@ -878,9 +835,6 @@
     min-height: 26px;
   }
 
-  .data-table-ops {
-    min-width: 780px;
-  }
 }
 
 @media (max-width: 760px) {
@@ -1030,10 +984,6 @@
   }
 
   .lead-import-map-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .table-ops-controls {
     grid-template-columns: 1fr;
   }
 
@@ -1361,51 +1311,6 @@
 
   .calls-active-actions {
     justify-content: flex-end;
-  }
-
-  .table-ops-search {
-    grid-column: auto;
-  }
-
-  .data-table-ops {
-    min-width: 860px;
-  }
-
-  .my-work-strip {
-    grid-template-columns: 1fr;
-  }
-
-  .my-work-strip-card::after {
-    display: none;
-  }
-
-  .my-work-strip-card {
-    border-bottom: 1px solid #e4ebf2;
-  }
-
-  .my-work-strip-card:last-child {
-    border-bottom: 0;
-  }
-
-  .my-work-card-head {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .my-work-card-head-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .my-work-task-row,
-  .my-work-meeting-row {
-    grid-template-columns: auto 1fr;
-  }
-
-  .my-work-task-row-side,
-  .my-work-meeting-pill {
-    grid-column: 2;
-    justify-self: start;
   }
 
   .dashboard-kpi-grid {

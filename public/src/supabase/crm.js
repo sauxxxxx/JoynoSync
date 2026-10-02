@@ -328,7 +328,7 @@ function normalizeLeadStatusFilter(value) {
 
 function normalizeLeadDateFilter(value) {
   const normalized = normalizeText(value, "all").toLowerCase();
-  return ["all", "overdue", "today", "tomorrow", "not-set"].includes(normalized) ? normalized : "all";
+  return ["all", "follow-up", "overdue", "today", "tomorrow", "not-set"].includes(normalized) ? normalized : "all";
 }
 
 function normalizeLeadTimezoneFilter(value) {
@@ -362,10 +362,16 @@ function normalizeLeadListSortColumn(value) {
     return "owner_member_id";
   }
   if (key === "lastTouch") {
-    return "updated_at";
+    return "last_touch_at";
   }
   if (key === "nextFollowUp") {
     return "next_follow_up_date";
+  }
+  if (key === "updatedAt") {
+    return "updated_at";
+  }
+  if (key === "createdAt") {
+    return "created_at";
   }
   return "name";
 }
@@ -379,7 +385,7 @@ function normalizeLeadCursorComparableValue(sortColumn, value) {
   if (!sortColumn) {
     return "";
   }
-  if (["created_at", "updated_at", "next_follow_up_date"].includes(sortColumn)) {
+  if (["created_at", "updated_at", "last_touch_at", "next_follow_up_date"].includes(sortColumn)) {
     return normalizeIso(value);
   }
   return normalizeText(value);
@@ -392,7 +398,8 @@ function escapePostgrestLiteral(value) {
 
 export function buildLeadPageCursorFromRow(row, sortKey) {
   const sortColumn = normalizeLeadListSortColumn(sortKey);
-  const sortValue = normalizeLeadCursorComparableValue(sortColumn, row?.[sortColumn]);
+  const rawSortValue = sortKey === "lastTouch" ? row?.last_activity_sort_at || row?.last_touch_at : row?.[sortColumn];
+  const sortValue = normalizeLeadCursorComparableValue(sortColumn, rawSortValue);
   const id = normalizeText(row?.id);
   if (!sortValue || !id) {
     return null;
@@ -503,6 +510,9 @@ function applyLeadDateFilter(query, dateFilter) {
   }
   if (normalized === "not-set") {
     return query.is("next_follow_up_date", null);
+  }
+  if (normalized === "follow-up") {
+    return query.not("next_follow_up_date", "is", null);
   }
   const today = localIsoDate(0);
   if (normalized === "overdue") {
@@ -1540,7 +1550,11 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
 
   let rpcPageData = null;
   let rowsResult = null;
-  if (!includeMeta) {
+  // The cursor RPC is backed by the production paging indexes. Direct
+  // PostgREST range queries can exceed the statement timeout on large
+  // workspaces, even when only the first page is requested.
+  const shouldUseCursorRpc = !includeMeta;
+  if (shouldUseCursorRpc) {
     const { data, error } = await client.rpc("get_leads_cursor_page", {
       p_scope: scope,
       p_status_filter: statusFilter || "all",
@@ -1603,7 +1617,7 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
   }
   const rows = pageRows.map((row) => ({
     ...mapLeadRow(row, sharedContext),
-    _lastTouchAt: normalizeIso(row?.last_touch_at || row?.updated_at || row?.created_at)
+    _lastTouchAt: normalizeIso(row?.last_touch_at)
   }));
   const pageStartCursor = buildLeadPageCursorFromRow(pageRows[0], sortKey);
   const pageEndCursor = buildLeadPageCursorFromRow(pageRows[pageRows.length - 1], sortKey);
@@ -1653,6 +1667,68 @@ export async function fetchSupabaseLeadsPage(workspaceId, options = {}) {
   };
 }
 
+export async function fetchSupabaseLeadImportPage(workspaceId, jobId, options = {}) {
+  const normalizedWorkspaceId = normalizeText(workspaceId);
+  const normalizedJobId = normalizeText(jobId);
+  const page = Math.max(1, Number(options.page) || 1);
+  const pageSize = Math.max(1, Math.min(100, Number(options.pageSize) || LEADS_PAGE_SIZE_FALLBACK));
+  if (!normalizedWorkspaceId || !normalizedJobId) {
+    return {
+      rows: [],
+      totalCount: 0,
+      page,
+      pageSize,
+      hasMore: false,
+      hasPrevious: page > 1,
+      hasNextPage: false,
+      hasPreviousPage: page > 1,
+      importJobId: normalizedJobId
+    };
+  }
+
+  const client = getClient();
+  const { data, error } = await client.rpc("get_lead_import_result_leads", {
+    p_job_id: normalizedJobId,
+    p_page: page,
+    p_page_size: pageSize
+  });
+  if (error) {
+    throw error;
+  }
+
+  const memberNameMap = buildMemberNameMap(Array.isArray(options.teamMembers) ? options.teamMembers : []);
+  const sharedContext = {
+    memberNameMap,
+    accountNameById: new Map(),
+    contactNameById: new Map(),
+    primaryContactByAccountId: new Map(),
+    openDealCountByAccountId: new Map()
+  };
+  const rows = (Array.isArray(data?.rows) ? data.rows : []).map((row) => ({
+    ...mapLeadRow(row, sharedContext),
+    _lastTouchAt: normalizeIso(row?.last_touch_at)
+  }));
+  const totalCount = Math.max(0, Number(data?.totalCount || 0));
+  const hasNextPage = Boolean(data?.hasMore);
+  return {
+    rows,
+    totalCount,
+    page: Math.max(1, Number(data?.page || page)),
+    pageSize: Math.max(1, Number(data?.pageSize || pageSize)),
+    hasMore: hasNextPage,
+    hasPrevious: page > 1,
+    hasNextPage,
+    hasPreviousPage: page > 1,
+    importJobId: normalizedJobId,
+    scope: "all",
+    statusFilter: "all",
+    dateFilter: "all",
+    sourceFilter: "all",
+    timezoneFilter: "all",
+    ownerFilter: "all"
+  };
+}
+
 export async function fetchSupabaseLeadsPageMeta(workspaceId, options = {}) {
   const normalizedWorkspaceId = normalizeText(workspaceId);
   if (!normalizedWorkspaceId) {
@@ -1686,19 +1762,22 @@ export async function fetchSupabaseLeadsPageMeta(workspaceId, options = {}) {
   const ownerFilter = normalizeLeadOwnerFilter(options.ownerFilter, canManage);
   const searchTerm = normalizeText(options.searchTerm);
 
-  const { data: rpcMeta, error: rpcMetaError } = await client.rpc("get_leads_page_meta", {
-    p_scope: scope,
-    p_current_user_id: currentUserId || null,
-    p_status_filter: statusFilter || "all",
-    p_date_filter: dateFilter || "all",
-    p_source_filter: sourceFilter || "all",
-    p_timezone_filter:
-      timezoneFilter && timezoneFilter !== "all" ? mapLeadTimezoneFilterToStoredValue(timezoneFilter) : "all",
-    p_owner_filter: ownerFilter || "all",
-    p_search_term: searchTerm,
-    p_today: localIsoDate(0),
-    p_include_reserve: canViewReserveCount
-  });
+  const { data: rpcMeta, error: rpcMetaError } =
+    dateFilter === "follow-up"
+      ? { data: null, error: null }
+      : await client.rpc("get_leads_page_meta", {
+          p_scope: scope,
+          p_current_user_id: currentUserId || null,
+          p_status_filter: statusFilter || "all",
+          p_date_filter: dateFilter || "all",
+          p_source_filter: sourceFilter || "all",
+          p_timezone_filter:
+            timezoneFilter && timezoneFilter !== "all" ? mapLeadTimezoneFilterToStoredValue(timezoneFilter) : "all",
+          p_owner_filter: ownerFilter || "all",
+          p_search_term: searchTerm,
+          p_today: localIsoDate(0),
+          p_include_reserve: canViewReserveCount
+        });
   if (!rpcMetaError && rpcMeta && typeof rpcMeta === "object") {
     const waitingItems = (Array.isArray(rpcMeta.waitingItems) ? rpcMeta.waitingItems : []).map((row) => ({
       id: normalizeText(row?.id),
@@ -2460,6 +2539,9 @@ function mapLeadActivityEventRow(row, teamMemberById = new Map()) {
   if (eventType === "bulk_reassigned") {
     return { ...base, label: "Bulk reassigned", text: "Owner changed by bulk reassignment." };
   }
+  if (eventType === "status_repaired") {
+    return { ...base, label: "Status restored", text: "A previous status was restored after an import correction." };
+  }
 
   const fieldSummary = fields
     .map((field) => {
@@ -2559,6 +2641,26 @@ export function createSupabaseLead(payload) {
 
 export function updateSupabaseLead(leadId, payload) {
   return updateCrmRow("leads", leadId, payload);
+}
+
+export async function qualifyAndHandoffSupabaseLeads(leadIds, allowDuplicates = false) {
+  const normalizedLeadIds = [...new Set(
+    (Array.isArray(leadIds) ? leadIds : [])
+      .map((leadId) => normalizeText(leadId))
+      .filter(Boolean)
+  )];
+  if (!normalizedLeadIds.length) {
+    throw new Error("Choose at least one lead to qualify.");
+  }
+  const client = getClient();
+  const { data, error } = await client.rpc("qualify_and_handoff_configured_leads", {
+    p_lead_ids: normalizedLeadIds,
+    p_allow_duplicates: Boolean(allowDuplicates)
+  });
+  if (error) {
+    throw error;
+  }
+  return data && typeof data === "object" ? data : {};
 }
 
 export function deleteSupabaseLead(leadId) {

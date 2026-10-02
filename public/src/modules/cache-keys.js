@@ -20,6 +20,7 @@ export function buildLeadsListCacheKey(workspaceId, options = {}) {
     sourceFilter: normalizeValue(options.sourceFilter),
     timezoneFilter: normalizeValue(options.timezoneFilter),
     ownerFilter: normalizeValue(options.ownerFilter),
+    importJobId: normalizeValue(options.importJobId),
     searchTerm: normalizeValue(options.searchTerm),
     page: Number(options.page) || 1,
     pageSize: Number(options.pageSize) || 25,
@@ -40,6 +41,7 @@ export function buildLeadsMetaCacheKey(workspaceId, options = {}) {
     sourceFilter: normalizeValue(options.sourceFilter),
     timezoneFilter: normalizeValue(options.timezoneFilter),
     ownerFilter: normalizeValue(options.ownerFilter),
+    importJobId: normalizeValue(options.importJobId),
     searchTerm: normalizeValue(options.searchTerm)
   });
 }

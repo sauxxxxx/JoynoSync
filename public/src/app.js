@@ -1,4 +1,4 @@
-import { createId, loadData, resetData, saveData } from "./data/store.js";
+import { createId, loadData, saveData } from "./data/store.js";
 import {
   attendanceMatchesCurrentUser as attendanceMatchesCurrentUserCore,
   canCurrentUserManageAttendance as canCurrentUserManageAttendanceCore,
@@ -27,6 +27,15 @@ import {
   isAttendanceWithinWindow as isAttendanceWithinWindowCore,
   updateAttendanceRecord as updateAttendanceRecordCore
 } from "./modules/attendance-core.js";
+import {
+  renderAttendanceRangeCalendars,
+  shiftAttendanceRangeMonth
+} from "./modules/attendance-range-calendar.js";
+import {
+  changeAttendanceRequestPage,
+  setAttendanceRequestFilter,
+  syncAttendanceRequestList
+} from "./modules/attendance-request-controls.js";
 import {
   ensureNamedDirectThread as ensureNamedDirectThreadCore,
   findDirectThreadByName as findDirectThreadByNameInData,
@@ -124,13 +133,53 @@ import {
   invalidateQueryCacheByPrefix,
   readQueryCache
 } from "./modules/query-cache.js";
+import {
+  cancelSettingsInlineEditor,
+  cancelSettingsSaveConfirmation,
+  confirmSettingsNavigation,
+  confirmSettingsSave,
+  consumeSettingsSaveConfirmation,
+  handleSettingsEditorKeydown,
+  handleSettingsPickerClick,
+  hasUnsavedSettingsChanges,
+  markSettingsFormDirty,
+  openSettingsInlineEditor,
+  openSettingsSaveConfirmation,
+  runSettingsSave,
+  scrollToSettingsSection,
+  syncSettingsThemeChoice
+} from "./modules/settings-form-state.js";
 import { createConfirmModalController } from "./modules/confirm-modal.js";
 import { createAttendanceManualController } from "./modules/attendance-manual.js";
 import { createLeadArchiveActions } from "./modules/lead-archive-actions.js";
+import {
+  canManageLeadArchive,
+  createEmptyLeadArchiveData,
+  createLeadArchivePageController
+} from "./modules/lead-archive-page.js";
+import {
+  applyLeadAdminViewState,
+  isLeadAdminRole,
+  resolveLeadScopeForRole
+} from "./modules/lead-admin-view.js";
+import { applyLeadAgentViewState } from "./modules/lead-agent-view.js";
+import { isLeadAssignableMember } from "./modules/lead-assignment-policy.js";
+import { formatQualificationDuplicateWarning } from "./modules/lead-qualification-policy.js";
+import { avatarHueFromValue } from "./modules/avatar-tone.js";
 import { renderLeadComposerMarkup } from "./modules/lead-compose-template.js";
 import { createMessengerController } from "./modules/messenger-controller.js";
 import { createMessengerRealtime } from "./modules/messenger-realtime.js";
+import { resolveMessengerAccess } from "./modules/messenger-bootstrap-state.js";
 import { hydrateLeadExportRows } from "./modules/lead-export-roundtrip.js";
+import {
+  buildEvenLeadAllocations,
+  closeLeadCustomSelectMenus,
+  getSelectedLeadOwnerIds,
+  renderLeadExportFiltersMarkup,
+  renderLeadOwnershipManagerMarkup,
+  setupLeadCustomSelects,
+  syncLeadOwnerPicker
+} from "./modules/lead-ownership-manager.js";
 import { handleIntegrationMarketplaceFilter } from "./modules/integration-marketplace.js";
 import {
   LEAD_IMPORT_DUPLICATE_OPTIONS,
@@ -140,10 +189,23 @@ import {
   LEAD_IMPORT_MODE_UPDATE,
   assertLeadImportFileLimits,
   inferLeadImportMode,
+  isJoynoSyncLeadExport,
   isLeadUpdateImport,
   resolveImportedStatus,
   validateManualLeadIdentity
 } from "./modules/lead-import-policy.js";
+import { parseLeadImportFile } from "./modules/lead-import-file.js";
+import { renderLeadImportReviewView } from "./modules/lead-import-review-view.js";
+import {
+  renderLeadImportDoneView,
+  renderLeadImportProcessingView
+} from "./modules/lead-import-status-view.js";
+import { formatLeadImportWorkspaceError, mergeLeadImportWorkspaceReview } from "./modules/lead-import-workspace-review.js";
+import { resolveLeadAttemptStatus } from "./modules/lead-attempt-policy.js";
+import {
+  buildLeadImportResultCsv,
+  renderLeadImportResultSummary
+} from "./modules/lead-import-results.js";
 import {
   endLocalQaSession,
   isLocalQaAvailable,
@@ -159,6 +221,14 @@ import {
   updateCurrentUserPassword,
   verifyEmailOtp
 } from "./supabase/auth.js";
+import { fetchSupabaseLeadImportResults } from "./supabase/lead-import-results.js";
+import { reviewSupabaseLeadImportRows } from "./supabase/lead-import-review.js";
+import { recordSupabaseLeadAttempt } from "./supabase/lead-attempts.js";
+import {
+  fetchArchivedLeadsPage,
+  permanentlyDeleteArchivedLead,
+  restoreArchivedLead
+} from "./supabase/lead-archive.js";
 import { normalizeSystemAppLabel, resolveBrandLogoUrl } from "./config/branding.js";
 import { getPublicAppUrl, supabaseConfig } from "./supabase/config.js";
 import {
@@ -181,6 +251,7 @@ import {
   fetchSupabaseAccountsSnapshot,
   fetchSupabaseDealsSnapshot,
   fetchSupabaseAllUnqualifiedLeads,
+  fetchSupabaseLeadImportPage,
   fetchSupabaseLeadsPage,
   fetchSupabasePendingFridayRedistributionLeads,
   fetchSupabasePendingAttemptLimitLeads,
@@ -189,6 +260,7 @@ import {
   fetchSupabaseCrmSnapshot,
   fetchSupabaseLeadsPageMeta,
   buildLeadPageCursorFromRow,
+  qualifyAndHandoffSupabaseLeads,
   updateSupabaseAccount,
   updateSupabaseContact,
   updateSupabaseDeal,
@@ -211,19 +283,15 @@ import {
   addSupabaseTaskChecklistItem,
   addSupabaseTaskComment,
   createSupabaseTaskAttachmentSignedUrl,
-  createSupabaseProject,
   createSupabaseTask,
-  deleteSupabaseProject,
   deleteSupabaseTask,
   deleteSupabaseTaskAttachment,
   deleteSupabaseTaskChecklistItem,
   downloadSupabaseTaskAttachment,
   fetchSupabaseWorkSnapshot,
   moveSupabaseTaskSchedule,
-  setSupabaseProjectProgress,
   setSupabaseTaskStatus,
   toggleSupabaseTaskChecklistItem,
-  updateSupabaseProject,
   updateSupabaseTask,
   uploadSupabaseTaskAttachment
 } from "./supabase/work.js";
@@ -235,18 +303,25 @@ import {
   deleteSupabaseMessengerConversation,
   deleteSupabaseMessengerMessage,
   editSupabaseMessengerMessage,
+  leaveSupabaseGroupConversation,
   markSupabaseConversationRead,
   removeSupabaseMessageReaction,
   sendSupabaseMessengerMessage,
+  setSupabaseMessengerMessagePinned,
   setSupabaseTyping,
+  updateSupabaseGroupConversation,
   updateSupabaseConversationPrefs
 } from "./supabase/messenger.js";
 import {
   dismissSupabaseNotification,
+  fetchSupabaseNotificationsPage,
   fetchSupabaseNotificationsSnapshot,
+  markAllSupabaseNotificationsRead,
   markSupabaseEntityNotificationsRead,
-  markSupabaseNotificationsRead
+  markSupabaseNotificationsRead,
+  restoreSupabaseNotification
 } from "./supabase/notifications.js";
+import { renderNotificationPopover } from "./modules/notification-popover-view.js";
 import {
   acknowledgeSupabaseInboundPopup,
   answerSupabaseCall,
@@ -311,7 +386,6 @@ import { clearDashboardCommandModelCache, getParticipants } from "./views/extend
 
 const TASK_STATUS_FLOW = ["New", "Scheduled", "In progress", "Completed"];
 const TASK_RECURRENCE_FLOW = ["none", "daily", "weekly", "monthly"];
-const PROJECT_STATUS_FLOW = ["On Track", "Needs Focus", "Blocked"];
 const LEAD_STATUS_TABLE_OPTIONS = ["New", "Contacted", "Qualified", "Unqualified"];
 const LEAD_ATTEMPT_REASON_OPTIONS = [
   "Call no answer",
@@ -322,11 +396,6 @@ const LEAD_ATTEMPT_REASON_OPTIONS = [
   "Sent follow-up text",
   "Other outreach"
 ];
-const LEAD_UNQUALIFIED_ATTEMPT_REASONS = new Set([
-  "talk to author, not interested",
-  "talked to author, not interested",
-  "wrong number"
-]);
 const LEAD_WEEKLY_REMOVAL_PENDING = "pending";
 const LEAD_WEEKLY_REMOVAL_REMOVED = "removed";
 const LEAD_WEEKLY_REMOVAL_REASON = "weekly-unqualified-cleanup";
@@ -353,15 +422,14 @@ const DEAL_STAGE_FLOW = ["Prospecting", "Qualified", "Proposal", "Negotiation", 
 const DEAL_OPEN_STAGE_FLOW = ["Prospecting", "Qualified", "Proposal", "Negotiation", "Won"];
 const TEAM_ROLE_FLOW = ["Owner", "Admin", "Manager", "Member", "Guest"];
 const MESSAGE_TYPE_FLOW = ["Update", "Question", "Blocker", "Announcement"];
-const TASK_LINK_TYPES = ["Lead", "Contact", "Account", "Deal", "Project", "Task"];
+const TASK_LINK_TYPES = ["Lead", "Contact", "Account", "Deal", "Task"];
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const ATTENDANCE_MANAGE_ROLES = ["owner", "admin", "manager"];
 const ATTENDANCE_TEAM_FILTERS = ["all", "late", "on-break", "overbreak", "absent", "leave"];
 const ATTENDANCE_TIME_STEP_MINUTES = 15;
 const CRM_CONVERSATION_ENTITY_TYPES = ["lead", "account", "deal"];
 const UI_THEME_OPTIONS = ["light", "dark"];
-const LEAD_IMPORT_XLSX_CDN = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
-const NOTIFICATIONS_REALTIME_FALLBACK_MS = 15000;
+const NOTIFICATIONS_REALTIME_FALLBACK_MS = 60000;
 const WORK_REALTIME_FALLBACK_MS = 6000;
 const SYSTEM_EVENT_LIMIT = 50;
 const SYSTEM_RETRY_BASE_MS = 500;
@@ -463,7 +531,7 @@ function clearLocalWorkCollections(data) {
     return false;
   }
   let changed = false;
-  ["tasks", "projects", "waitingList"].forEach((key) => {
+  ["tasks", "waitingList"].forEach((key) => {
     if (Array.isArray(data[key])) {
       if (data[key].length) {
         changed = true;
@@ -780,11 +848,6 @@ function normalizeCallsPerformanceTablePageSize(value) {
   return [10, 20, 50].includes(numeric) ? numeric : 10;
 }
 
-function normalizeTaskTablePageSize(value) {
-  const numeric = Number(value);
-  return [10, 20, 50].includes(numeric) ? numeric : 20;
-}
-
 function normalizeAttendanceTablePageSize(value) {
   const numeric = Number(value);
   return [10, 20, 50].includes(numeric) ? numeric : 10;
@@ -916,6 +979,23 @@ function createEmptyTelephonyIdentity() {
     extensionStatus: "",
     active: false,
     updatedAt: ""
+  };
+}
+
+function createEmptyNotificationCenterData(overrides = {}) {
+  return {
+    loaded: false,
+    loading: false,
+    enabled: true,
+    error: "",
+    filter: "all",
+    items: [],
+    totalCount: 0,
+    unreadCount: 0,
+    offset: 0,
+    limit: 24,
+    hasMore: false,
+    ...overrides
   };
 }
 
@@ -1072,6 +1152,8 @@ let dashboardRefreshRunId = 0;
 let settingsProfileRefreshPromise = null;
 let settingsProfileRefreshRunId = 0;
 let settingsProfileLastRefreshAt = 0;
+let settingsProfileLoadedEmail = "";
+let settingsProfileLoadError = "";
 let settingsProfileDeferredRenderTimer = 0;
 let settingsProfileDeferredRenderPending = false;
 let callsPerformanceDeferredRenderTimer = 0;
@@ -1116,6 +1198,7 @@ const state = {
         Object.keys(initialData.attendancePolicy).length)
   ),
   attendanceSnapshotUpdatedAt: 0,
+  attendanceSnapshotLoading: false,
   serverTimeOffsetMs: 0,
   routeId: resolveRouteFromLocation(window.location.hash || `#/${defaultRouteId}`),
   supabaseConfigured: isSupabaseConfigured(),
@@ -1145,6 +1228,7 @@ const state = {
   leadBulkStatusTarget: "",
   leadArchivingIds: new Set(),
   leadArchiveHiddenIds: new Set(),
+  leadArchiveData: createEmptyLeadArchiveData(),
   loginEmailDraft: "",
   loginViewMode: "signin",
   loginPasswordDraft: "",
@@ -1185,12 +1269,15 @@ const state = {
   messengerSending: false,
   messengerSnapshotReady: !isSupabaseConfigured(),
   messengerSnapshotError: "",
+  messengerHistoryByConversation: {},
+  messengerFailedMessages: [],
   dashboardLoading: false,
   dashboardSnapshot: null,
   dashboardSnapshotQueryKey: "",
   dashboardSnapshotError: "",
   dashboardUiState: createDefaultDashboardUiState(),
   notificationsData: createEmptyNotificationsData(),
+  notificationCenterData: createEmptyNotificationCenterData(),
   messengerTyping: [],
   messengerEditMessageId: "",
   messengerEditDraft: "",
@@ -1201,16 +1288,11 @@ const state = {
   selectedEmailMessageId: "",
   selectedCallWorkspaceItemId: "",
   selectedCallWorkspaceItemType: "",
-  tableScope: "all",
-  tableCurrentOnly: false,
-  tableSortKey: "",
-  tableSortDir: "none",
   tablePage: 1,
-  tablePageSize: 20,
-  teamView: "cards",
+  teamView: "table",
   attendanceTeamFilter: "all",
   attendanceTeamSearch: "",
-  attendanceTeamDepartment: "all",
+  attendanceTeamDepartment: "sales",
   attendanceTab: "today",
   attendanceManagerMonth: "",
   attendanceHistoryRange: "today",
@@ -1234,15 +1316,11 @@ const state = {
   selectedAccountId: "",
   selectedDealId: "",
   selectedLeadId: "",
-  projectsQuickFilter: "all",
-  projectsSearchTerm: "",
-  projectsSort: "recent:desc",
-  selectedProjectId: "",
   selectedTeamMemberId: String(initialData.teamMembers?.[0]?.id || ""),
   profileViewTab: "overview",
   teamMemberProfileTab: "overview",
   crmSortByRoute: {
-    leads: { key: "", dir: "none" },
+    leads: { key: "createdAt", dir: "desc" },
     contacts: { key: "", dir: "none" },
     accounts: { key: "", dir: "none" },
     deals: { key: "", dir: "none" },
@@ -1252,7 +1330,8 @@ const state = {
     leads: 1,
     contacts: 1,
     accounts: 1,
-    deals: 1
+    deals: 1,
+    team: 1
   },
   crmPageSizeByRoute: {
     leads: 25,
@@ -1278,14 +1357,20 @@ const state = {
   kanbanFilterPriority: "all",
   kanbanFilterDate: "all",
   kanbanFilterSearch: "",
+  kanbanView: "board",
+  kanbanSort: "due-asc",
+  kanbanPropertiesOpen: false,
+  kanbanHiddenProperties: [],
   leadConversionDraft: null,
   leadImportDraft: null,
   leadsScope: "all",
+  leadsImportJobId: "",
+  leadsImportResultCount: 0,
+  leadsImportViewActive: false,
   routeScrollMemory: createEmptyRouteScrollMemory(),
   nestedScrollMemory: createEmptyNestedScrollMemory(),
   lastLeadImportBatch: null,
   selectedLeadIds: new Set(),
-  selectedTaskIds: new Set(),
   activeTaskDetailId: "",
   activeLeadDrawerId: "",
   activeContactDrawerId: "",
@@ -1352,12 +1437,14 @@ let callsPerformancePrefetchUsesIdleCallback = false;
 let callsPerformancePrefetchKey = "";
 let notificationsRefreshSequence = 0;
 let notificationsRefreshPromise = null;
+let notificationCenterRefreshSequence = 0;
+let notificationCenterRefreshPromise = null;
 let leadWeeklyCleanupPromise = null;
 let leadWeeklyCleanupLastStartedAt = 0;
 let notificationsInitialLoadComplete = false;
 let callsRefreshTimer = 0;
 let callsRefreshInFlight = false;
-const LEAD_IMPORT_JOB_POLL_MS = 1800;
+const LEAD_IMPORT_JOB_POLL_MS = 700;
 let leadImportJobPollTimer = 0;
 let leadImportJobPollInFlight = false;
 
@@ -1820,7 +1907,7 @@ function normalizeLeadCompanyFields(data) {
 function getDefaultCrmSortState(routeId) {
   const key = String(routeId || "").trim();
   if (key === "leads") {
-    return { key: "lastTouch", dir: "desc" };
+    return { key: "createdAt", dir: "desc" };
   }
   return { key: "", dir: "none" };
 }
@@ -1869,8 +1956,8 @@ function shouldUseSupabaseCallsPerformanceData() {
   return Boolean(state.supabaseConfigured && state.signedInUser && state.authAccessState === "granted");
 }
 
-function getLeadListScopeForRole(role = resolveCurrentUserRole(state.data)) {
-  return ["Owner", "Admin", "Manager"].includes(String(role || "").trim()) ? "all" : "mine";
+function getLeadListScopeForRole(role = resolveCurrentUserRole(state.data), requestedScope = state.leadsScope) {
+  return resolveLeadScopeForRole(role, requestedScope);
 }
 
 function getEffectiveLeadsOwnerFilter(ownerFilter = state.leadsOwnerFilter, role = resolveCurrentUserRole(state.data)) {
@@ -1900,6 +1987,7 @@ function buildLeadsPageRequestOptions() {
     sourceFilter: state.leadsSourceFilter,
     timezoneFilter: state.leadsTimezoneFilter,
     ownerFilter: getEffectiveLeadsOwnerFilter(state.leadsOwnerFilter, currentUserRole),
+    importJobId: state.leadsImportViewActive ? String(state.leadsImportJobId || "").trim() : "",
     searchTerm: state.searchTerm,
     page: getCrmPageState("leads"),
     pageSize: getCrmPageSizeState("leads"),
@@ -1925,6 +2013,10 @@ function getCallsPerformanceTodayShiftDate(policy = getCallsPerformancePolicy())
   const fallbackIso = todayIso(0);
   const shiftContext = getAttendanceReferenceShiftContextCore(new Date().toISOString(), policy || {});
   return String(shiftContext?.shiftDateIso || fallbackIso).trim() || fallbackIso;
+}
+
+function clearLeadImportResultView() {
+  state.leadsImportViewActive = false;
 }
 
 function resolveCallsPerformanceRequestTimeZone(policy = getCallsPerformancePolicy()) {
@@ -2194,7 +2286,7 @@ function buildLeadsRouteSourceOptions(rows = [], requestedSourceFilter = "all", 
 
 function resetCrmPage(routeId = state.routeId) {
   const key = String(routeId || "").trim();
-  if (["leads", "contacts", "accounts", "deals"].includes(key)) {
+  if (["leads", "contacts", "accounts", "deals", "team"].includes(key)) {
     state.crmPageByRoute[key] = 1;
     if (key === "leads") {
       clearLeadSelection();
@@ -2234,6 +2326,8 @@ let routePositionRestoreFrame = 0;
 let nestedScrollRestoreFrame = 0;
 const inputRefreshTimers = new Map();
 let authSyncSequence = 0;
+let authWorkspaceSyncPromise = null;
+let authWorkspaceSyncUserKey = "";
 let emailIntegrationSyncSequence = 0;
 let emailMailboxSyncSequence = 0;
 let inviteLookupSyncSequence = 0;
@@ -2293,9 +2387,39 @@ const leadArchiveActions = createLeadArchiveActions({
   setRoute
 });
 
+const leadArchivePageController = createLeadArchivePageController({
+  state,
+  canManage: () => canManageLeadArchive(resolveCurrentUserRole(state.data)),
+  isLiveEnabled: isSupabaseCrmWriteEnabled,
+  fetchPage: fetchArchivedLeadsPage,
+  restoreRemote: restoreArchivedLead,
+  deleteRemote: permanentlyDeleteArchivedLead,
+  openConfirmModal,
+  renderRoute,
+  renderRoutePreservingInput,
+  onRestored: (lead) => {
+    patchLeadAcrossCaches(lead.id, {
+      archived: false,
+      archivedAt: "",
+      activePool: true,
+      updatedAt: new Date().toISOString()
+    });
+    state.leadsPageData = createEmptyLeadsPageData();
+    invalidateQueryCacheByPrefix('{"type":"crm:leads:');
+    saveData(state.data);
+  },
+  onDeleted: (lead) => {
+    deleteById("leads", lead.id);
+    state.leadsPageData = createEmptyLeadsPageData();
+    invalidateQueryCacheByPrefix('{"type":"crm:leads:');
+    saveData(state.data);
+  },
+  showToast
+});
+
 const messengerRealtime = createMessengerRealtime({
   state,
-  canAccessComms,
+  canAccessMessenger,
   isSupabaseMessengerEnabled,
   initSupabase,
   withRetryableSystemSync,
@@ -2350,10 +2474,15 @@ const messengerController = createMessengerController({
   deleteSupabaseMessengerMessage,
   editSupabaseMessengerMessage,
   sendSupabaseMessengerMessage,
+  setSupabaseMessengerMessagePinned,
+  updateSupabaseGroupConversation,
+  leaveSupabaseGroupConversation,
   appendInternalMessage,
   setSupabaseTyping,
   isSupabaseMessengerEnabled,
   openConfirmModal,
+  closeModal,
+  showToast,
   showFormFeedback,
   deleteById,
   saveUiPrefs
@@ -2604,6 +2733,7 @@ function createEmptyMessengerUiState() {
     draftsByConversationKey: {},
     messageListScrollTop: 0,
     conversationListScrollTop: 0,
+    infoPaneScrollTopByConversationKey: {},
     composerSelectionStart: null,
     composerSelectionEnd: null,
     lastSelectedConversationKey: "",
@@ -2616,6 +2746,7 @@ function createDefaultDashboardUiState() {
     range: "30d",
     sourceMetric: "converted",
     ownerMetric: "qualified",
+    compare: true,
     hiddenSeries: []
   };
 }
@@ -2636,6 +2767,7 @@ function captureMessengerUiState(root = document.getElementById("viewContent")) 
   const conversationKey = String(state.selectedConversationKey || "").trim();
   const messageList = root.querySelector("#commMessageList");
   const conversationList = root.querySelector(".conversation-list.messenger-list");
+  const infoPane = root.querySelector(".messenger-info-pane");
   const composer = root.querySelector("#commComposerText");
   const currentDrafts = {
     ...((state.messengerUiState && state.messengerUiState.draftsByConversationKey) || {})
@@ -2647,11 +2779,18 @@ function captureMessengerUiState(root = document.getElementById("viewContent")) 
       selectionEnd: Number.isFinite(composer.selectionEnd) ? composer.selectionEnd : null
     };
   }
+  const infoPaneScrollTopByConversationKey = {
+    ...((state.messengerUiState && state.messengerUiState.infoPaneScrollTopByConversationKey) || {})
+  };
+  if (conversationKey && infoPane instanceof HTMLElement) {
+    infoPaneScrollTopByConversationKey[conversationKey] = Number(infoPane.scrollTop || 0);
+  }
   const nextState = {
     ...(state.messengerUiState || createEmptyMessengerUiState()),
     draftsByConversationKey: currentDrafts,
     messageListScrollTop: Number(messageList?.scrollTop || 0),
     conversationListScrollTop: Number(conversationList?.scrollTop || 0),
+    infoPaneScrollTopByConversationKey,
     lastSelectedConversationKey: conversationKey,
     lastCapturedAt: Date.now()
   };
@@ -2680,6 +2819,7 @@ function restoreMessengerUiState(root = document.getElementById("viewContent"), 
   const conversationKey = String(state.selectedConversationKey || "").trim();
   const messageList = root.querySelector("#commMessageList");
   const conversationList = root.querySelector(".conversation-list.messenger-list");
+  const infoPane = root.querySelector(".messenger-info-pane");
   const composer = root.querySelector("#commComposerText");
   const messengerUiState = state.messengerUiState || createEmptyMessengerUiState();
   const draftEntry = conversationKey
@@ -2700,6 +2840,10 @@ function restoreMessengerUiState(root = document.getElementById("viewContent"), 
         : 0;
     }
   }
+  if (conversationKey && infoPane instanceof HTMLElement) {
+    const savedInfoScrollTop = Number(messengerUiState.infoPaneScrollTopByConversationKey?.[conversationKey] || 0);
+    infoPane.scrollTop = Number.isFinite(savedInfoScrollTop) ? Math.max(0, savedInfoScrollTop) : 0;
+  }
   if (composer instanceof HTMLTextAreaElement) {
     const editingMessageId = String(state.messengerEditMessageId || "").trim();
     const nextValue = editingMessageId ? String(state.messengerEditDraft || "") : String(draftEntry?.value || "");
@@ -2714,6 +2858,15 @@ function restoreMessengerUiState(root = document.getElementById("viewContent"), 
       }
     }
   }
+}
+
+function applyCrmSortChange(routeId) {
+  resetCrmPage(routeId);
+  if (routeId === "leads" && shouldUseSupabaseLeadsRouteData()) {
+    void refreshSupabaseLeadsPageData({ render: true, force: true });
+    return;
+  }
+  renderRoute();
 }
 
 function resolveRouteFromLocation(hashValue = window.location.hash) {
@@ -2846,7 +2999,7 @@ const CRM_BOOTSTRAP_ROUTE_IDS = new Set([
   "account-profile",
   "deal-profile"
 ]);
-const WORK_BOOTSTRAP_ROUTE_IDS = new Set(["my-work", "calendar", "kanban", "table", "projects", "comms-calls"]);
+const WORK_BOOTSTRAP_ROUTE_IDS = new Set(["calendar", "kanban", "comms-calls"]);
 const ATTENDANCE_BOOTSTRAP_ROUTE_IDS = new Set(["attendance"]);
 const MESSENGER_BOOTSTRAP_ROUTE_IDS = new Set(["comms-messenger"]);
 const CALLS_BOOTSTRAP_ROUTE_IDS = new Set(["comms-calls"]);
@@ -2899,7 +3052,10 @@ function createPostAuthRefreshPlan(targetRouteId = defaultRouteId, targetHash = 
   const blocking = [];
   const deferred = [];
   const scheduled = new Set();
-  const commsAccessEnabled = canAccessComms();
+  const communicationsAccess = resolveMessengerAccess({
+    messenger: canAccessMessenger(),
+    managedComms: canAccessComms()
+  });
   const addTask = (bucket, key, run) => {
     if (scheduled.has(key)) {
       return;
@@ -3079,13 +3235,15 @@ function createPostAuthRefreshPlan(targetRouteId = defaultRouteId, targetHash = 
     }
   }
 
-  if (commsAccessEnabled) {
+  if (communicationsAccess.messenger) {
     if (MESSENGER_BOOTSTRAP_ROUTE_IDS.has(targetRouteId)) {
       addTask(blocking, "messenger", messengerTask);
     } else {
       addTask(deferred, "messenger", messengerTask);
     }
+  }
 
+  if (communicationsAccess.managedComms) {
     if (CALLS_BOOTSTRAP_ROUTE_IDS.has(targetRouteId)) {
       addTask(blocking, "calls", callsSnapshotTask);
     } else {
@@ -3289,6 +3447,7 @@ function applySignedOutUiState(options = {}) {
   state.leadBulkStatusTarget = "";
   state.leadArchivingIds = new Set();
   state.leadArchiveHiddenIds = new Set();
+  state.leadArchiveData = createEmptyLeadArchiveData();
   state.loginPasswordDraft = "";
   state.loginOtpDraft = "";
   state.loginOtpSentTo = "";
@@ -3320,9 +3479,11 @@ function applySignedOutUiState(options = {}) {
   state.callInboundPopupId = "";
   state.callSession = createEmptyCallSession();
   state.notificationsData = createEmptyNotificationsData();
+  state.notificationCenterData = createEmptyNotificationCenterData();
   seenNotificationIds.clear();
   notificationsInitialLoadComplete = false;
   notificationsRefreshPromise = null;
+  notificationCenterRefreshPromise = null;
   clearSupabaseWorkState();
   clearSupabaseAttendanceState();
   clearSupabaseCallsState();
@@ -4290,7 +4451,6 @@ function applySupabaseWorkSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object") {
     return;
   }
-  state.data.projects = Array.isArray(snapshot.projects) ? structuredClone(snapshot.projects) : [];
   state.data.tasks = Array.isArray(snapshot.tasks) ? structuredClone(snapshot.tasks) : [];
   state.data.waitingList = Array.isArray(snapshot.waitingList) ? structuredClone(snapshot.waitingList) : [];
   syncWorkCollections(state.data);
@@ -4301,9 +4461,13 @@ function clearSupabaseNotificationsState() {
   state.notificationsData = createEmptyNotificationsData({
     loaded: !state.supabaseConfigured
   });
+  state.notificationCenterData = createEmptyNotificationCenterData({
+    loaded: !state.supabaseConfigured
+  });
   seenNotificationIds.clear();
   notificationsInitialLoadComplete = false;
   notificationsRefreshPromise = null;
+  notificationCenterRefreshPromise = null;
 }
 
 function getNotificationItems() {
@@ -4315,11 +4479,9 @@ function getNotificationById(notificationId) {
   if (!normalizedId) {
     return null;
   }
-  return getNotificationItems().find((item) => String(item?.id || "") === normalizedId) || null;
-}
-
-function recalculateNotificationsUnreadCount(items = getNotificationItems()) {
-  return items.reduce((sum, item) => sum + (item?.readAt ? 0 : 1), 0);
+  return getNotificationItems().find((item) => String(item?.id || "") === normalizedId) ||
+    getNotificationCenterItems().find((item) => String(item?.id || "") === normalizedId) ||
+    null;
 }
 
 function applySupabaseNotificationsSnapshot(snapshot) {
@@ -4346,8 +4508,12 @@ function markNotificationIdsReadLocally(notificationIds = []) {
   if (!ids.size) {
     return;
   }
+  const currentItems = getNotificationItems();
+  const newlyRead = currentItems.filter(
+    (item) => ids.has(String(item?.id || "").trim()) && !String(item?.readAt || "").trim()
+  ).length;
   const readAt = new Date().toISOString();
-  const nextItems = getNotificationItems().map((item) => (
+  const nextItems = currentItems.map((item) => (
     ids.has(String(item?.id || "").trim()) && !String(item?.readAt || "").trim()
       ? {
           ...item,
@@ -4358,7 +4524,7 @@ function markNotificationIdsReadLocally(notificationIds = []) {
   ));
   state.notificationsData = createEmptyNotificationsData({
     ...state.notificationsData,
-    unreadCount: recalculateNotificationsUnreadCount(nextItems),
+    unreadCount: Math.max(0, Number(state.notificationsData?.unreadCount || 0) - newlyRead),
     items: nextItems
   });
 }
@@ -4369,8 +4535,14 @@ function markEntityNotificationsReadLocally(entityType, entityId) {
   if (!normalizedType || !normalizedId) {
     return;
   }
+  const currentItems = getNotificationItems();
+  const newlyRead = currentItems.filter(
+    (item) => String(item?.entityType || "").trim() === normalizedType &&
+      String(item?.entityId || "").trim() === normalizedId &&
+      !String(item?.readAt || "").trim()
+  ).length;
   const readAt = new Date().toISOString();
-  const nextItems = getNotificationItems().map((item) => (
+  const nextItems = currentItems.map((item) => (
     String(item?.entityType || "").trim() === normalizedType &&
     String(item?.entityId || "").trim() === normalizedId &&
     !String(item?.readAt || "").trim()
@@ -4383,9 +4555,10 @@ function markEntityNotificationsReadLocally(entityType, entityId) {
   ));
   state.notificationsData = createEmptyNotificationsData({
     ...state.notificationsData,
-    unreadCount: recalculateNotificationsUnreadCount(nextItems),
+    unreadCount: Math.max(0, Number(state.notificationsData?.unreadCount || 0) - newlyRead),
     items: nextItems
   });
+  markEntityNotificationCenterReadLocally(normalizedType, normalizedId);
 }
 
 function dismissNotificationLocally(notificationId) {
@@ -4393,11 +4566,74 @@ function dismissNotificationLocally(notificationId) {
   if (!normalizedId) {
     return;
   }
-  const nextItems = getNotificationItems().filter((item) => String(item?.id || "").trim() !== normalizedId);
+  const currentItems = getNotificationItems();
+  const dismissed = currentItems.find((item) => String(item?.id || "").trim() === normalizedId);
+  const nextItems = currentItems.filter((item) => String(item?.id || "").trim() !== normalizedId);
   state.notificationsData = createEmptyNotificationsData({
     ...state.notificationsData,
-    unreadCount: recalculateNotificationsUnreadCount(nextItems),
+    unreadCount: Math.max(
+      0,
+      Number(state.notificationsData?.unreadCount || 0) - (dismissed && !String(dismissed.readAt || "").trim() ? 1 : 0)
+    ),
     items: nextItems
+  });
+}
+
+function getNotificationCenterItems() {
+  return Array.isArray(state.notificationCenterData?.items) ? state.notificationCenterData.items : [];
+}
+
+function applySupabaseNotificationCenterPage(page, requestState) {
+  const normalized = page && typeof page === "object" ? page : {};
+  const items = Array.isArray(normalized.notifications)
+    ? normalized.notifications.map((item) => ({ ...item, unread: !String(item?.readAt || "").trim() }))
+    : [];
+  state.notificationCenterData = createEmptyNotificationCenterData({
+    loaded: true,
+    loading: false,
+    enabled: normalized.enabled !== false,
+    error: "",
+    filter: requestState.filter,
+    items: normalized.enabled === false ? [] : items,
+    totalCount: normalized.enabled === false ? 0 : Math.max(0, Number(normalized.totalCount || 0)),
+    unreadCount: normalized.enabled === false ? 0 : Math.max(0, Number(normalized.unreadCount || 0)),
+    offset: requestState.offset,
+    limit: requestState.limit,
+    hasMore: normalized.enabled === false ? false : Boolean(normalized.hasMore)
+  });
+}
+
+function markNotificationCenterIdsReadLocally(notificationIds = []) {
+  const ids = new Set((Array.isArray(notificationIds) ? notificationIds : []).map((value) => String(value || "").trim()).filter(Boolean));
+  if (!ids.size) {
+    return;
+  }
+  const readAt = new Date().toISOString();
+  const newlyRead = getNotificationCenterItems().filter((item) => ids.has(String(item?.id || "").trim()) && !String(item?.readAt || "").trim()).length;
+  state.notificationCenterData = createEmptyNotificationCenterData({
+    ...state.notificationCenterData,
+    unreadCount: Math.max(0, Number(state.notificationCenterData?.unreadCount || 0) - newlyRead),
+    items: getNotificationCenterItems().map((item) => ids.has(String(item?.id || "").trim())
+      ? { ...item, readAt: String(item?.readAt || "").trim() || readAt, unread: false }
+      : item)
+  });
+}
+
+function markEntityNotificationCenterReadLocally(entityType, entityId) {
+  const ids = getNotificationCenterItems()
+    .filter((item) => String(item?.entityType || "").trim() === String(entityType || "").trim() && String(item?.entityId || "").trim() === String(entityId || "").trim())
+    .map((item) => item.id);
+  markNotificationCenterIdsReadLocally(ids);
+}
+
+function dismissNotificationCenterLocally(notificationId) {
+  const normalizedId = String(notificationId || "").trim();
+  const dismissed = getNotificationCenterItems().find((item) => String(item?.id || "").trim() === normalizedId);
+  state.notificationCenterData = createEmptyNotificationCenterData({
+    ...state.notificationCenterData,
+    totalCount: Math.max(0, Number(state.notificationCenterData?.totalCount || 0) - (dismissed ? 1 : 0)),
+    unreadCount: Math.max(0, Number(state.notificationCenterData?.unreadCount || 0) - (dismissed && !String(dismissed.readAt || "").trim() ? 1 : 0)),
+    items: getNotificationCenterItems().filter((item) => String(item?.id || "").trim() !== normalizedId)
   });
 }
 
@@ -4525,6 +4761,88 @@ async function refreshSupabaseNotifications(options = {}) {
   return notificationsRefreshPromise;
 }
 
+async function refreshSupabaseNotificationCenter(options = {}) {
+  const { render = false, force = false } = options;
+  if (!state.supabaseConfigured || !state.signedInUser || state.authAccessState !== "granted") {
+    state.notificationCenterData = createEmptyNotificationCenterData({
+      ...state.notificationCenterData,
+      loaded: !state.supabaseConfigured,
+      loading: false,
+      error: ""
+    });
+    if (render && state.routeId === "notifications") {
+      renderRoute();
+    }
+    return false;
+  }
+  const workspaceId = String(state.data.workspace?.id || "").trim();
+  if (!workspaceId) {
+    return false;
+  }
+  if (!force && notificationCenterRefreshPromise) {
+    return notificationCenterRefreshPromise;
+  }
+
+  const previousData = state.notificationCenterData || createEmptyNotificationCenterData();
+  const requestState = {
+    filter: ["unread", "read"].includes(String(previousData.filter || "").trim()) ? previousData.filter : "all",
+    offset: Math.max(0, Number(previousData.offset || 0)),
+    limit: Math.max(1, Number(previousData.limit || 24))
+  };
+  const runId = ++notificationCenterRefreshSequence;
+  state.notificationCenterData = createEmptyNotificationCenterData({
+    ...previousData,
+    loaded: false,
+    loading: true,
+    error: "",
+    ...requestState
+  });
+  if (render && state.routeId === "notifications") {
+    renderRoute();
+  }
+
+  notificationCenterRefreshPromise = (async () => {
+    try {
+      const page = await fetchSupabaseNotificationsPage(workspaceId, requestState);
+      if (runId !== notificationCenterRefreshSequence) {
+        return false;
+      }
+      applySupabaseNotificationCenterPage(page, requestState);
+      state.notificationsData = createEmptyNotificationsData({
+        ...state.notificationsData,
+        enabled: page.enabled !== false,
+        unreadCount: page.enabled === false ? 0 : Math.max(0, Number(page.unreadCount || 0))
+      });
+      if (render && state.routeId === "notifications") {
+        renderRoute();
+      }
+      updateHeaderMenus();
+      return true;
+    } catch (error) {
+      if (runId !== notificationCenterRefreshSequence) {
+        return false;
+      }
+      state.notificationCenterData = createEmptyNotificationCenterData({
+        ...previousData,
+        loaded: false,
+        loading: false,
+        error: String(error?.message || error || "Notifications could not load."),
+        ...requestState
+      });
+      console.error("Notification Center sync failed:", error);
+      if (render && state.routeId === "notifications") {
+        renderRoute();
+      }
+      return false;
+    } finally {
+      if (runId === notificationCenterRefreshSequence) {
+        notificationCenterRefreshPromise = null;
+      }
+    }
+  })();
+  return notificationCenterRefreshPromise;
+}
+
 function unsubscribeNotificationsRealtime() {
   if (notificationsRealtimeChannel) {
     notificationsRealtimeChannel.unsubscribe();
@@ -4549,15 +4867,10 @@ function startNotificationsRealtimeFallback() {
       return;
     }
     void refreshSupabaseNotifications({ render: false, alertOnError: false });
+    if (state.routeId === "notifications") {
+      void refreshSupabaseNotificationCenter({ render: true });
+    }
   }, NOTIFICATIONS_REALTIME_FALLBACK_MS);
-}
-
-function stopNotificationsRealtimeFallback() {
-  if (!notificationsRealtimeState.fallbackTimer) {
-    return;
-  }
-  window.clearInterval(notificationsRealtimeState.fallbackTimer);
-  notificationsRealtimeState.fallbackTimer = 0;
 }
 
 function scheduleNotificationsRefresh(options = {}) {
@@ -4571,6 +4884,9 @@ function scheduleNotificationsRefresh(options = {}) {
       alertOnError: false,
       showToasts: options.showToasts !== false
     });
+    if (state.routeId === "notifications") {
+      void refreshSupabaseNotificationCenter({ render: true });
+    }
   }, 220);
 }
 
@@ -4600,7 +4916,6 @@ function subscribeNotificationsRealtime() {
     })
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        stopNotificationsRealtimeFallback();
         scheduleNotificationsRefresh({ showToasts: false });
         return;
       }
@@ -4649,7 +4964,7 @@ function shouldPollWorkRealtime() {
     isSupabaseWorkRealtimeEnabled() &&
       (
         state.routeId === "dashboard" ||
-        ["my-work", "calendar", "kanban", "table", "projects"].includes(String(state.routeId || "").trim()) ||
+        ["calendar", "kanban"].includes(String(state.routeId || "").trim()) ||
         isCallsSchedulerRoute ||
         Boolean(state.activeTaskDetailId)
       )
@@ -4661,7 +4976,7 @@ function shouldRenderWorkRealtimeRefresh() {
   if (normalizedRouteId === "comms-calls" && state.callsView === "scheduler") {
     return true;
   }
-  return ["dashboard", "my-work", "calendar", "kanban", "table", "projects"].includes(normalizedRouteId);
+  return ["dashboard", "calendar", "kanban"].includes(normalizedRouteId);
 }
 
 function scheduleWorkRealtimeRefresh() {
@@ -4789,7 +5104,6 @@ function subscribeWorkRealtime() {
   });
   syncWorkRealtimeFallbackState({ recordHealth: false });
   const tablesWithWorkspaceId = [
-    "projects",
     "tasks",
     "task_comments",
     "task_checklist_items",
@@ -4807,11 +5121,7 @@ function subscribeWorkRealtime() {
     })
   ), services.client.channel(`work:${workspaceId}`));
 
-  workRealtimeChannel = workRealtimeChannel
-    .on("postgres_changes", { event: "*", schema: "public", table: "project_members" }, () => {
-      scheduleWorkRealtimeRefresh();
-    })
-    .subscribe((status) => {
+  workRealtimeChannel = workRealtimeChannel.subscribe((status) => {
       if (status === "SUBSCRIBED") {
         stopWorkRealtimeFallback();
         setRealtimeHealth("workRealtime", "healthy", {
@@ -4842,6 +5152,7 @@ function applySupabaseAttendanceSnapshot(snapshot) {
   state.data.attendanceLogs = Array.isArray(snapshot.logs) ? structuredClone(snapshot.logs) : [];
   state.data.attendanceRequests = Array.isArray(snapshot.requests) ? structuredClone(snapshot.requests) : [];
   state.attendanceSnapshotLoaded = true;
+  state.attendanceSnapshotLoading = false;
   state.attendanceSnapshotUpdatedAt = Date.now();
   if (!wasSnapshotLoaded && !state.callsPerformanceCalendarTouched) {
     const shiftContext = getAttendanceReferenceShiftContextCore(new Date().toISOString(), state.data.attendancePolicy || {});
@@ -4859,7 +5170,6 @@ function applySupabaseAttendanceSnapshot(snapshot) {
 }
 
 function clearSupabaseWorkState() {
-  state.data.projects = [];
   state.data.tasks = [];
   state.data.waitingList = [];
   syncTaskAttachmentThumbnailCache();
@@ -4872,6 +5182,7 @@ function clearSupabaseAttendanceState() {
   state.data.attendanceLogs = [];
   state.data.attendanceRequests = [];
   state.attendanceSnapshotLoaded = false;
+  state.attendanceSnapshotLoading = false;
   state.attendanceSnapshotUpdatedAt = 0;
   ensureAttendanceCollections(state.data);
   resetSystemHealthEntry("attendanceSync");
@@ -5196,64 +5507,17 @@ function refreshDashboardViewInPlace() {
   beginLiveSync();
   const selectors = [
     "[data-dashboard-region='toolbar']",
-    "[data-dashboard-region='kpis']",
-    "[data-dashboard-region='funnel']",
+    "[data-dashboard-region='summary']",
     "[data-dashboard-region='attention']",
-    "[data-dashboard-region='sales-funnel']",
-    "[data-dashboard-region='top-reps']",
-    "[data-dashboard-region='follow-up-tasks']"
+    "[data-dashboard-region='today']",
+    "[data-dashboard-region='sales-flow']",
+    "[data-dashboard-region='sources']",
+    "[data-dashboard-region='team']"
   ];
   const synced = selectors.every((selector) => syncKeyedChildrenFromPreview(currentRoot, nextRoot, selector));
   if (!synced) {
     return false;
   }
-  syncElementFromPreview(currentRoot, nextRoot, "[data-dashboard-region='pipeline-summary']", { copyTextOnly: true });
-  syncElementFromPreview(currentRoot, nextRoot, "[data-dashboard-region='pipeline-footnote']", { copyTextOnly: true });
-  syncElementFromPreview(currentRoot, nextRoot, "[data-dashboard-region='attention-note']");
-  return true;
-}
-
-function refreshMyWorkViewInPlace() {
-  if (String(state.routeId || "").trim() !== "my-work") {
-    return false;
-  }
-  const viewContent = document.getElementById("viewContent");
-  const currentRoot = viewContent?.querySelector("[data-my-work-live-root]");
-  if (!(currentRoot instanceof HTMLElement)) {
-    return false;
-  }
-  const nextRoot = createRoutePreviewRoot("my-work");
-  if (!(nextRoot instanceof HTMLElement) || !nextRoot.hasAttribute("data-my-work-live-root")) {
-    return false;
-  }
-  const taskCard = currentRoot.querySelector("[data-my-work-card='tasks']");
-  const nextTaskCard = nextRoot.querySelector("[data-my-work-card='tasks']");
-  const meetingsCard = currentRoot.querySelector("[data-my-work-card='meetings']");
-  const nextMeetingsCard = nextRoot.querySelector("[data-my-work-card='meetings']");
-  if (
-    !(taskCard instanceof HTMLElement) ||
-    !(nextTaskCard instanceof HTMLElement) ||
-    !(meetingsCard instanceof HTMLElement) ||
-    !(nextMeetingsCard instanceof HTMLElement)
-  ) {
-    return false;
-  }
-  beginLiveSync();
-  taskCard.className = nextTaskCard.className;
-  meetingsCard.className = nextMeetingsCard.className;
-  const keyedSelectors = [
-    "[data-my-work-region='tasks-list']",
-    "[data-my-work-region='snapshot-list']",
-    "[data-my-work-region='meetings-list']"
-  ];
-  const syncedKeyed = keyedSelectors.every((selector) => syncKeyedChildrenFromPreview(currentRoot, nextRoot, selector));
-  if (!syncedKeyed) {
-    return false;
-  }
-  if (!syncElementFromPreview(currentRoot, nextRoot, "[data-my-work-region='snapshot-foot']")) {
-    return false;
-  }
-  syncElementFromPreview(currentRoot, nextRoot, "[data-my-work-region='snapshot-badge']");
   return true;
 }
 
@@ -5261,9 +5525,6 @@ function refreshActiveRouteInPlace() {
   const routeId = String(state.routeId || "").trim();
   if (routeId === "dashboard") {
     return refreshDashboardViewInPlace();
-  }
-  if (routeId === "my-work") {
-    return refreshMyWorkViewInPlace();
   }
   return false;
 }
@@ -5902,6 +6163,9 @@ async function refreshSupabaseLeadsPageMetaData(requestOptions = {}, options = {
   }
 
   const { render = state.routeId === "leads", force = false } = options;
+  if (String(requestOptions.importJobId || "").trim()) {
+    return true;
+  }
   const metaQueryKey = buildLeadsMetaCacheKey(workspaceId, requestOptions);
   const current = state.leadsPageData || createEmptyLeadsPageData();
   const cachedMeta = readQueryCache(metaQueryKey, {
@@ -6672,17 +6936,20 @@ async function refreshSupabaseLeadsPageData(options = {}) {
   const refreshSequence = ++leadsPageRefreshSequence;
 
   try {
+    const importJobId = String(requestOptions.importJobId || "").trim();
     const pageData = await fetchAndCacheQuery(queryKey, () =>
-      fetchSupabaseLeadsPage(workspaceId, {
-        ...requestOptions,
-        includeMeta: false,
-        ...(cursorState
-          ? {
-              cursor: cursorState.cursor,
-              cursorDirection: cursorState.cursorDirection
-            }
-          : {})
-      })
+      importJobId
+        ? fetchSupabaseLeadImportPage(workspaceId, importJobId, requestOptions)
+        : fetchSupabaseLeadsPage(workspaceId, {
+            ...requestOptions,
+            includeMeta: false,
+            ...(cursorState
+              ? {
+                  cursor: cursorState.cursor,
+                  cursorDirection: cursorState.cursorDirection
+                }
+              : {})
+          })
     );
     if (refreshSequence !== leadsPageRefreshSequence) {
       return true;
@@ -6705,7 +6972,7 @@ async function refreshSupabaseLeadsPageData(options = {}) {
       });
     }
     hydrateLeadsPageFromCachedResult(pageData, requestOptions, queryKey, current);
-    if (Boolean(pageData?.hasNextPage ?? pageData?.hasMore)) {
+    if (!importJobId && Boolean(pageData?.hasNextPage ?? pageData?.hasMore)) {
       const nextPage = Math.max(1, Number(requestOptions.page || 1) + 1);
       void prefetchSupabaseLeadsPageData(requestOptions, nextPage).catch((prefetchError) => {
         console.warn("Lead page prefetch skipped:", prefetchError);
@@ -7065,7 +7332,7 @@ async function refreshSupabaseWorkData(options = {}) {
         label: "Work sync",
         source: "rpc:get_work_snapshot",
         attempts: 3,
-        failureDetail: "Projects and tasks could not be refreshed."
+        failureDetail: "Tasks could not be refreshed."
       }
     );
     applyWorkSnapshotResult(snapshot, { persist, render, invalidateDashboard: false });
@@ -7137,9 +7404,14 @@ async function refreshSupabaseAttendanceData(options = {}) {
     }
     return true;
   } catch (error) {
+    state.attendanceSnapshotLoading = false;
     console.error("Supabase attendance sync failed:", error);
     if (alertOnError) {
       window.alert(`Attendance sync failed: ${String(error?.message || error || "Unknown error")}`);
+    }
+    if (render && state.routeId === "attendance") {
+      state.attendanceSnapshotLoaded = true;
+      renderRoute();
     }
     return false;
   }
@@ -7654,28 +7926,12 @@ function buildLeadStatusMetaPatch(sourceLead, nextStatus, nowIso = new Date().to
   };
 }
 
-function normalizeLeadAttemptReasonKey(reason) {
-  return String(reason || "").trim().replace(/\s+/g, " ").toLowerCase();
-}
-
-function isLeadUnqualifiedAttemptReason(reason) {
-  return LEAD_UNQUALIFIED_ATTEMPT_REASONS.has(normalizeLeadAttemptReasonKey(reason));
-}
-
 function buildLeadAttemptMutation(sourceLead, reason, note = "", actorName = "", nowIso = new Date().toISOString()) {
   const attemptTracking = getLeadAttemptTrackingMeta(sourceLead);
   const currentCount = normalizeLeadAttemptCountValue(attemptTracking.attemptCount);
   const nextAttemptCount = Math.max(0, Math.min(3, currentCount + 1));
   const currentStatus = String(sourceLead?.status || "").trim();
-  const shouldUnqualify = isLeadUnqualifiedAttemptReason(reason);
-  const nextStatus =
-    currentStatus === "Unqualified"
-      ? "Unqualified"
-      : shouldUnqualify
-        ? "Unqualified"
-        : currentStatus === "New" || !currentStatus
-          ? "Contacted"
-          : currentStatus;
+  const nextStatus = resolveLeadAttemptStatus(currentStatus, reason);
   const statusChangedByAttempt = currentStatus !== nextStatus;
   const autoContacted = currentStatus === "New" && nextStatus === "Contacted";
   const autoUnqualified = currentStatus !== "Unqualified" && nextStatus === "Unqualified";
@@ -7725,40 +7981,26 @@ async function persistLeadAttemptChange(leadId, reason, note = "", options = {})
   const nowIso = new Date().toISOString();
   const currentMemberId = resolveCurrentUserId(state.data) || "";
   const currentMemberName = String(state.data.currentUser?.name || "").trim();
-  const { nextAttemptCount, nextStatus, autoContacted, autoUnqualified, metaPatch } = buildLeadAttemptMutation(
+  const attemptMutation = buildLeadAttemptMutation(
     lead,
     normalizedReason,
     normalizedNote,
     currentMemberName,
     nowIso
   );
+  let nextAttemptCount = attemptMutation.nextAttemptCount;
+  let autoContacted = attemptMutation.autoContacted;
+  let autoUnqualified = attemptMutation.autoUnqualified;
+  let nextStatus = attemptMutation.nextStatus;
+  let metaPatch = attemptMutation.metaPatch;
 
   if (isSupabaseCrmWriteEnabled()) {
-    await updateSupabaseLead(
-      lead.id,
-      buildSupabaseLeadPayload(
-        {
-          name: lead.name,
-          company: lead.company,
-          source: lead.source,
-          status: nextStatus,
-          owner: lead.owner,
-          nextFollowUp: lead.nextFollowUp,
-          email: lead.email || "",
-          phone: lead.phone || "",
-          secondaryPhone: lead.secondaryPhone || "",
-          interest: lead.interest || "",
-          role: lead.role || "",
-          notes: lead.notes || "",
-          tags: lead.tags || []
-        },
-        {
-          existing: lead,
-          archivedAt: lead.archived ? lead.archivedAt || nowIso : null,
-          meta: metaPatch
-        }
-      )
-    );
+    const serverResult = await recordSupabaseLeadAttempt(lead.id, normalizedReason, normalizedNote);
+    nextStatus = String(serverResult.status || nextStatus).trim() || nextStatus;
+    nextAttemptCount = Number(serverResult.attemptCount || nextAttemptCount);
+    autoContacted = String(lead.status || "").trim() === "New" && nextStatus === "Contacted";
+    autoUnqualified = String(lead.status || "").trim() !== "Unqualified" && nextStatus === "Unqualified";
+    metaPatch = serverResult.meta && typeof serverResult.meta === "object" ? serverResult.meta : metaPatch;
   } else if (blockConnectedModeLocalFallback("Logging lead attempts", { form })) {
     return false;
   }
@@ -8289,6 +8531,71 @@ async function persistLeadStatusChange(leadId, nextStatus, options = {}) {
   return true;
 }
 
+function setQualifiedLeadHandoffSaving(leads, saving) {
+  const leadIds = (Array.isArray(leads) ? leads : [])
+    .map((lead) => String(lead?.id || "").trim())
+    .filter(Boolean);
+  state.leadStatusSavingIds = saving ? new Set(leadIds) : new Set();
+  state.leadStatusSavingId = saving && leadIds.length === 1 ? leadIds[0] : "";
+  state.leadBulkStatusSaving = Boolean(saving && leadIds.length > 1);
+  state.leadBulkStatusTarget = saving ? "Qualified" : "";
+}
+
+async function executeQualifiedLeadHandoff(leads, allowDuplicates = false) {
+  const selectedLeads = (Array.isArray(leads) ? leads : [])
+    .filter((lead) => lead && String(lead.id || "").trim());
+  if (!selectedLeads.length) {
+    return false;
+  }
+  if (!isSupabaseCrmWriteEnabled()) {
+    blockConnectedModeLocalFallback("Qualified lead handoff");
+    return false;
+  }
+
+  setQualifiedLeadHandoffSaving(selectedLeads, true);
+  renderRoute();
+  try {
+    const result = await qualifyAndHandoffSupabaseLeads(
+      selectedLeads.map((lead) => lead.id),
+      allowDuplicates
+    );
+    const duplicates = Array.isArray(result?.duplicates) ? result.duplicates : [];
+    if (result?.requiresDuplicateConfirmation) {
+      setQualifiedLeadHandoffSaving(selectedLeads, false);
+      renderRoute();
+      openConfirmModal({
+        title: "Possible duplicate leads found",
+        message: formatQualificationDuplicateWarning(duplicates, selectedLeads.length),
+        confirmLabel: `Qualify and assign to ${result?.destinationOwnerName || "the qualified lead owner"}`,
+        cancelLabel: "Review leads",
+        danger: false,
+        onConfirm: async () => {
+          await executeQualifiedLeadHandoff(selectedLeads, true);
+          return true;
+        }
+      });
+      return false;
+    }
+
+    clearLeadSelection();
+    await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
+    setQualifiedLeadHandoffSaving(selectedLeads, false);
+    renderRoute();
+    const updatedCount = Number(result?.updatedCount || selectedLeads.length);
+    const destinationOwnerName = String(result?.destinationOwnerName || "the qualified lead owner").trim();
+    showToast(
+      `${updatedCount} lead${updatedCount === 1 ? "" : "s"} qualified and assigned to ${destinationOwnerName}.`,
+      { tone: "success" }
+    );
+    return true;
+  } catch (error) {
+    setQualifiedLeadHandoffSaving(selectedLeads, false);
+    renderRoute();
+    window.alert(`Qualified lead handoff failed: ${String(error?.message || error || "Unknown error")}`);
+    return false;
+  }
+}
+
 async function maybeRunLeadWeeklyCleanup(requestOptions = {}) {
   if (!isSupabaseCrmWriteEnabled()) {
     return false;
@@ -8782,7 +9089,7 @@ async function refreshSupabaseTeamWorkspace(options = {}) {
 
 async function refreshSupabaseSettingsProfileData(options = {}) {
   const {
-    render = state.routeId === "settings-me" || state.routeId === "settings-workspace",
+    render = isSettingsRouteId(state.routeId),
     alertOnError = false,
     force = false
   } = options;
@@ -8799,10 +9106,15 @@ async function refreshSupabaseSettingsProfileData(options = {}) {
   if (!normalizedEmail) {
     return false;
   }
+  if (!force && settingsProfileLoadedEmail === normalizedEmail && settingsProfileLoadError) {
+    return false;
+  }
+  settingsProfileLoadError = "";
 
   const now = Date.now();
   if (
     !force &&
+    settingsProfileLoadedEmail === normalizedEmail &&
     settingsProfileLastRefreshAt &&
     now - settingsProfileLastRefreshAt < SETTINGS_PROFILE_REFRESH_STALE_MS
   ) {
@@ -8816,13 +9128,23 @@ async function refreshSupabaseSettingsProfileData(options = {}) {
   settingsProfileRefreshPromise = (async () => {
     try {
       const bundle = await fetchWorkspaceBundleByEmail(normalizedEmail);
-      if (runId !== settingsProfileRefreshRunId || !bundle?.member || !bundle?.workspace) {
+      if (runId !== settingsProfileRefreshRunId) {
+        return false;
+      }
+      if (!bundle?.member || !bundle?.workspace) {
+        settingsProfileLoadedEmail = normalizedEmail;
+        settingsProfileLoadError = "Settings could not be refreshed. Try again.";
+        if (render && isSettingsRouteId(state.routeId)) {
+          requestSettingsProfileRouteRender();
+        }
         return false;
       }
       applySupabaseWorkspaceBundle(bundle);
       settingsProfileLastRefreshAt = Date.now();
+      settingsProfileLoadedEmail = normalizedEmail;
+      settingsProfileLoadError = "";
       saveData(state.data);
-      if (render && (state.routeId === "settings-me" || state.routeId === "settings-workspace")) {
+      if (render && isSettingsRouteId(state.routeId)) {
         requestSettingsProfileRouteRender();
       } else {
         updateHeaderMenus();
@@ -8830,6 +9152,11 @@ async function refreshSupabaseSettingsProfileData(options = {}) {
       return true;
     } catch (error) {
       console.warn("Supabase profile workspace refresh failed:", error);
+      settingsProfileLoadedEmail = normalizedEmail;
+      settingsProfileLoadError = "Settings could not be refreshed. Try again.";
+      if (render && isSettingsRouteId(state.routeId)) {
+        requestSettingsProfileRouteRender();
+      }
       if (alertOnError) {
         window.alert(`Profile refresh failed: ${String(error?.message || error || "Unknown error")}`);
       }
@@ -8853,7 +9180,7 @@ function clearSettingsProfileDeferredRender() {
 }
 
 function isSettingsProfileUiBusy() {
-  if (state.routeId !== "settings-me" && state.routeId !== "settings-workspace") {
+  if (!isSettingsRouteId(state.routeId)) {
     return false;
   }
   if (document.querySelector(".modal-overlay:not([hidden])")) {
@@ -8869,7 +9196,7 @@ function isSettingsProfileUiBusy() {
 }
 
 function requestSettingsProfileRouteRender() {
-  if (state.routeId !== "settings-me" && state.routeId !== "settings-workspace") {
+  if (!isSettingsRouteId(state.routeId)) {
     clearSettingsProfileDeferredRender();
     return;
   }
@@ -8883,7 +9210,7 @@ function requestSettingsProfileRouteRender() {
     return;
   }
   settingsProfileDeferredRenderTimer = window.setInterval(() => {
-    if (state.routeId !== "settings-me" && state.routeId !== "settings-workspace") {
+    if (!isSettingsRouteId(state.routeId)) {
       clearSettingsProfileDeferredRender();
       return;
     }
@@ -9350,8 +9677,8 @@ function getSelectedConversation(data, selectedKey) {
 }
 
 const CREATE_CONFIG = {
-  dashboard: "my-work",
-  "my-work": {
+  dashboard: "kanban",
+  kanban: {
     title: "Add Task",
     collection: "tasks",
     idPrefix: "task",
@@ -9378,27 +9705,7 @@ const CREATE_CONFIG = {
       }
     ]
   },
-  calendar: "my-work",
-  kanban: "my-work",
-  table: "my-work",
-  projects: {
-    title: "Add Project",
-    collection: "projects",
-    idPrefix: "proj",
-    fields: [
-      { name: "name", label: "Project Name", type: "text", required: true, placeholder: "Project name" },
-      { name: "owner", label: "Owner", type: "text", required: true, placeholder: "Owner name" },
-      {
-        name: "status",
-        label: "Status",
-        type: "select",
-        required: true,
-        options: ["On Track", "Needs Focus", "Blocked"],
-        defaultValue: "On Track"
-      },
-      { name: "progress", label: "Progress %", type: "number", required: true, defaultValue: 0, min: 0, max: 100 }
-    ]
-  },
+  calendar: "kanban",
   leads: {
     title: "Add Lead",
     collection: "leads",
@@ -9555,7 +9862,7 @@ const CREATE_CONFIG = {
         label: "Linked Module",
         type: "select",
         required: false,
-        options: [{ value: "", label: "None" }, "Lead", "Contact", "Account", "Deal", "Project", "Task"],
+        options: [{ value: "", label: "None" }, "Lead", "Contact", "Account", "Deal", "Task"],
         defaultValue: ""
       },
       {
@@ -9746,114 +10053,6 @@ function ensureOwnerTeamMemberAccess(member, options = {}) {
     window.alert("Only workspace owners can manage another owner account.");
   }
   return false;
-}
-
-function formatWorkspacePreviewCount(value, unit) {
-  const count = Math.max(0, Number(value) || 0);
-  return `${count} ${count === 1 ? unit : `${unit}s`}`;
-}
-
-function workspacePreviewStageClass(value) {
-  const normalized = String(value || "Prospecting")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-");
-  return `stage-${normalized || "prospecting"}`;
-}
-
-function updateWorkspaceProfilePreview(form) {
-  if (!(form instanceof HTMLFormElement)) {
-    return;
-  }
-
-  const readFieldValue = (selector, fallback = "") => String(form.querySelector(selector)?.value || "").trim() || fallback;
-  const workspaceName = readFieldValue("input[name='workspaceName']", "Workspace");
-  const legalName = readFieldValue("input[name='legalName']");
-  const appLabel = normalizeSystemAppLabel(readFieldValue("input[name='appLabel']", workspaceName));
-  const brandColor = normalizeInviteBrandColor(readFieldValue("[name='brandColor']", "#2457d6"));
-  const website = readFieldValue("input[name='website']", "No website");
-  const supportEmail = readFieldValue("input[name='supportEmail']", "No support email");
-  const supportPhone = readFieldValue("input[name='supportPhone']", "No support phone");
-  const businessAddress = readFieldValue("textarea[name='businessAddress']", "No business address set");
-  const timezone = readFieldValue("select[name='workspaceTimezone']", "Local");
-  const businessStart = readFieldValue("input[name='businessStart']", "09:00");
-  const businessEnd = readFieldValue("input[name='businessEnd']", "18:00");
-  const businessHours = `${businessStart} - ${businessEnd}`;
-  const businessDays = [...form.querySelectorAll("input[name='businessDays']:checked")]
-    .map((input) => String(input.nextElementSibling?.textContent || "").trim())
-    .filter(Boolean);
-  const businessDaysLabel = businessDays.length ? businessDays.join(" / ") : "Mon / Tue / Wed / Thu / Fri";
-  const crmStage =
-    String(form.querySelector("input[name='crmDefaultStage']:checked")?.value || "").trim() || "Prospecting";
-  const crmOwner = readFieldValue("[name='crmDefaultOwner']", "Current admin");
-  const crmSlaHours = formatWorkspacePreviewCount(readFieldValue("input[name='crmSlaHours']", "24"), "hour");
-  const crmFollowUpCount = Math.max(0, Number(readFieldValue("input[name='crmFollowUpDays']", "2")) || 0);
-  const crmFollowUpDays = crmFollowUpCount === 0 ? "Same day" : formatWorkspacePreviewCount(crmFollowUpCount, "day");
-  const identityLine = legalName && legalName !== workspaceName ? legalName : `${workspaceName} workspace`;
-  const logoInput = readFieldValue("input[name='logoUrl']");
-  const logoUrl = resolveBrandLogoUrl(logoInput);
-
-  const previewText = {
-    appLabel,
-    appLabelSecondary: appLabel,
-    identityLine,
-    workspaceName,
-    website,
-    supportEmail,
-    supportPhone,
-    businessAddress,
-    timezone,
-    timezoneSecondary: timezone,
-    businessDays: businessDaysLabel,
-    businessHours,
-    businessHoursSecondary: businessHours,
-    crmDefaultOwner: crmOwner,
-    crmDefaultOwnerSecondary: crmOwner,
-    crmSlaHours,
-    crmFollowUpDays
-  };
-
-  Object.entries(previewText).forEach(([key, value]) => {
-    form.querySelectorAll(`[data-workspace-preview="${key}"]`).forEach((node) => {
-      node.textContent = value;
-    });
-  });
-
-  form.querySelectorAll("[data-workspace-preview-color]").forEach((node) => {
-    node.style.setProperty("--workspace-brand", brandColor);
-  });
-
-  form.querySelectorAll("[data-workspace-logo-preview]").forEach((node) => {
-    node.setAttribute("src", logoUrl);
-    node.setAttribute("alt", appLabel);
-  });
-
-  form.querySelectorAll("[data-workspace-stage-chip], [data-workspace-stage-chip-secondary]").forEach((node) => {
-    node.textContent = crmStage;
-    node.className = `status-chip ${workspacePreviewStageClass(crmStage)}`;
-  });
-
-  form.querySelectorAll("[data-settings-field-group='brandColor'] .settings-swatch-btn").forEach((node) => {
-    node.classList.toggle(
-      "is-active",
-      normalizeInviteBrandColor(node.dataset.value) === brandColor
-    );
-  });
-
-  form.querySelectorAll("[data-settings-field-group='crmSlaHours'] .settings-quick-chip").forEach((node) => {
-    node.classList.toggle("is-active", String(node.dataset.value || "") === String(Math.max(0, Number(readFieldValue("input[name='crmSlaHours']", "24")) || 0)));
-  });
-
-  form.querySelectorAll("[data-settings-field-group='crmFollowUpDays'] .settings-quick-chip").forEach((node) => {
-    node.classList.toggle("is-active", String(node.dataset.value || "") === String(Math.max(0, Number(readFieldValue("input[name='crmFollowUpDays']", "2")) || 0)));
-  });
-
-  form.querySelectorAll("[data-settings-field-group='businessHours'] .settings-quick-chip").forEach((node) => {
-    node.classList.toggle(
-      "is-active",
-      String(node.dataset.start || "") === businessStart && String(node.dataset.end || "") === businessEnd
-    );
-  });
 }
 
 function defaultPermissionValueByRole(role, action, moduleId) {
@@ -10570,6 +10769,10 @@ function renderLeadExportDatePicker(control) {
   }
   const selectedDate = parseLeadExportDateValue(input.value);
   const monthDate = getLeadExportVisibleMonth(control);
+  const form = control.closest("form");
+  const fromValue = String(form?.querySelector("[name='leadExportFrom']")?.value || "");
+  const toValue = String(form?.querySelector("[name='leadExportTo']")?.value || "");
+  const isToDate = control.dataset.leadExportDateEdge === "to";
   control.dataset.visibleMonth = formatLeadExportDateValue(monthDate).slice(0, 7);
   trigger.textContent = formatLeadExportDateDisplay(input.value);
   trigger.classList.toggle("is-empty", !selectedDate);
@@ -10593,8 +10796,10 @@ function renderLeadExportDatePicker(control) {
     );
     const iso = formatLeadExportDateValue(cellDate);
     const isSelected = selectedDate && iso === formatLeadExportDateValue(selectedDate);
+    const isInRange = fromValue && toValue && iso > fromValue && iso < toValue;
+    const isDisabled = isToDate && fromValue && iso < fromValue;
     cells.push(
-      `<button type="button" class="lead-export-calendar-day${isCurrentMonth ? "" : " is-muted"}${isSelected ? " is-selected" : ""}" data-lead-export-date-day="${iso}">${displayDay}</button>`
+      `<button type="button" class="lead-export-calendar-day${isCurrentMonth ? "" : " is-muted"}${isInRange ? " is-in-range" : ""}${isSelected ? " is-selected" : ""}" data-lead-export-date-day="${iso}" aria-label="${cellDate.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}" ${isDisabled ? "disabled" : ""}>${displayDay}</button>`
     );
   }
 
@@ -10621,8 +10826,58 @@ function setupLeadExportDatePickers(container) {
     controls.forEach((control) => {
       if (control !== exceptControl) {
         control.classList.remove("is-open");
+        const trigger = control.querySelector("[data-lead-export-date-toggle]");
+        const panel = control.querySelector("[data-lead-export-date-panel]");
+        trigger?.setAttribute("aria-expanded", "false");
+        panel?.removeAttribute("style");
       }
     });
+  };
+  const openPanel = (control) => {
+    closePanels(control);
+    control.classList.add("is-open");
+    control.querySelector("[data-lead-export-date-toggle]")?.setAttribute("aria-expanded", "true");
+    renderLeadExportDatePicker(control);
+    requestAnimationFrame(() => {
+      const trigger = control.querySelector("[data-lead-export-date-toggle]");
+      const panel = control.querySelector("[data-lead-export-date-panel]");
+      const modalCard = container.closest(".modal-card");
+      if (!(trigger instanceof HTMLElement) || !(panel instanceof HTMLElement) || !(modalCard instanceof HTMLElement)) return;
+      const triggerRect = trigger.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      const modalRect = modalCard.getBoundingClientRect();
+      const headerBottom = modalCard.querySelector(".modal-head")?.getBoundingClientRect().bottom || modalRect.top;
+      const footerTop = container.querySelector(".form-actions")?.getBoundingClientRect().top || modalRect.bottom;
+      const minTop = headerBottom + 8;
+      const maxBottom = footerTop - 8;
+      const preferredBelow = triggerRect.bottom + 6;
+      const preferredAbove = triggerRect.top - panelRect.height - 6;
+      const top = preferredBelow + panelRect.height <= maxBottom
+        ? preferredBelow
+        : Math.max(minTop, Math.min(preferredAbove, maxBottom - panelRect.height));
+      const preferredLeft = control.dataset.leadExportDateEdge === "to"
+        ? triggerRect.right - panelRect.width
+        : triggerRect.left;
+      const left = Math.max(modalRect.left + 12, Math.min(preferredLeft, modalRect.right - panelRect.width - 12));
+      Object.assign(panel.style, { position: "fixed", top: `${top}px`, left: `${left}px`, right: "auto", bottom: "auto" });
+    });
+  };
+  const commitDate = (control, value) => {
+    const input = control.querySelector("input");
+    if (!(input instanceof HTMLInputElement)) return;
+    input.value = value;
+    control.dataset.visibleMonth = value.slice(0, 7);
+    const toControl = controls.find((item) => item.dataset.leadExportDateEdge === "to");
+    if (control.dataset.leadExportDateEdge === "from" && toControl) {
+      const toInput = toControl.querySelector("input");
+      if (toInput instanceof HTMLInputElement && toInput.value && toInput.value < value) toInput.value = "";
+      controls.forEach((item) => renderLeadExportDatePicker(item));
+      toControl.dataset.visibleMonth = value.slice(0, 7);
+      openPanel(toControl);
+      return;
+    }
+    closePanels();
+    controls.forEach((item) => renderLeadExportDatePicker(item));
   };
   controls.forEach((control) => renderLeadExportDatePicker(control));
   if (container.leadExportDatePickerHandler) {
@@ -10636,9 +10891,8 @@ function setupLeadExportDatePickers(container) {
     }
     const input = control.querySelector("input");
     if (event.target.closest("[data-lead-export-date-toggle]")) {
-      closePanels(control);
-      control.classList.toggle("is-open");
-      renderLeadExportDatePicker(control);
+      if (control.classList.contains("is-open")) closePanels();
+      else openPanel(control);
       return;
     }
     const shiftButton = event.target.closest("[data-lead-export-date-shift]");
@@ -10650,23 +10904,21 @@ function setupLeadExportDatePickers(container) {
       return;
     }
     const dayButton = event.target.closest("[data-lead-export-date-day]");
-    if (dayButton && input) {
-      input.value = String(dayButton.dataset.leadExportDateDay || "");
-      control.dataset.visibleMonth = input.value.slice(0, 7);
-      control.classList.remove("is-open");
-      renderLeadExportDatePicker(control);
+    if (dayButton && input && !dayButton.disabled) {
+      commitDate(control, String(dayButton.dataset.leadExportDateDay || ""));
       return;
     }
     if (event.target.closest("[data-lead-export-date-clear]") && input) {
       input.value = "";
-      renderLeadExportDatePicker(control);
+      if (control.dataset.leadExportDateEdge === "from") {
+        const toInput = container.querySelector("[name='leadExportTo']");
+        if (toInput instanceof HTMLInputElement) toInput.value = "";
+      }
+      controls.forEach((item) => renderLeadExportDatePicker(item));
       return;
     }
     if (event.target.closest("[data-lead-export-date-today]") && input) {
-      input.value = formatLeadExportDateValue(new Date());
-      control.dataset.visibleMonth = input.value.slice(0, 7);
-      control.classList.remove("is-open");
-      renderLeadExportDatePicker(control);
+      commitDate(control, formatLeadExportDateValue(new Date()));
     }
   };
   container.addEventListener("click", container.leadExportDatePickerHandler);
@@ -10698,15 +10950,16 @@ function openLeadExportModal(exportType = "leads") {
   const requestedType = String(exportType || "").trim();
   const normalizedType = requestedType === "duplicates" || requestedType === "unqualified" ? requestedType : "leads";
   const label = getLeadExportLabel(normalizedType);
+  const exportOwnerMembers = getLeadAssignableTeamMembers();
   modalTitle.textContent =
     normalizedType === "duplicates"
-      ? "Export Duplicates"
+      ? "Export duplicates"
       : normalizedType === "unqualified"
-        ? "Export Unqualified Leads"
-        : "Export Leads";
+        ? "Export unqualified leads"
+        : "Export leads";
   modalForm.dataset.mode = "lead-export";
   modalForm.dataset.exportType = normalizedType;
-  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide", "is-lead-export");
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide", "is-lead-export");
   modalCard.classList.add("is-lead-export");
   modalForm.innerHTML = `
     <div class="modal-body lead-export-modal">
@@ -10719,25 +10972,7 @@ function openLeadExportModal(exportType = "leads") {
             <small>Status and archive visibility</small>
           </div>
           <div class="lead-export-modal__grid">
-            <label class="lead-export-field">
-              <span>Status</span>
-              <select name="leadExportStatus">
-                <option value="all">All statuses</option>
-                <option value="New">New</option>
-                <option value="Contacted">Contacted</option>
-                <option value="Qualified">Qualified</option>
-                <option value="Unqualified">Unqualified</option>
-                <option value="Converted">Converted</option>
-              </select>
-            </label>
-            <label class="lead-export-field">
-              <span>Archive scope</span>
-              <select name="leadExportArchiveScope">
-                <option value="active">Active leads only</option>
-                <option value="archived">Archived leads only</option>
-                <option value="all">Active + archived</option>
-              </select>
-            </label>
+            ${renderLeadExportFiltersMarkup(exportOwnerMembers)}
           </div>
           <fieldset class="lead-export-attempts" data-lead-export-attempt-field hidden>
             <legend>Contact attempt</legend>
@@ -10758,33 +10993,35 @@ function openLeadExportModal(exportType = "leads") {
           <div class="lead-export-scope-list">
             ${normalizedType === "leads" ? "" : `<label class="lead-export-scope-card"><input type="radio" name="leadExportScope" value="new" checked /> <span>New ${escapeModalText(label)} only</span></label>`}
             <label class="lead-export-scope-card">
-              <input type="radio" name="leadExportScope" value="date-range" ${normalizedType === "leads" ? "checked" : ""} />
+              <input type="radio" name="leadExportScope" value="date-range" />
               <span>${normalizedType === "duplicates" ? "Duplicates detected" : normalizedType === "unqualified" ? "Unqualified leads" : "Leads created"} in date range</span>
             </label>
-            <div class="lead-export-date-row" data-lead-export-date-range ${normalizedType === "leads" ? "" : "hidden"}>
-              <div class="lead-export-date-control" data-lead-export-date-control>
+            <div class="lead-export-date-row" data-lead-export-date-range hidden>
+              <div class="lead-export-date-control" data-lead-export-date-control data-lead-export-date-edge="from">
                 <span>From date</span>
                 <input type="hidden" name="leadExportFrom" />
-                <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
-                <div class="lead-export-calendar" data-lead-export-date-panel></div>
+                <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle aria-haspopup="dialog" aria-expanded="false">Select date</button>
+                <div class="lead-export-calendar" data-lead-export-date-panel role="dialog" aria-label="Choose from date"></div>
               </div>
-              <div class="lead-export-date-control" data-lead-export-date-control>
+              <div class="lead-export-date-control" data-lead-export-date-control data-lead-export-date-edge="to">
                 <span>To date</span>
                 <input type="hidden" name="leadExportTo" />
-                <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle>Select date</button>
-                <div class="lead-export-calendar" data-lead-export-date-panel></div>
+                <button type="button" class="lead-export-date-trigger is-empty" data-lead-export-date-toggle aria-haspopup="dialog" aria-expanded="false">Select date</button>
+                <div class="lead-export-calendar" data-lead-export-date-panel role="dialog" aria-label="Choose to date"></div>
               </div>
             </div>
-            <label class="lead-export-scope-card"><input type="radio" name="leadExportScope" value="all" /> <span>All matching ${escapeModalText(label)}</span></label>
+            <label class="lead-export-scope-card"><input type="radio" name="leadExportScope" value="all" ${normalizedType === "leads" ? "checked" : ""} /> <span>All matching ${escapeModalText(label)}</span></label>
           </div>
         </section>
       </div>
+      ${normalizedType === "leads" ? `<p class="lead-export-owner-note">Only leads matching the selected owner and filters will be included.</p>` : ""}
     </div>
     <div class="form-actions">
       <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
-      <button type="submit" class="btn btn-accent" data-submit-busy-label="Exporting...">Export</button>
+      <button type="submit" class="btn btn-accent" data-submit-busy-label="Exporting...">Export CSV</button>
     </div>
   `;
+  setupLeadCustomSelects(modalForm);
   setupLeadExportDatePickers(modalForm);
   syncLeadExportAttemptFilter(modalForm);
   modalOverlay.hidden = false;
@@ -10845,6 +11082,7 @@ async function submitLeadExportModal(form, submitter) {
   const statusValue = String(form.querySelector("[name='leadExportStatus']")?.value || "all").trim() || "all";
   const archiveScope = String(form.querySelector("[name='leadExportArchiveScope']")?.value || "active").trim() || "active";
   const attemptFilter = String(form.querySelector("input[name='leadExportAttemptFilter']:checked")?.value || "all").trim() || "all";
+  const ownerMemberId = String(form.querySelector("[name='leadExportOwner']")?.value || "all").trim() || "all";
   if (scope === "date-range" && (!fromValue || !toValue)) {
     window.alert("Choose a from date and to date before exporting.");
     return;
@@ -10874,7 +11112,10 @@ async function submitLeadExportModal(form, submitter) {
     if (error) {
       throw error;
     }
-    const rows = await hydrateLeadExportRows(client, Array.isArray(data?.rows) ? data.rows : []);
+    const hydratedRows = await hydrateLeadExportRows(client, Array.isArray(data?.rows) ? data.rows : []);
+    const rows = ownerMemberId === "all"
+      ? hydratedRows
+      : hydratedRows.filter((row) => String(row?.owner_member_id || "").trim() === ownerMemberId);
     if (!rows.length) {
       window.alert("No leads match this export scope.");
       return;
@@ -10957,6 +11198,7 @@ function submitKanbanFiltersForm(form) {
 
 function submitLeadFiltersForm(form) {
   const formData = new FormData(form);
+  clearLeadImportResultView();
   state.searchTerm = String(formData.get("searchTerm") || "").trim();
   state.leadsStatusFilter = String(formData.get("statusFilter") || "all").trim() || "all";
   state.leadsOwnerFilter = String(formData.get("ownerFilter") || "all").trim() || "all";
@@ -10966,6 +11208,50 @@ function submitLeadFiltersForm(form) {
   state.leadFiltersOpen = false;
   resetCrmPage("leads");
   renderRoute();
+}
+
+function selectLeadFilterDropdownOption(optionButton) {
+  const dropdown = optionButton?.closest?.("[data-lead-filter-dropdown]");
+  if (!(dropdown instanceof HTMLDetailsElement)) {
+    return false;
+  }
+  const nextValue = String(optionButton.dataset.value || "");
+  const nextLabel = String(optionButton.dataset.label || "Select");
+  const hiddenInput = dropdown.querySelector("input[type='hidden']");
+  const valueLabel = dropdown.querySelector("[data-lead-filter-value]");
+  if (hiddenInput instanceof HTMLInputElement) {
+    hiddenInput.value = nextValue;
+  }
+  if (valueLabel instanceof HTMLElement) {
+    valueLabel.textContent = nextLabel;
+  }
+  dropdown.querySelectorAll("[data-lead-filter-option]").forEach((option) => {
+    const selected = option === optionButton;
+    option.classList.toggle("is-selected", selected);
+    option.setAttribute("aria-selected", String(selected));
+  });
+  dropdown.open = false;
+  dropdown.querySelector("summary")?.focus();
+  return true;
+}
+
+function filterLeadOwnerDropdown(searchInput) {
+  const dropdown = searchInput?.closest?.("[data-lead-filter-dropdown]");
+  if (!(dropdown instanceof HTMLDetailsElement)) {
+    return false;
+  }
+  const query = String(searchInput.value || "").trim().toLowerCase();
+  let visibleCount = 0;
+  dropdown.querySelectorAll("[data-lead-filter-option]").forEach((option) => {
+    const matches = !query || String(option.dataset.searchText || "").includes(query);
+    option.hidden = !matches;
+    if (matches) visibleCount += 1;
+  });
+  const emptyState = dropdown.querySelector("[data-lead-filter-empty]");
+  if (emptyState instanceof HTMLElement) {
+    emptyState.hidden = visibleCount > 0;
+  }
+  return true;
 }
 
 function openAttendanceRangeModal(mode = "filter") {
@@ -10980,16 +11266,12 @@ function openAttendanceRangeModal(mode = "filter") {
   if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
     return;
   }
-  const preservedTab =
-    modalForm instanceof HTMLFormElement &&
-    modalForm.dataset.mode === "contact-view" &&
-    String(modalForm.dataset.contactId || "").trim() === String(contact.id || "").trim()
-      ? String(modalForm.dataset.contactViewTab || "activity").trim().toLowerCase() || "activity"
-      : "activity";
 
   const intent = String(mode || "filter").trim().toLowerCase() === "export" ? "export" : "filter";
   const defaultStart = String(state.attendanceHistoryDateStart || todayIso(0)).trim() || todayIso(0);
   const defaultEnd = String(state.attendanceHistoryDateEnd || defaultStart).trim() || defaultStart;
+  const defaultStartMonth = `${defaultStart.slice(0, 7)}-01`;
+  const defaultEndMonth = `${defaultEnd.slice(0, 7)}-01`;
 
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
@@ -10997,30 +11279,32 @@ function openAttendanceRangeModal(mode = "filter") {
   modalCard.classList.remove("is-contact-compose");
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-attendance-manual");
   modalCard.classList.remove("is-wide");
+  modalCard.classList.add("is-wide");
 
   modalTitle.textContent = intent === "export" ? "Export Attendance" : "Custom Attendance Range";
   modalForm.dataset.mode = "attendance-range-compose";
   modalForm.dataset.intent = intent;
+  modalForm.dataset.rangeStartMonth = defaultStartMonth;
+  modalForm.dataset.rangeEndMonth = defaultEndMonth;
   modalForm.innerHTML = `
     <p class="task-meta">${
       intent === "export"
         ? "Choose the exact attendance range to export. The table will update to match this report range before downloading."
         : "Choose the exact date range to show in Team Attendance."
     }</p>
-    <div class="attendance-policy-grid">
-      <label class="form-field">
-        <span>Start</span>
-        <input type="date" name="startDate" value="${escapeModalText(defaultStart)}" required />
-      </label>
-      <label class="form-field">
-        <span>End</span>
-        <input type="date" name="endDate" value="${escapeModalText(defaultEnd)}" required />
-      </label>
+    <input type="hidden" name="startDate" value="${escapeModalText(defaultStart)}" />
+    <input type="hidden" name="endDate" value="${escapeModalText(defaultEnd)}" />
+    <div class="attendance-range-calendars" data-attendance-range-calendars>
+      ${renderAttendanceRangeCalendars({
+        startDate: defaultStart,
+        endDate: defaultEnd,
+        startMonth: defaultStartMonth,
+        endMonth: defaultEndMonth
+      })}
     </div>
     <div class="form-actions">
       <button type="button" class="btn btn-light" data-action="close-modal">Cancel</button>
@@ -11028,6 +11312,24 @@ function openAttendanceRangeModal(mode = "filter") {
     </div>
   `;
   modalOverlay.hidden = false;
+}
+
+function syncAttendanceRangeCalendarUi(form) {
+  if (!(form instanceof HTMLFormElement) || form.dataset.mode !== "attendance-range-compose") {
+    return;
+  }
+  const startInput = form.querySelector('input[name="startDate"]');
+  const endInput = form.querySelector('input[name="endDate"]');
+  const calendarShell = form.querySelector("[data-attendance-range-calendars]");
+  if (!(startInput instanceof HTMLInputElement) || !(endInput instanceof HTMLInputElement) || !calendarShell) {
+    return;
+  }
+  calendarShell.innerHTML = renderAttendanceRangeCalendars({
+    startDate: startInput.value,
+    endDate: endInput.value,
+    startMonth: form.dataset.rangeStartMonth,
+    endMonth: form.dataset.rangeEndMonth
+  });
 }
 
 function syncAttendanceManualEntryUi(form) {
@@ -11727,7 +12029,7 @@ function isTaskOverdue(task) {
   return due.valueOf() < Date.now();
 }
 
-function normalizeTaskRecord(task, projectById) {
+function normalizeTaskRecord(task) {
   const next = { ...task };
   const parsedLegacyTime = parseLegacyTimeRange(next.time);
 
@@ -11786,39 +12088,12 @@ function normalizeTaskRecord(task, projectById) {
     ? String(next.backlogState || "").toLowerCase()
     : "scheduled";
 
-  next.projectId = String(next.projectId || "").trim();
-  next.projectName = String(next.projectName || "").trim();
-  if (next.projectId && projectById.has(next.projectId)) {
-    next.projectName = projectById.get(next.projectId).name;
-  } else if (next.projectName) {
-    const exact = [...projectById.values()].find(
-      (project) => String(project.name || "").toLowerCase() === next.projectName.toLowerCase()
-    );
-    if (exact) {
-      next.projectId = exact.id;
-      next.projectName = exact.name;
-    }
-  } else {
-    next.projectId = "";
-    next.projectName = "";
-  }
-
   const rawLinkType = String(next.linkType || "").trim();
   next.linkType = TASK_LINK_TYPES.includes(rawLinkType) ? rawLinkType : "";
   next.linkId = String(next.linkId || "").trim();
   next.linkLabel = String(next.linkLabel || "").trim();
 
-  if (next.projectId && next.projectName) {
-    next.linkType = "Project";
-    next.linkId = next.projectId;
-    next.linkLabel = next.projectName;
-  }
-
-  const linkedProject = next.projectId && projectById.has(next.projectId) ? projectById.get(next.projectId) : null;
-  const projectAccountName = linkedProject
-    ? String(linkedProject.accountName || linkedProject.account || "").trim()
-    : "";
-  next.accountName = String(next.accountName || next.account || "").trim() || projectAccountName || "";
+  next.accountName = String(next.accountName || next.account || "").trim();
   next.account = next.accountName;
 
   const explicitTaskType = canonicalTaskType(next.taskType, "");
@@ -11840,62 +12115,9 @@ function normalizeTaskRecord(task, projectById) {
   return next;
 }
 
-function normalizeProjectRecord(project) {
-  const next = { ...project };
-  next.name = String(next.name || "").trim() || "Untitled Project";
-  next.ownerId = String(next.ownerId || "").trim();
-  if (!next.ownerId && next.owner) {
-    next.ownerId = resolveTeamMemberIdByName(next.owner, false);
-  }
-  next.owner = String(next.owner || "").trim() || state.data.currentUser.name;
-  if (!next.owner && next.ownerId) {
-    next.owner = String(findTeamMemberById(next.ownerId)?.name || "").trim();
-  }
-  next.status = normalizeProjectStatus(next.status);
-  const progressRaw = Number(next.progress);
-  next.progress = Number.isFinite(progressRaw) ? Math.max(0, Math.min(100, Math.round(progressRaw))) : 0;
-  next.deadline = parseIsoDateLocal(String(next.deadline || "").trim()) ? String(next.deadline).trim() : todayIso(14);
-  next.accountId = String(next.accountId || "").trim();
-  next.accountName = String(next.accountName || next.account || "").trim();
-  next.account = next.accountName;
-  next.teamMemberIds = parseProjectTeamMembers(next.teamMemberIds);
-  if (!next.teamMemberIds.length && Array.isArray(next.teamMembers)) {
-    next.teamMemberIds = next.teamMembers.map((name) => resolveTeamMemberIdByName(name, false)).filter(Boolean);
-  }
-  next.teamMembers = next.teamMemberIds
-    .map((memberId) => String(findTeamMemberById(memberId)?.name || "").trim())
-    .filter(Boolean);
-  next.description = String(next.description || "").trim();
-  next.risks = String(next.risks || "").trim();
-  next.activity = Array.isArray(next.activity)
-    ? next.activity
-        .map((entry) => ({
-          id: String(entry?.id || createId("pactivity")),
-          type: String(entry?.type || "update").trim() || "update",
-          actor: String(entry?.actor || "System").trim() || "System",
-          actorId: String(entry?.actorId || "").trim(),
-          text: String(entry?.text || "").trim() || "Updated project",
-          details: entry?.details && typeof entry.details === "object" ? { ...entry.details } : {},
-          taskId: String(entry?.taskId || "").trim(),
-          taskTitle: String(entry?.taskTitle || "").trim(),
-          createdAt: String(entry?.createdAt || "").trim() || new Date().toISOString()
-        }))
-        .sort((a, b) => Date.parse(String(b.createdAt || "")) - Date.parse(String(a.createdAt || "")))
-    : [];
-  next.createdAt = String(next.createdAt || "").trim() || new Date().toISOString();
-  next.updatedAt = String(next.updatedAt || "").trim() || next.createdAt;
-  return next;
-}
-
-function normalizeProjectCollection(data) {
-  data.projects = (Array.isArray(data.projects) ? data.projects : []).map((project) => normalizeProjectRecord(project));
-}
-
 function normalizeTaskCollection(data) {
-  const projects = Array.isArray(data.projects) ? data.projects : [];
-  const projectById = new Map(projects.map((project) => [project.id, project]));
   data.tasks = (Array.isArray(data.tasks) ? data.tasks : []).map((task) => {
-    const normalized = normalizeTaskRecord(task, projectById);
+    const normalized = normalizeTaskRecord(task);
     ensureTaskDetailCollections(normalized);
     return normalized;
   });
@@ -11939,7 +12161,6 @@ function buildWaitingListFromTasks(tasks = []) {
 }
 
 function syncWorkCollections(data) {
-  normalizeProjectCollection(data);
   normalizeTaskCollection(data);
   data.waitingList = buildWaitingListFromTasks(data.tasks);
 }
@@ -12278,7 +12499,6 @@ function refreshDerivedMetrics() {
 function persistDataAndRefresh() {
   clearDashboardCommandModelCache();
   refreshDerivedMetrics();
-  syncSelectedTaskIds();
   saveData(state.data);
   renderRoute();
   if (state.activeTaskDetailId) {
@@ -12289,11 +12509,6 @@ function persistDataAndRefresh() {
       closeTaskDetailSheet();
     }
   }
-}
-
-function syncSelectedTaskIds() {
-  const validIds = new Set((state.data.tasks || []).map((task) => task.id));
-  state.selectedTaskIds = new Set([...state.selectedTaskIds].filter((id) => validIds.has(id)));
 }
 
 function getVisibleLeadRowsForSelection() {
@@ -12337,31 +12552,6 @@ function syncLeadSelectionUi() {
   const headerCheckbox = document.getElementById("leadSelectAll");
   if (headerCheckbox instanceof HTMLInputElement) {
     headerCheckbox.indeterminate = headerCheckbox.dataset.indeterminate === "true";
-  }
-}
-
-function clearTaskSelection() {
-  state.selectedTaskIds.clear();
-}
-
-function getSelectedTasks() {
-  if (!state.selectedTaskIds.size) {
-    return [];
-  }
-  const selectedIds = state.selectedTaskIds;
-  return state.data.tasks.filter((task) => selectedIds.has(task.id));
-}
-
-function shiftTaskDueDate(task, dayOffset) {
-  if (!task) {
-    return;
-  }
-  const previousDueDate = String(task.dueDate || "").trim();
-  task.dueDate = addDaysToIso(task.dueDate, dayOffset);
-  task.deadlineAt = composeDeadlineAt(task.dueDate, task.startTime || "09:00");
-  task.day = getWeekdayLabelFromIso(task.dueDate) || task.day;
-  if (String(task.dueDate || "").trim() !== previousDueDate) {
-    recordTaskActivity(task, `Due date moved to ${formatLeadDate(task.dueDate)}`, "schedule");
   }
 }
 
@@ -12671,20 +12861,6 @@ function getContextMenuItems(cardType, recordId) {
       { label: "Send Email", action: "account-send-email", id: account.id, icon: "bi-envelope" },
       { divider: true },
       { label: "More actions", action: "account-more-actions", id: account.id, icon: "bi-sliders" }
-    ];
-  }
-
-  if (cardType === "project") {
-    const project = state.data.projects.find((item) => item.id === recordId);
-    if (!project) {
-      return [];
-    }
-    return [
-      { label: "Edit Project", action: "project-edit", id: project.id },
-      { divider: true },
-      { label: "Add 10% Progress", action: "project-progress", id: project.id },
-      { divider: true },
-      { label: "Delete Project", action: "project-delete", id: project.id, danger: true }
     ];
   }
 
@@ -13059,6 +13235,7 @@ function sidebarMarkup() {
       const singleParentWithChildren =
         section.routes.length === 1 && Boolean(section.routes[0]?.children?.length);
       const navItems = section.routes
+        .filter((route) => !route.adminOnly || canManageLeadArchive(resolveCurrentUserRole(state.data)))
         .map((route) => {
           const hasChildren = Boolean(route.children?.length);
           const showNodeToggle = hasChildren && !singleParentWithChildren;
@@ -13191,6 +13368,15 @@ function sidebarMarkup() {
         </button>
       </header>
       ${sections}
+      <button class="sidebar-user-card" type="button" data-action="profile-open" aria-label="Open my profile">
+        <span class="sidebar-user-avatar" id="sidebarUserAvatar">J</span>
+        <span class="sidebar-user-copy">
+          <strong id="sidebarUserName">User</strong>
+          <small id="sidebarUserRole">Member</small>
+          <span class="sidebar-user-presence"><i aria-hidden="true"></i><span id="sidebarUserStatus">Online</span></span>
+        </span>
+        <i class="bi bi-chevron-down sidebar-user-chevron" aria-hidden="true"></i>
+      </button>
     </aside>
   `;
 }
@@ -13317,10 +13503,10 @@ function shellMarkup() {
       <div class="inbound-call-popup-layer" id="inboundCallPopupLayer" hidden></div>
       <div class="context-menu" id="contextMenu" hidden></div>
       <div class="modal-overlay" id="modalOverlay" hidden>
-        <div class="modal-card">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
           <header class="modal-head">
             <h3 id="modalTitle"></h3>
-            <button class="icon-btn" id="modalCloseButton" type="button" data-action="close-modal">X</button>
+            <button class="icon-btn" id="modalCloseButton" type="button" data-action="close-modal" aria-label="Close dialog">X</button>
           </header>
           <form class="modal-form" id="modalForm"></form>
         </div>
@@ -13493,7 +13679,7 @@ function getTopbarNotifications() {
       section: "overdue",
       badge: "Overdue",
       tone: "danger",
-      route: "my-work",
+      route: "kanban",
       count: overdueTasks
     });
   }
@@ -13504,7 +13690,7 @@ function getTopbarNotifications() {
       section: "today",
       badge: "Today",
       tone: "warning",
-      route: "my-work",
+      route: "kanban",
       count: dueTodayTasks
     });
   }
@@ -14170,6 +14356,10 @@ function syncAttendanceTicker() {
 
 function updateHeaderMenus() {
   const avatarNode = document.getElementById("userAvatarInitials");
+  const sidebarAvatarNode = document.getElementById("sidebarUserAvatar");
+  const sidebarNameNode = document.getElementById("sidebarUserName");
+  const sidebarRoleNode = document.getElementById("sidebarUserRole");
+  const sidebarStatusNode = document.getElementById("sidebarUserStatus");
   const cardAvatarNode = document.getElementById("userMenuCardAvatar");
   const eyebrowNode = document.getElementById("userMenuEyebrow");
   const nameNode = document.getElementById("userMenuName");
@@ -14214,6 +14404,11 @@ function updateHeaderMenus() {
     : state.supabaseConfigured
       ? "?"
       : initialsFromName(displayName || "J");
+
+  if (sidebarAvatarNode) sidebarAvatarNode.textContent = avatarLabel;
+  if (sidebarNameNode) sidebarNameNode.textContent = displayName;
+  if (sidebarRoleNode) sidebarRoleNode.textContent = displayRole || "Member";
+  if (sidebarStatusNode) sidebarStatusNode.textContent = hasSupabaseSession || !state.supabaseConfigured ? "Online" : "Signed out";
 
   let eyebrowText = "Workspace access";
   let subText = displayEmail || "Not signed in";
@@ -14297,8 +14492,7 @@ function updateHeaderMenus() {
   const useBackendNotifications = Boolean(
     state.supabaseConfigured &&
       state.signedInUser &&
-      state.authAccessState === "granted" &&
-      notificationsState.loaded
+      state.authAccessState === "granted"
   );
   const notifications = useBackendNotifications ? getNotificationItems() : getTopbarNotifications();
   const totalNotifications = useBackendNotifications
@@ -14307,73 +14501,7 @@ function updateHeaderMenus() {
   notifBadge.hidden = totalNotifications === 0;
   notifBadge.textContent = totalNotifications > 9 ? "9+" : String(totalNotifications);
   if (useBackendNotifications) {
-    if (!notificationsState.enabled) {
-      notifList.innerHTML = "<p class='task-meta topbar-notif-empty'>In-app notifications are turned off in Settings.</p>";
-      return;
-    }
-    if (!notifications.length) {
-      notifList.innerHTML = "<p class='task-meta topbar-notif-empty'>No new notifications.</p>";
-      return;
-    }
-
-    const groupsMarkup = [
-      {
-        label: "Unread",
-        rows: notifications.filter((item) => !String(item?.readAt || "").trim())
-      },
-      {
-        label: "Earlier",
-        rows: notifications.filter((item) => String(item?.readAt || "").trim())
-      }
-    ]
-      .map((group) => {
-        if (!group.rows.length) {
-          return "";
-        }
-        return `
-          <section class="topbar-notif-group">
-            <p class="topbar-notif-group-title">${group.label}</p>
-            ${group.rows
-              .map(
-                (item) => `
-                  <article class="topbar-notif-item is-${escapeModalText(item.tone || "info")}${item.unread ? " is-unread" : ""}">
-                    <button
-                      class="topbar-notif-trigger"
-                      type="button"
-                      data-action="notification-open"
-                      data-id="${escapeModalText(item.id || "")}"
-                    >
-                      <span class="topbar-notif-main">
-                        <span class="topbar-notif-title">${escapeModalText(item.title)}</span>
-                        <span class="topbar-notif-meta">${escapeModalText(item.meta || item.body || "")}</span>
-                      </span>
-                      ${item.badge ? `<span class="topbar-notif-chip is-${escapeModalText(item.tone || "info")}">${escapeModalText(item.badge)}</span>` : ""}
-                    </button>
-                    <button
-                      class="topbar-notif-dismiss"
-                      type="button"
-                      data-action="notification-dismiss"
-                      data-id="${escapeModalText(item.id || "")}"
-                      aria-label="Dismiss notification"
-                    >
-                      <i class="bi bi-x" aria-hidden="true"></i>
-                    </button>
-                  </article>
-                `
-              )
-              .join("")}
-          </section>
-        `;
-      })
-      .join("");
-
-    notifList.innerHTML = `
-      ${groupsMarkup}
-      <footer class="topbar-notif-footer">
-        ${totalNotifications > 0 ? `<button class="topbar-notif-viewall" type="button" data-action="notifications-mark-all-read">Mark all as read</button>` : ""}
-        <button class="topbar-notif-viewall" type="button" data-route="dashboard">Open dashboard</button>
-      </footer>
-    `;
+    notifList.innerHTML = renderNotificationPopover(notificationsState);
     return;
   }
 
@@ -14571,7 +14699,6 @@ function renderLeadDrawerModalContent(leadId) {
   modalCard.classList.remove("is-confirm");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -14689,17 +14816,39 @@ function getCallsNestedScrollConfigs() {
   ];
 }
 
+const LEADS_TABLE_NESTED_SCROLL_CONFIG = {
+  key: "leads:table",
+  selector: ".crm-leads-list > .data-table-shell"
+};
+
+const TEAM_DIRECTORY_NESTED_SCROLL_CONFIG = {
+  key: "team:directory",
+  selector: ".team-directory-view > .team-directory-table-shell"
+};
+
+function isSettingsRouteId(routeId) {
+  return ["settings", "settings-me", "settings-workspace"].includes(String(routeId || "").trim());
+}
+
 function getRenderedNestedScrollConfig(root = document.getElementById("viewContent")) {
   if (!(root instanceof HTMLElement)) {
     return null;
   }
   return (
-    getCallsNestedScrollConfigs().find((config) => root.querySelector(config.selector) instanceof HTMLElement) || null
+    [LEADS_TABLE_NESTED_SCROLL_CONFIG, TEAM_DIRECTORY_NESTED_SCROLL_CONFIG, ...getCallsNestedScrollConfigs()].find(
+      (config) => root.querySelector(config.selector) instanceof HTMLElement
+    ) || null
   );
 }
 
 function getActiveNestedScrollConfig(routeId = state.routeId, callsView = state.callsView) {
   const normalizedRouteId = String(routeId || "").trim();
+  if (normalizedRouteId === "leads") {
+    return LEADS_TABLE_NESTED_SCROLL_CONFIG;
+  }
+  if (normalizedRouteId === "team") {
+    return TEAM_DIRECTORY_NESTED_SCROLL_CONFIG;
+  }
   if (normalizedRouteId !== "comms-calls") {
     return null;
   }
@@ -14812,7 +14961,7 @@ function playRouteEnterMotion() {
 
 function shouldDisableRouteMotion(routeId = state.routeId) {
   const normalizedRouteId = String(routeId || "").trim();
-  return normalizedRouteId === "dashboard" || normalizedRouteId === "my-work";
+  return normalizedRouteId === "dashboard";
 }
 
 function getLoginRouteTransitionStage() {
@@ -14919,8 +15068,21 @@ function renderRoute() {
   const shouldAnimateRoute = previousRouteId !== state.routeId;
   const preservedScrollTop = shouldAnimateRoute ? 0 : Number(viewContent?.scrollTop || 0);
 
+  if (previousRouteId === "lead-archive" && state.routeId !== "lead-archive") {
+    state.leadArchiveData = createEmptyLeadArchiveData({
+      ...state.leadArchiveData,
+      loaded: false
+    });
+  }
+
   if (state.supabaseConfigured && shouldBlockForAuthGate()) {
     redirectToLoginRoute(window.location.hash);
+    return;
+  }
+
+  const requestedRoute = getRoute(state.routeId);
+  if (requestedRoute.adminOnly && !canManageLeadArchive(resolveCurrentUserRole(state.data))) {
+    setRoute("leads");
     return;
   }
 
@@ -15029,10 +15191,6 @@ function renderRoute() {
     clearLeadSelection();
   }
   syncSelectedLeadIds();
-  if (state.routeId !== "table" && state.selectedTaskIds.size) {
-    clearTaskSelection();
-  }
-  syncSelectedTaskIds();
   if (isCommsRoute && !commsLocked) {
     state.commsMode = getCommsModeForRoute(state.routeId);
   }
@@ -15298,6 +15456,14 @@ function renderRoute() {
       prefetchCallsPerformanceDateWindows(workspaceId, performancePolicy);
     }
   }
+  if (
+    state.routeId === "lead-archive" &&
+    canManageLeadArchive(resolveCurrentUserRole(state.data)) &&
+    !state.leadArchiveData?.loaded &&
+    !state.leadArchiveData?.loading
+  ) {
+    void leadArchivePageController.refresh({ renderStart: false });
+  }
   if (shouldLazyLoadFullCrmSnapshotForRoute(state.routeId) && !Object.values(state.crmLoadingByRoute || {}).some(Boolean)) {
     const shouldRenderAfterSnapshot = ["lead-profile", "account-profile", "deal-profile"].includes(String(state.routeId || "").trim());
     void refreshSupabaseCrmData({
@@ -15306,6 +15472,14 @@ function renderRoute() {
       alertOnError: false,
       syncDashboard: false
     });
+  }
+  if (state.routeId === "attendance") {
+    state.attendanceSnapshotLoading = Boolean(
+      state.supabaseConfigured &&
+        !state.attendanceSnapshotLoaded &&
+        (state.authBootstrapPending ||
+          (state.signedInUser && state.authAccessState === "granted"))
+    );
   }
   const route = getRoute(state.routeId);
   const view = route.render(state.data, buildRouteRenderContext(state.routeId));
@@ -15323,6 +15497,7 @@ function renderRoute() {
     if (viewContent) {
       viewContent.classList.toggle("is-comms-view", isCommsRoute);
       viewContent.classList.toggle("is-kanban-view", isKanbanRoute);
+      viewContent.classList.toggle("is-messenger-view", state.routeId === "comms-messenger");
       viewContent.innerHTML = view.html;
       syncLeadSelectionUi();
       bindSettingsIdentityTriggers(viewContent);
@@ -15363,6 +15538,13 @@ function renderRoute() {
   const searchInput = document.getElementById("globalSearch");
   if (searchInput) {
     searchInput.value = state.searchTerm;
+    searchInput.placeholder = state.routeId === "leads"
+      ? isLeadAdminRole(resolveCurrentUserRole(state.data))
+        ? "Search leads by name, email, phone, interest..."
+        : "Search my leads by name, email, phone, interest..."
+      : state.routeId === "lead-archive"
+        ? "Search archived leads by name, email, phone..."
+        : "Search now";
   }
 
   state.activeViewSupportsWaiting = Boolean(view.showWaitingPanel);
@@ -15551,13 +15733,24 @@ function renderRoute() {
     }
   }
   if (
-    (state.routeId === "settings-me" || state.routeId === "settings-workspace") &&
+    isSettingsRouteId(state.routeId) &&
     state.supabaseConfigured &&
     state.signedInUser &&
     state.authAccessState === "granted" &&
     !state.authBootstrapPending
   ) {
     void refreshSupabaseSettingsProfileData({ render: true, alertOnError: false });
+  }
+  if (
+    state.routeId === "notifications" &&
+    state.supabaseConfigured &&
+    state.signedInUser &&
+    state.authAccessState === "granted" &&
+    !state.authBootstrapPending &&
+    !state.notificationCenterData?.loading &&
+    (!state.notificationCenterData?.loaded || previousRouteId !== "notifications")
+  ) {
+    void refreshSupabaseNotificationCenter({ render: true });
   }
   if (
     state.routeId === "integrations" &&
@@ -15574,6 +15767,20 @@ function renderRoute() {
 
 function buildRouteRenderContext(routeId = state.routeId) {
   const dashboardRange = getActiveDashboardRange();
+  const settingsEmail = normalizeEmailAddress(state.signedInUser?.email || "");
+  const settingsProfileLoading = Boolean(
+    isSettingsRouteId(routeId) &&
+      state.supabaseConfigured &&
+      (
+        state.authBootstrapPending ||
+        state.authAccessState === "loading" ||
+        (
+          settingsEmail &&
+          state.authAccessState === "granted" &&
+          settingsProfileLoadedEmail !== settingsEmail
+        )
+      )
+  );
   const dashboardWorkspaceId = String(state.data.workspace?.id || "").trim();
   const dashboardQueryKey = buildDashboardSnapshotCacheKey(dashboardWorkspaceId, { range: dashboardRange });
   const dashboardSnapshotMatchesRange =
@@ -15590,6 +15797,8 @@ function buildRouteRenderContext(routeId = state.routeId) {
     authAccessState: state.authAccessState,
     authAccessMessage: state.authAccessMessage,
     authAccessCachedGranted: state.authAccessCachedGranted,
+    settingsProfileLoading,
+    settingsProfileError: settingsProfileLoadedEmail === settingsEmail ? settingsProfileLoadError : "",
     localQaAvailable: isLocalQaAvailable(),
     lastKnownAuthEmail: state.lastKnownAuthEmail,
     loginEmailDraft: state.loginEmailDraft,
@@ -15638,6 +15847,8 @@ function buildRouteRenderContext(routeId = state.routeId) {
     messengerSending: state.messengerSending,
     messengerSnapshotReady: state.messengerSnapshotReady,
     messengerSnapshotError: state.messengerSnapshotError,
+    messengerHistoryByConversation: { ...(state.messengerHistoryByConversation || {}) },
+    messengerFailedMessages: Array.isArray(state.messengerFailedMessages) ? [...state.messengerFailedMessages] : [],
     dashboardLoading: state.dashboardLoading,
     dashboardSnapshot: dashboardSnapshotMatchesRange ? structuredClone(state.dashboardSnapshot) : null,
     dashboardSnapshotError: state.dashboardSnapshotError,
@@ -15645,17 +15856,14 @@ function buildRouteRenderContext(routeId = state.routeId) {
       state.dashboardUiState && typeof state.dashboardUiState === "object"
         ? structuredClone(state.dashboardUiState)
         : createDefaultDashboardUiState(),
-    tableScope: state.tableScope,
-    tableCurrentOnly: state.tableCurrentOnly,
-    tableSortKey: state.tableSortKey,
-    tableSortDir: state.tableSortDir,
+    notificationCenterData: structuredClone(state.notificationCenterData || createEmptyNotificationCenterData()),
     tablePage: state.tablePage,
-    tablePageSize: state.tablePageSize,
     teamView: state.teamView,
     attendanceTeamFilter: state.attendanceTeamFilter,
     attendanceTeamSearch: state.attendanceTeamSearch,
     attendanceTeamDepartment: state.attendanceTeamDepartment,
     attendanceTab: state.attendanceTab,
+    attendanceSnapshotLoading: state.attendanceSnapshotLoading,
     attendanceManagerMonth: state.attendanceManagerMonth,
     attendanceHistoryRange: state.attendanceHistoryRange,
     attendanceHistoryMember: state.attendanceHistoryMember,
@@ -15675,10 +15883,6 @@ function buildRouteRenderContext(routeId = state.routeId) {
     selectedAccountId: state.selectedAccountId,
     selectedDealId: state.selectedDealId,
     selectedLeadId: state.selectedLeadId,
-    projectsQuickFilter: state.projectsQuickFilter,
-    projectsSearchTerm: state.projectsSearchTerm,
-    projectsSort: state.projectsSort,
-    selectedProjectId: state.selectedProjectId,
     selectedTeamMemberId: state.selectedTeamMemberId,
     profileViewTab: state.profileViewTab,
     teamMemberProfileTab: state.teamMemberProfileTab,
@@ -15688,6 +15892,9 @@ function buildRouteRenderContext(routeId = state.routeId) {
     leadsTimezoneFilter: state.leadsTimezoneFilter,
     leadsOwnerFilter: state.leadsOwnerFilter,
     leadsScope: getLeadListScopeForRole(),
+    leadsImportJobId: state.leadsImportJobId,
+    leadsImportResultCount: state.leadsImportResultCount,
+    leadsImportViewActive: state.leadsImportViewActive,
     selectedLeadIds: [...state.selectedLeadIds],
     usePagedLeadsRoute: shouldUseSupabaseLeadsRouteData(),
     leadsPageData: structuredClone(state.leadsPageData || createEmptyLeadsPageData()),
@@ -15709,6 +15916,7 @@ function buildRouteRenderContext(routeId = state.routeId) {
     leadBulkStatusTarget: state.leadBulkStatusTarget,
     leadArchivingIds: [...state.leadArchivingIds],
     leadArchiveHiddenIds: [...state.leadArchiveHiddenIds],
+    leadArchiveData: structuredClone(state.leadArchiveData || createEmptyLeadArchiveData()),
     leadFiltersOpen: state.leadFiltersOpen,
     crmSortKey: getCrmSortState(routeId).key,
     crmSortDir: getCrmSortState(routeId).dir,
@@ -15724,6 +15932,10 @@ function buildRouteRenderContext(routeId = state.routeId) {
     kanbanFilterPriority: state.kanbanFilterPriority,
     kanbanFilterDate: state.kanbanFilterDate,
     kanbanFilterSearch: state.kanbanFilterSearch,
+    kanbanView: state.kanbanView,
+    kanbanSort: state.kanbanSort,
+    kanbanPropertiesOpen: state.kanbanPropertiesOpen,
+    kanbanHiddenProperties: [...state.kanbanHiddenProperties],
     callsView: state.callsView,
     callsSchedulerDate: state.callsSchedulerDate,
     callsSchedulerMode: state.callsSchedulerMode,
@@ -15741,7 +15953,6 @@ function buildRouteRenderContext(routeId = state.routeId) {
     callsPerformanceTablePage: state.callsPerformanceTablePage,
     callsPerformanceTablePageSize: state.callsPerformanceTablePageSize,
     callsPerformanceData: structuredClone(state.callsPerformanceData || createEmptyCallsPerformanceData()),
-    selectedTaskIds: [...state.selectedTaskIds],
     profileAvatarDraft: state.profileAvatarDraft ? { ...state.profileAvatarDraft } : null,
     callDraftTo: state.callDraftTo,
     callDraftNote: state.callDraftNote,
@@ -16572,7 +16783,6 @@ function openLeadComposerModal(leadId = "") {
   modalOverlay.classList.remove("is-file-preview");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-contact-compose");
   modalCard.classList.remove("is-account-compose");
@@ -16849,8 +17059,6 @@ async function createFollowUpTaskFromLead(lead) {
     day: getWeekdayLabelFromIso(dueDate) || "Mon",
     status: "New",
     priority: "low",
-    projectId: "",
-    projectName: "",
     linkType: "Lead",
     linkId: lead.id,
     linkLabel: lead.name,
@@ -17526,7 +17734,6 @@ function openContactComposerModal(contactId = "", options = {}) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -17785,8 +17992,6 @@ async function createFollowUpTaskFromContact(contact, followUpDate = "", notes =
     day: getWeekdayLabelFromIso(dueDate) || "Mon",
     status: "New",
     priority: "low",
-    projectId: "",
-    projectName: "",
     linkType: "Contact",
     linkId: contact.id,
     linkLabel: contact.name,
@@ -18414,7 +18619,6 @@ function openAccountComposerModal(accountId = "", options = {}) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -18959,7 +19163,6 @@ function openNewDirectChatModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.add("is-new-direct-chat");
@@ -19000,6 +19203,24 @@ function openNewDirectChatModal() {
 }
 
 function buildNewGroupChatModalMarkup() {
+  const currentUserId = String(state.data.currentUser?.id || "").trim();
+  const activeMembers = (state.data.teamMembers || [])
+    .filter((member) => normalizeTeamMemberStatus(member?.status) === "Active")
+    .sort((a, b) => String(a?.name || "").localeCompare(String(b?.name || "")));
+  const memberOptionsMarkup = activeMembers
+    .map((member) => {
+      const memberId = String(member?.id || "").trim();
+      const isCurrentUser = memberId === currentUserId;
+      return `
+        <label class="messenger-member-option">
+          <input type="checkbox" name="groupChatMember" value="${escapeModalText(memberId)}" ${isCurrentUser ? "checked disabled" : ""}>
+          ${isCurrentUser ? `<input type="hidden" name="groupChatMember" value="${escapeModalText(memberId)}">` : ""}
+          <span class="messenger-member-avatar">${escapeModalText(String(member?.name || "?").slice(0, 1).toUpperCase())}</span>
+          <span><strong>${escapeModalText(member?.name || "Unnamed member")}</strong><small>${escapeModalText(member?.role || "Member")}${isCurrentUser ? " · You" : ""}</small></span>
+        </label>
+      `;
+    })
+    .join("");
   return `
     <section class="new-direct-chat-modal new-group-chat-modal">
       <label class="form-field new-group-chat-name-field">
@@ -19013,7 +19234,10 @@ function buildNewGroupChatModalMarkup() {
           data-group-chat-name
         />
       </label>
-      <p class="task-meta new-group-chat-note">All active teammates will be added for now.</p>
+      <div class="messenger-member-picker">
+        <div class="messenger-member-picker-head"><span>Members</span><small>Select at least one teammate</small></div>
+        <div class="messenger-member-options">${memberOptionsMarkup || "<p class='task-meta'>No active teammates available.</p>"}</div>
+      </div>
       <div class="form-actions">
         <button type="button" class="btn btn-light" data-action="close-modal">Cancel</button>
         <button type="submit" class="btn btn-accent">Create group</button>
@@ -19041,13 +19265,13 @@ function openNewGroupChatModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-attendance-manual");
   modalCard.classList.remove("is-messenger-customize");
   modalCard.classList.remove("is-messenger-theme");
   modalCard.classList.remove("is-messenger-nickname");
+  modalCard.classList.remove("is-messenger-workflow");
   modalCard.classList.remove("is-workspace-logo");
   modalCard.classList.add("is-new-direct-chat");
 
@@ -19115,13 +19339,11 @@ function buildMessengerThemeModalMarkup(selectedConversation, selectedThemeKey) 
   return `
     <section class="messenger-customize-modal messenger-customize-modal-theme" data-selected-theme="${escapeModalText(themeKey)}">
       <div class="messenger-customize-column messenger-customize-column-list">
-        <p class="messenger-customize-eyebrow">Themes</p>
         <div class="messenger-customize-option-list">
           ${themeOptionsMarkup}
         </div>
       </div>
       <div class="messenger-customize-column messenger-customize-column-preview">
-        <p class="messenger-customize-eyebrow">Preview</p>
         <div class="messenger-theme-preview ${escapeModalText(previewTheme.previewClass)}">
           <div class="messenger-theme-preview-head">
             <span class="messenger-theme-preview-avatar">${escapeModalText(String(conversationName || "").slice(0, 1).toUpperCase() || "C")}</span>
@@ -19241,7 +19463,6 @@ function openMessengerThemeModal(selectedConversation, options = {}) {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-attendance-manual");
@@ -19284,7 +19505,6 @@ function openMessengerNicknameModal(selectedConversation, options = {}) {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-attendance-manual");
@@ -19363,10 +19583,13 @@ async function submitNewGroupChatForm(form) {
   }
 
   if (isSupabaseMessengerEnabled()) {
-    const memberIds = (state.data.teamMembers || [])
-      .filter((member) => normalizeTeamMemberStatus(member?.status) === "Active")
-      .map((member) => String(member.id || "").trim())
+    const memberIds = [...form.querySelectorAll("input[name='groupChatMember']:checked, input[type='hidden'][name='groupChatMember']")]
+      .map((input) => String(input.value || "").trim())
       .filter(Boolean);
+    if (new Set(memberIds).size < 2) {
+      showFormFeedback(form, "Select at least one teammate.");
+      return;
+    }
     try {
       const conversationId = await createSupabaseGroupConversation(name, memberIds);
       closeModal({ reopenTaskSheet: false });
@@ -19613,6 +19836,7 @@ async function openNotificationById(notificationId) {
     } else if (workspaceId && String(notification.readAt || "").trim() === "") {
       await markSupabaseNotificationsRead(workspaceId, [notification.id]);
       markNotificationIdsReadLocally([notification.id]);
+      markNotificationCenterIdsReadLocally([notification.id]);
     }
   } catch (error) {
     console.warn("Notification read update failed:", error);
@@ -19652,40 +19876,78 @@ async function dismissNotificationById(notificationId) {
   if (!normalizedId) {
     return false;
   }
+  const dismissedNotification = getNotificationById(normalizedId);
   const workspaceId = String(state.data.workspace?.id || "").trim();
   try {
     if (workspaceId) {
       await dismissSupabaseNotification(workspaceId, normalizedId);
     }
     dismissNotificationLocally(normalizedId);
+    dismissNotificationCenterLocally(normalizedId);
     updateHeaderMenus();
+    if (state.routeId === "notifications") {
+      renderRoute();
+    }
+    showToast("Notification dismissed.", {
+      actionLabel: "Undo",
+      onAction: async () => {
+        try {
+          if (workspaceId) {
+            await restoreSupabaseNotification(workspaceId, normalizedId);
+            await Promise.all([
+              refreshSupabaseNotifications({ render: false, showToasts: false, force: true }),
+              refreshSupabaseNotificationCenter({ render: state.routeId === "notifications", force: true })
+            ]);
+          } else if (dismissedNotification) {
+            state.notificationCenterData.items = [dismissedNotification, ...getNotificationCenterItems()];
+            renderRoute();
+          }
+        } catch (error) {
+          console.warn("Notification restore failed:", error);
+          showToast("Notification could not be restored.", { tone: "danger" });
+        }
+      }
+    });
     return true;
   } catch (error) {
     console.warn("Notification dismiss failed:", error);
-    window.alert(`Notification dismiss failed: ${String(error?.message || error || "Unknown error")}`);
+    showToast("Notification could not be dismissed.", { tone: "danger" });
     return false;
   }
 }
 
 async function markAllNotificationsAsRead() {
-  const unreadIds = getNotificationItems()
+  const unreadIds = [...getNotificationItems(), ...getNotificationCenterItems()]
     .filter((item) => !String(item?.readAt || "").trim())
     .map((item) => String(item?.id || "").trim())
     .filter(Boolean);
-  if (!unreadIds.length) {
+  const unreadCount = Math.max(Number(state.notificationsData?.unreadCount || 0), Number(state.notificationCenterData?.unreadCount || 0));
+  if (!unreadIds.length && unreadCount === 0) {
     return false;
   }
   const workspaceId = String(state.data.workspace?.id || "").trim();
   try {
     if (workspaceId) {
-      await markSupabaseNotificationsRead(workspaceId, unreadIds);
+      await markAllSupabaseNotificationsRead(workspaceId);
     }
     markNotificationIdsReadLocally(unreadIds);
+    markNotificationCenterIdsReadLocally(unreadIds);
+    state.notificationsData.unreadCount = 0;
+    const centerFilter = String(state.notificationCenterData?.filter || "all");
+    state.notificationCenterData = createEmptyNotificationCenterData({
+      ...state.notificationCenterData,
+      unreadCount: 0,
+      totalCount: centerFilter === "unread" ? 0 : state.notificationCenterData.totalCount,
+      items: centerFilter === "unread" ? [] : getNotificationCenterItems()
+    });
     updateHeaderMenus();
+    if (state.routeId === "notifications") {
+      renderRoute();
+    }
     return true;
   } catch (error) {
     console.warn("Mark notifications read failed:", error);
-    window.alert(`Mark notifications read failed: ${String(error?.message || error || "Unknown error")}`);
+    showToast("Notifications could not be marked as read.", { tone: "danger" });
     return false;
   }
 }
@@ -19889,7 +20151,6 @@ function renderContactDrawerModalContent(contactId) {
   modalOverlay.classList.add("is-lead-drawer");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20065,7 +20326,6 @@ function openLeadNoteModal(leadId) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20109,8 +20369,8 @@ function openLeadAttemptModal(leadId) {
   const openedFromDrawer = String(state.activeLeadDrawerId || "").trim() === String(lead.id || "").trim();
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
+  modalCard.classList.add("is-lead-attempt");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20183,8 +20443,8 @@ function openLeadBulkAttemptModal() {
   }
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
+  modalCard.classList.add("is-lead-attempt");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20381,7 +20641,6 @@ function openLeadFollowUpModal(leadId) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20491,7 +20750,6 @@ function openLeadReassignModal(leadId) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20538,7 +20796,6 @@ function openLeadMoreActionsModal(leadId) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20614,7 +20871,6 @@ function openRecordMoreActionsModal({ title, meta, mode, items }) {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -20840,7 +21096,7 @@ function openLeadBulkReassignModal() {
     window.alert("No active team members are available for reassignment.");
     return;
   }
-  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide");
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide");
   modalTitle.textContent = "Reassign selected leads";
   modalForm.dataset.mode = "lead-bulk-reassign";
   modalForm.innerHTML = `
@@ -20856,7 +21112,14 @@ function openLeadBulkReassignModal() {
             .join("")}
         </select>
       </label>
-      <p class="lead-profile-list-meta">This changes ownership only. It does not count as a sales touch.</p>
+      <label class="lead-import-check-row">
+        <input type="checkbox" name="restartWorkflow" value="1" />
+        <span>
+          <strong>Start a new sales cycle</strong>
+          <small>Set Status to New, clear the current attempt counter and next follow-up, and preserve the previous cycle in history.</small>
+        </span>
+      </label>
+      <p class="lead-profile-list-meta">Leave this unchecked to change ownership only. Reassignment does not count as a sales touch.</p>
     </div>
     <div class="form-actions">
       <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
@@ -20883,120 +21146,123 @@ function openLeadOwnershipManagerModal(sourceOwnerId = "") {
   if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
     return;
   }
-  const members = Array.isArray(state.data.teamMembers) ? state.data.teamMembers : [];
-  const ownerMembers = members.filter((member) => String(member?.id || "").trim());
   const activeMembers = getLeadAssignableTeamMembers();
-  const selectedSourceId = String(sourceOwnerId || "").trim();
+  const ownerMembers = activeMembers;
+  const requestedSourceId = String(sourceOwnerId || "").trim();
+  const selectedSourceId = ownerMembers.some((member) => String(member.id || "").trim() === requestedSourceId)
+    ? requestedSourceId
+    : "";
   if (!ownerMembers.length) {
     window.alert("No team members are available for ownership management.");
     return;
   }
-  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-project-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide", "is-lead-export", "is-lead-ownership");
+  modalCard.classList.remove("is-lead-drawer", "is-task-compose", "is-profile-compose", "is-lead-compose", "is-contact-compose", "is-account-compose", "is-attendance-policy", "is-confirm", "is-lead-import", "is-wide", "is-lead-export", "is-lead-ownership");
   modalCard.classList.add("is-lead-ownership");
-  modalTitle.textContent = "Manage Lead Ownership";
+  modalTitle.textContent = "Reassign leads";
   modalForm.dataset.mode = "lead-ownership-manager";
-  modalForm.innerHTML = `
-    <div class="modal-body lead-ownership-modal">
-      <p class="lead-export-modal__intro">Move or unassign leads by owner without selecting rows one by one.</p>
-      <section class="lead-ownership-step">
-        <label class="lead-export-field">
-          <span>Current owner</span>
-          <select name="sourceOwnerMemberId" required>
-            <option value="">Choose owner</option>
-            ${ownerMembers
-              .map((member) => `<option value="${escapeModalText(member.id)}" ${String(member.id) === selectedSourceId ? "selected" : ""}>${escapeModalText(member.name || member.email || "Team member")}</option>`)
-              .join("")}
-          </select>
-        </label>
-      </section>
-      <section class="lead-ownership-step">
-        <span class="lead-ownership-step-label">Action</span>
-        <div class="lead-ownership-radio-row">
-          <label class="lead-ownership-radio">
-            <input type="radio" name="ownershipAction" value="transfer" checked />
-            <span>Transfer leads</span>
-          </label>
-          <label class="lead-ownership-radio">
-            <input type="radio" name="ownershipAction" value="unassign" />
-            <span>Unassign leads</span>
-          </label>
-        </div>
-        <label class="lead-export-field" data-lead-ownership-destination-field>
-          <span>New owner</span>
-          <select name="destinationOwnerMemberId">
-            <option value="">Choose new owner</option>
-            ${activeMembers
-              .map((member) => `<option value="${escapeModalText(member.id)}">${escapeModalText(member.name || member.email || "Team member")}</option>`)
-              .join("")}
-          </select>
-        </label>
-      </section>
-      <section class="lead-ownership-step">
-        <span class="lead-ownership-step-label">Scope</span>
-        <div class="lead-ownership-advanced">
-          <div class="lead-export-modal__grid">
-          <label class="lead-export-field">
-            <span>Status</span>
-            <select name="leadStatus">
-              <option value="all">All statuses</option>
-              ${LEAD_STATUS_TABLE_OPTIONS.map((status) => `<option value="${escapeModalText(status)}">${escapeModalText(status)}</option>`).join("")}
-              <option value="Converted">Converted</option>
-            </select>
-          </label>
-          <label class="lead-export-field">
-            <span>Archive scope</span>
-            <select name="archiveScope">
-              <option value="active">Active leads only</option>
-              <option value="archived">Archived leads only</option>
-              <option value="all">Active + archived</option>
-            </select>
-          </label>
-        </div>
-        <div class="lead-ownership-amount-grid">
-          <label class="lead-export-scope-card">
-            <input type="radio" name="amountMode" value="all" checked />
-            <span>All matching leads</span>
-          </label>
-          <label class="lead-export-scope-card">
-            <input type="radio" name="amountMode" value="limited" />
-            <span>First</span>
-            <input class="lead-ownership-limit-input" type="number" name="leadLimit" min="1" max="50000" step="1" value="500" inputmode="numeric" />
-            <span>matching leads</span>
-          </label>
-        </div>
-        <label class="lead-export-field">
-          <span>Order</span>
-          <select name="leadOrder">
-            <option value="oldest_updated">Oldest updated first</option>
-            <option value="newest_updated">Newest updated first</option>
-            <option value="oldest_created">Oldest created first</option>
-            <option value="newest_created">Newest created first</option>
-            <option value="random">Random</option>
-          </select>
-        </label>
-        </div>
-        <p class="lead-profile-list-meta">Preview shows the exact number before anything changes.</p>
-      </section>
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
-      <button type="submit" class="btn btn-accent" data-submit-busy-label="Previewing...">Preview</button>
-    </div>
-  `;
+  modalForm.innerHTML = renderLeadOwnershipManagerMarkup({
+    ownerMembers,
+    activeMembers,
+    selectedSourceId,
+    statuses: LEAD_STATUS_TABLE_OPTIONS
+  });
+  setupLeadCustomSelects(modalForm);
+  if (modalForm.leadOwnershipClickHandler) {
+    modalForm.removeEventListener("click", modalForm.leadOwnershipClickHandler);
+  }
+  modalForm.leadOwnershipClickHandler = (event) => {
+    const picker = modalForm.querySelector("[data-lead-owner-picker]");
+    const panel = modalForm.querySelector("[data-lead-owner-picker-panel]");
+    const trigger = modalForm.querySelector("[data-lead-owner-picker-toggle]");
+    if (event.target.closest("[data-lead-custom-select]")) {
+      if (panel instanceof HTMLElement) panel.hidden = true;
+      trigger?.setAttribute("aria-expanded", "false");
+      return;
+    }
+    if (event.target.closest("[data-lead-ownership-unassign-toggle]")) {
+      const actionInput = modalForm.querySelector("[name='ownershipAction']");
+      if (actionInput instanceof HTMLInputElement) {
+        actionInput.value = actionInput.value === "unassign" ? "transfer" : "unassign";
+      }
+      syncLeadOwnershipManagerModal(modalForm);
+      return;
+    }
+    if (event.target.closest("[data-lead-owner-picker-toggle]")) {
+      closeLeadCustomSelectMenus(modalForm);
+      const willOpen = Boolean(panel?.hidden);
+      if (panel instanceof HTMLElement) panel.hidden = !willOpen;
+      trigger?.setAttribute("aria-expanded", String(willOpen));
+      return;
+    }
+    if (picker && panel instanceof HTMLElement && !event.target.closest("[data-lead-owner-picker]")) {
+      panel.hidden = true;
+      trigger?.setAttribute("aria-expanded", "false");
+    }
+  };
+  modalForm.addEventListener("click", modalForm.leadOwnershipClickHandler);
   syncLeadOwnershipManagerModal(modalForm);
   modalOverlay.hidden = false;
   requestAnimationFrame(() => modalOverlay.classList.add("show"));
+  void refreshLeadOwnershipAvailability(modalForm);
 }
 
 function syncLeadOwnershipManagerModal(form) {
-  const action = String(form?.querySelector?.("input[name='ownershipAction']:checked")?.value || "transfer").trim();
-  const field = form?.querySelector?.("[data-lead-ownership-destination-field]");
-  if (field instanceof HTMLElement) {
-    field.hidden = action === "unassign";
-    const destination = field.querySelector("[name='destinationOwnerMemberId']");
-    if (field.hidden && destination instanceof HTMLSelectElement) {
-      destination.value = "";
-    }
+  const action = String(form?.querySelector?.("[name='ownershipAction']")?.value || "transfer").trim();
+  const destinationSection = form?.querySelector?.("[data-lead-ownership-destination-section]");
+  if (destinationSection instanceof HTMLElement) destinationSection.hidden = action === "unassign";
+  const toggle = form?.querySelector?.("[data-lead-ownership-unassign-toggle]");
+  if (toggle instanceof HTMLButtonElement) toggle.textContent = action === "unassign" ? "Transfer instead" : "Unassign instead";
+  const submit = form?.querySelector?.("button[type='submit']");
+  if (submit instanceof HTMLButtonElement) submit.textContent = action === "unassign" ? "Preview unassign" : "Preview transfer";
+
+  const sourceId = String(form?.querySelector?.("[name='sourceOwnerMemberId']")?.value || "").trim();
+  form?.querySelectorAll?.("input[name='destinationOwnerMemberIds']").forEach((input) => {
+    const isSource = String(input.value || "").trim() === sourceId;
+    input.disabled = isSource;
+    if (isSource) input.checked = false;
+    input.closest(".lead-owner-option")?.classList.toggle("is-disabled", isSource);
+  });
+  const matchingCount = Math.max(0, Number(form?.dataset?.matchingCount || 0) || 0);
+  const amountMode = String(form?.querySelector?.("input[name='amountMode']:checked")?.value || "all").trim();
+  const limit = Math.max(1, Math.min(50000, Number(form?.querySelector?.("[name='leadLimit']")?.value || 500) || 500));
+  const affectedCount = amountMode === "limited" ? Math.min(matchingCount, limit) : matchingCount;
+  const allLabel = form?.querySelector?.("[data-lead-ownership-all-label]");
+  if (allLabel) allLabel.textContent = matchingCount ? `All ${matchingCount.toLocaleString()} matching leads` : "All matching leads";
+  syncLeadOwnerPicker(form, state.data.teamMembers || [], affectedCount);
+}
+
+async function refreshLeadOwnershipAvailability(form) {
+  const sourceOwnerId = String(form?.querySelector?.("[name='sourceOwnerMemberId']")?.value || "").trim();
+  const label = form?.querySelector?.("[data-lead-ownership-availability]");
+  if (!sourceOwnerId) {
+    form.dataset.matchingCount = "0";
+    if (label) label.textContent = "Choose a current owner";
+    syncLeadOwnershipManagerModal(form);
+    return;
+  }
+  const requestId = String((Number(form.dataset.previewRequestId || 0) || 0) + 1);
+  form.dataset.previewRequestId = requestId;
+  if (label) label.textContent = "Checking available leads...";
+  try {
+    const client = getSupabaseClient();
+    const { destinationOwnerIds: _destinationOwnerIds, ...payload } = getLeadOwnershipManagerPayload(form, true);
+    const { data, error } = await client.rpc("manage_lead_ownership", {
+      ...payload,
+      p_action: "unassign",
+      p_destination_owner_member_id: null,
+      p_limit: null
+    });
+    if (error) throw error;
+    if (form.dataset.previewRequestId !== requestId) return;
+    const count = Math.max(0, Number(data?.matchingCount || 0) || 0);
+    form.dataset.matchingCount = String(count);
+    if (label) label.textContent = `${count.toLocaleString()} lead${count === 1 ? "" : "s"} available`;
+    syncLeadOwnershipManagerModal(form);
+  } catch (error) {
+    console.error("Lead ownership availability failed:", error);
+    if (form.dataset.previewRequestId !== requestId) return;
+    form.dataset.matchingCount = "0";
+    if (label) label.textContent = "Availability could not be loaded";
   }
 }
 
@@ -21004,28 +21270,30 @@ function getLeadOwnershipManagerPayload(form, dryRun) {
   const amountMode = String(form.querySelector("input[name='amountMode']:checked")?.value || "all").trim();
   const limitValue = Math.max(0, Math.min(50000, Number(form.querySelector("[name='leadLimit']")?.value || 0) || 0));
   return {
+    destinationOwnerIds: getSelectedLeadOwnerIds(form),
     p_source_owner_member_id: String(form.querySelector("[name='sourceOwnerMemberId']")?.value || "").trim() || null,
-    p_action: String(form.querySelector("input[name='ownershipAction']:checked")?.value || "transfer").trim() || "transfer",
-    p_destination_owner_member_id: String(form.querySelector("[name='destinationOwnerMemberId']")?.value || "").trim() || null,
+    p_action: String(form.querySelector("[name='ownershipAction']")?.value || "transfer").trim() || "transfer",
+    p_destination_owner_member_id: null,
     p_status: String(form.querySelector("[name='leadStatus']")?.value || "all").trim() || "all",
     p_archive_scope: String(form.querySelector("[name='archiveScope']")?.value || "active").trim() || "active",
     p_limit: amountMode === "limited" ? limitValue : null,
-    p_order: String(form.querySelector("[name='leadOrder']")?.value || "oldest_updated").trim() || "oldest_updated",
+    p_order: String(form.querySelector("[name='leadOrder']")?.value || "newest_created").trim() || "newest_created",
     p_dry_run: Boolean(dryRun)
   };
 }
 
 async function submitLeadOwnershipManagerForm(form, submitter) {
   const payload = getLeadOwnershipManagerPayload(form, true);
+  const destinationOwnerIds = payload.destinationOwnerIds;
   if (!payload.p_source_owner_member_id) {
     window.alert("Choose the current owner.");
     return;
   }
-  if (payload.p_action === "transfer" && !payload.p_destination_owner_member_id) {
-    window.alert("Choose the new owner.");
+  if (payload.p_action === "transfer" && !destinationOwnerIds.length) {
+    window.alert("Choose at least one new owner.");
     return;
   }
-  if (payload.p_action === "transfer" && payload.p_source_owner_member_id === payload.p_destination_owner_member_id) {
+  if (payload.p_action === "transfer" && destinationOwnerIds.includes(payload.p_source_owner_member_id)) {
     window.alert("Choose a different new owner.");
     return;
   }
@@ -21038,7 +21306,9 @@ async function submitLeadOwnershipManagerForm(form, submitter) {
   form.dataset.submitting = "1";
   try {
     const client = getSupabaseClient();
-    const { data: preview, error: previewError } = await client.rpc("manage_lead_ownership", payload);
+    const { destinationOwnerIds: _destinationOwnerIds, ...rpcPayload } = payload;
+    rpcPayload.p_destination_owner_member_id = payload.p_action === "transfer" ? destinationOwnerIds[0] : null;
+    const { data: preview, error: previewError } = await client.rpc("manage_lead_ownership", rpcPayload);
     if (previewError) {
       throw previewError;
     }
@@ -21049,27 +21319,43 @@ async function submitLeadOwnershipManagerForm(form, submitter) {
       return;
     }
     const sourceName = findTeamMemberById(payload.p_source_owner_member_id)?.name || "selected owner";
-    const destinationName = payload.p_action === "transfer"
-      ? findTeamMemberById(payload.p_destination_owner_member_id)?.name || "the new owner"
-      : "Unassigned";
-    const actionText = payload.p_action === "transfer" ? `transfer to ${destinationName}` : "unassign";
+    const allocations = payload.p_action === "transfer" ? buildEvenLeadAllocations(affectedCount, destinationOwnerIds) : [];
+    const distributionText = allocations
+      .map(({ ownerId, count }) => `${findTeamMemberById(ownerId)?.name || "Team member"}: ${count.toLocaleString()}`)
+      .join(" | ");
     const limitedText = matchingCount !== affectedCount ? ` ${affectedCount} of ${matchingCount}` : ` ${affectedCount}`;
     openConfirmModal({
-      title: "Apply ownership changes?",
-      message: `This will ${actionText}${limitedText} lead${affectedCount === 1 ? "" : "s"} from ${sourceName}.`,
-      confirmLabel: "Apply changes",
+      title: payload.p_action === "transfer" ? "Confirm lead transfer" : "Confirm unassign",
+      message: payload.p_action === "transfer"
+        ? `${limitedText.trim()} lead${affectedCount === 1 ? "" : "s"} from ${sourceName} will be distributed evenly. ${distributionText}`
+        : `${limitedText.trim()} lead${affectedCount === 1 ? "" : "s"} from ${sourceName} will become unassigned.`,
+      confirmLabel: payload.p_action === "transfer" ? "Confirm transfer" : "Confirm unassign",
       cancelLabel: "Cancel",
       danger: false,
       onConfirm: async () => {
         try {
-          const { data: result, error } = await client.rpc("manage_lead_ownership", {
-            ...payload,
-            p_dry_run: false
-          });
-          if (error) {
-            throw error;
+          let updatedCount = 0;
+          if (payload.p_action === "unassign") {
+            const { data: result, error } = await client.rpc("manage_lead_ownership", {
+              ...rpcPayload,
+              p_limit: affectedCount,
+              p_dry_run: false
+            });
+            if (error) throw error;
+            updatedCount = Number(result?.affectedCount || 0) || 0;
+          } else {
+            for (const allocation of allocations) {
+              if (!allocation.count) continue;
+              const { data: result, error } = await client.rpc("manage_lead_ownership", {
+                ...rpcPayload,
+                p_destination_owner_member_id: allocation.ownerId,
+                p_limit: allocation.count,
+                p_dry_run: false
+              });
+              if (error) throw error;
+              updatedCount += Number(result?.affectedCount || 0) || 0;
+            }
           }
-          const updatedCount = Number(result?.affectedCount || 0) || 0;
           await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
           await refreshSupabaseTeamWorkspace({ alertOnDeny: false });
           renderRoute();
@@ -21092,6 +21378,31 @@ async function submitLeadOwnershipManagerForm(form, submitter) {
       submitButton.textContent = defaultSubmitLabel;
     }
   }
+
+  if (routeId === "kanban") {
+    const taskId = String(payload.taskId || entityId || "").trim();
+    setRoute("kanban");
+    if (taskId) {
+      window.setTimeout(() => openTaskDetailModal(taskId), 0);
+    }
+    return true;
+  }
+
+  if (routeId === "deal-profile") {
+    const dealId = String(payload.dealId || entityId || routeParams.deal || "").trim();
+    setRoute("deal-profile", dealId ? { deal: dealId } : null);
+    return true;
+  }
+
+  if (routeId === "comms-calls") {
+    const callLogId = String(payload.callLogId || entityId || "").trim();
+    if (callLogId) {
+      state.selectedCallWorkspaceItemType = "call";
+      state.selectedCallWorkspaceItemId = callLogId;
+    }
+    setRoute("comms-calls");
+    return true;
+  }
 }
 
 async function submitLeadBulkReassignForm(form, submitter) {
@@ -21100,6 +21411,7 @@ async function submitLeadBulkReassignForm(form, submitter) {
     .map((id) => id.trim())
     .filter(Boolean);
   const ownerMemberId = String(form.querySelector("[name='ownerMemberId']")?.value || "").trim();
+  const restartWorkflow = Boolean(form.querySelector("[name='restartWorkflow']")?.checked);
   if (!leadIds.length) {
     window.alert("No selected leads were found.");
     return;
@@ -21117,9 +21429,10 @@ async function submitLeadBulkReassignForm(form, submitter) {
   form.dataset.submitting = "1";
   try {
     const client = getSupabaseClient();
-    const { error } = await client.rpc("bulk_reassign_leads", {
+    const { data, error } = await client.rpc("bulk_reassign_and_restart_leads", {
       p_lead_ids: leadIds,
-      p_owner_member_id: ownerMemberId
+      p_owner_member_id: ownerMemberId,
+      p_restart_workflow: restartWorkflow
     });
     if (error) {
       throw error;
@@ -21128,6 +21441,12 @@ async function submitLeadBulkReassignForm(form, submitter) {
     closeModal();
     await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
     renderRoute();
+    showToast(
+      restartWorkflow
+        ? `${Number(data?.restartedCount || 0)} lead${Number(data?.restartedCount || 0) === 1 ? "" : "s"} reassigned and restarted as New.`
+        : `${Number(data?.updatedCount || 0)} lead${Number(data?.updatedCount || 0) === 1 ? "" : "s"} reassigned.`,
+      { tone: "success" }
+    );
   } catch (error) {
     console.error("Bulk reassign failed:", error);
     window.alert(`Bulk reassign failed: ${String(error?.message || error || "Unknown error")}`);
@@ -21149,8 +21468,6 @@ function buildTaskComposerPrefill(values = {}) {
     endTime: normalizeTimeValue(values.endTime || "", ""),
     status: String(values.status || "").trim(),
     priority: normalizeTaskPriority(values.priority, "low"),
-    projectId: String(values.projectId || "").trim(),
-    projectName: String(values.projectName || "").trim(),
     taskType: canonicalTaskType(values.taskType, "General"),
     callPhone: normalizePhoneValue(values.callPhone || ""),
     linkType: canonicalTaskType(values.linkType, ""),
@@ -21895,7 +22212,6 @@ function renderLeadConversionModal() {
   modalOverlay.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-lead-drawer");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
@@ -22220,184 +22536,6 @@ async function submitLeadConversionForm(form) {
   }
 }
 
-function getTaskProjectOptions(selectedProjectId = "") {
-  const projects = Array.isArray(state.data.projects) ? state.data.projects : [];
-  const options = [`<option value="" ${!selectedProjectId ? "selected" : ""}>No project</option>`];
-  projects.forEach((project) => {
-    const selected = selectedProjectId === project.id ? "selected" : "";
-    options.push(`<option value="${project.id}" ${selected}>${escapeModalText(project.name)}</option>`);
-  });
-  return options.join("");
-}
-
-function parseProjectTeamMembers(value) {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => String(item || "").trim())
-      .filter(Boolean);
-  }
-  return String(value || "")
-    .split("|")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function normalizeProjectStatus(value) {
-  const status = String(value || "").trim();
-  if (PROJECT_STATUS_FLOW.includes(status)) {
-    return status;
-  }
-  return "On Track";
-}
-
-function getProjectOwnerCandidates(selectedOwner = "") {
-  const options = new Map();
-  const currentUserId = String(state.data.currentUser?.id || "").trim();
-  const currentUser = String(state.data.currentUser?.name || "").trim();
-  if (currentUserId && currentUser) {
-    options.set(currentUserId, currentUser);
-  }
-  (state.data.teamMembers || []).forEach((member) => {
-    const id = String(member.id || "").trim();
-    const name = String(member.name || "").trim();
-    if (id && name) {
-      options.set(id, name);
-    }
-  });
-  const selected = String(selectedOwner || "").trim();
-  const selectedMember = findTeamMemberById(selected);
-  if (selected && selectedMember?.name) {
-    options.set(selected, String(selectedMember.name || "").trim());
-  }
-  return [...options.entries()]
-    .map(([id, name]) => ({ id, name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function buildProjectOwnerOptionsMarkup(selectedOwner = "") {
-  const selected = String(selectedOwner || "").trim();
-  return getProjectOwnerCandidates(selected)
-    .map(
-      (owner) =>
-        `<option value="${escapeModalText(owner.id)}" ${owner.id === selected ? "selected" : ""}>${escapeModalText(owner.name)}</option>`
-    )
-    .join("");
-}
-
-function buildProjectAccountOptionsMarkup(selectedAccountName = "") {
-  const selected = String(selectedAccountName || "").trim();
-  const rows = [`<option value="" ${!selected ? "selected" : ""}>No linked account</option>`];
-  (state.data.accounts || [])
-    .map((account) => String(account.name || "").trim())
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b))
-    .forEach((name) => {
-      rows.push(`<option value="${escapeModalText(name)}" ${name === selected ? "selected" : ""}>${escapeModalText(name)}</option>`);
-    });
-  return rows.join("");
-}
-
-function buildProjectTeamOptionsMarkup(selectedMembers = []) {
-  const selectedSet = new Set(parseProjectTeamMembers(selectedMembers));
-  return getProjectOwnerCandidates("")
-    .map(
-      (member) => `
-        <button
-          type="button"
-          class="project-team-chip ${selectedSet.has(member.id) ? "is-selected" : ""}"
-          data-action="project-team-toggle"
-          data-id="${escapeModalText(member.id)}"
-        >
-          ${escapeModalText(member.name)}
-        </button>
-      `
-    )
-    .join("");
-}
-
-function resolveProjectDraft(project) {
-  const base = project || {};
-  const name = String(base.name || "").trim();
-  const owner = String(base.ownerId || resolveTeamMemberIdByName(base.owner) || state.data.currentUser.id || "").trim();
-  const status = normalizeProjectStatus(base.status);
-  const progressRaw = Number(base.progress);
-  const progress = Number.isFinite(progressRaw) ? Math.max(0, Math.min(100, Math.round(progressRaw))) : 25;
-  const deadlineRaw = String(base.deadline || base.targetDate || "").trim();
-  const deadline = parseIsoDateLocal(deadlineRaw) ? deadlineRaw : todayIso(14);
-  const accountName = String(base.accountName || base.account || "").trim();
-  const teamMembers = parseProjectTeamMembers(base.teamMemberIds || base.teamMembers);
-  const description = String(base.description || "").trim();
-  const risks = String(base.risks || "").trim();
-  return {
-    name,
-    owner,
-    status,
-    progress,
-    deadline,
-    accountName,
-    teamMembers,
-    description,
-    risks
-  };
-}
-
-function syncProjectComposerUi(form) {
-  if (!form) {
-    return;
-  }
-  const statusInput = form.querySelector("input[name='status']");
-  const progressInput = form.querySelector("input[name='progress']");
-  const teamInput = form.querySelector("input[name='teamMembers']");
-  const detailsBody = form.querySelector("[data-project-details-body]");
-  const detailsLabel = form.querySelector("[data-project-details-label]");
-  const detailsToggle = form.querySelector("[data-project-details-toggle]");
-  const descriptionInput = form.querySelector("textarea[name='description']");
-  const risksInput = form.querySelector("textarea[name='risks']");
-
-  if (statusInput) {
-    statusInput.value = normalizeProjectStatus(statusInput.value);
-  }
-
-  if (progressInput) {
-    const value = Number(progressInput.value);
-    const normalized = Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
-    progressInput.value = String(normalized);
-    progressInput.style.setProperty("--project-progress", `${normalized}%`);
-    form.querySelectorAll("[data-project-progress-value]").forEach((node) => {
-      node.textContent = `${normalized}%`;
-    });
-  }
-
-  if (statusInput) {
-    form.querySelectorAll("[data-action='project-status-select']").forEach((button) => {
-      button.classList.toggle("is-selected", String(button.dataset.id || "") === statusInput.value);
-    });
-  }
-
-  if (teamInput) {
-    const members = parseProjectTeamMembers(teamInput.value);
-    const uniqueMembers = [...new Set(members)];
-    teamInput.value = uniqueMembers.join("|");
-    const selectedSet = new Set(uniqueMembers);
-    form.querySelectorAll("[data-action='project-team-toggle']").forEach((button) => {
-      button.classList.toggle("is-selected", selectedSet.has(String(button.dataset.id || "")));
-    });
-  }
-
-  const detailsOpen = form.dataset.projectDetailsOpen === "1";
-  if (detailsBody) {
-    detailsBody.hidden = !detailsOpen;
-  }
-  if (detailsToggle) {
-    detailsToggle.classList.toggle("is-open", detailsOpen);
-    detailsToggle.setAttribute("aria-expanded", detailsOpen ? "true" : "false");
-  }
-  if (detailsLabel) {
-    const hasDetails = Boolean(String(descriptionInput?.value || "").trim() || String(risksInput?.value || "").trim());
-    detailsLabel.textContent = detailsOpen ? "Hide details" : hasDetails ? "Details added" : "Add details";
-  }
-}
-
 function initialsFromName(value) {
   const parts = String(value || "")
     .trim()
@@ -22423,6 +22561,12 @@ function createEmptyLeadImportDraft() {
     mapping: {},
     importMode: LEAD_IMPORT_MODE_NEW,
     importModeExplicit: false,
+    detectedJoynoSyncExport: false,
+    workspaceReviewStatus: "idle",
+    workspaceReviewVerified: false,
+    workspaceReviewError: "",
+    workspaceReviewRequestId: "",
+    workspaceMatches: [],
     resetBlankStatus: false,
     restoreArchived: false,
     clearBlankFields: [],
@@ -22434,6 +22578,7 @@ function createEmptyLeadImportDraft() {
     assigneeIds: getDefaultLeadImportAssigneeIds(),
     review: null,
     importSummary: null,
+    importResults: [],
     jobId: "",
     jobStatus: "",
     jobRowCount: 0,
@@ -22448,7 +22593,9 @@ function createEmptyLeadImportDraft() {
     jobLastError: "",
     showMapping: false,
     showIssueRows: false,
+    reviewSubview: "",
     showAssignees: false,
+    assigneeSearch: "",
     openMapField: "",
     openDuplicateMode: false,
     openDuplicateColumns: false,
@@ -22471,12 +22618,6 @@ function normalizeLeadImportStep(value) {
     return "import";
   }
   return ["upload", "review", "import", "processing", "done"].includes(raw) ? raw : "upload";
-}
-
-function isLeadAssignableMember(member) {
-  const status = String(member?.status || "").trim();
-  const role = String(member?.role || "").trim();
-  return status === "Active" && role !== "Guest";
 }
 
 function getLeadAssignableTeamMembers(data = state.data) {
@@ -22552,124 +22693,6 @@ function formatLeadImportDuplicateColumnsSummary(headers, duplicateColumns) {
     return selectedLabels.join(", ");
   }
   return `${selectedLabels.slice(0, 2).join(", ")} +${selectedLabels.length - 2}`;
-}
-
-function ensureUniqueLeadImportHeaders(headers) {
-  const seen = new Map();
-  return headers.map((header, index) => {
-    const base = String(header || "").trim() || `Column ${index + 1}`;
-    const count = seen.get(base) || 0;
-    seen.set(base, count + 1);
-    return count ? `${base} (${count + 1})` : base;
-  });
-}
-
-function parseCsvMatrix(text) {
-  const rows = [];
-  let row = [];
-  let value = "";
-  let insideQuotes = false;
-  const raw = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  for (let index = 0; index < raw.length; index += 1) {
-    const char = raw[index];
-    const next = raw[index + 1];
-    if (insideQuotes) {
-      if (char === '"' && next === '"') {
-        value += '"';
-        index += 1;
-        continue;
-      }
-      if (char === '"') {
-        insideQuotes = false;
-        continue;
-      }
-      value += char;
-      continue;
-    }
-    if (char === '"') {
-      insideQuotes = true;
-      continue;
-    }
-    if (char === ",") {
-      row.push(value);
-      value = "";
-      continue;
-    }
-    if (char === "\n") {
-      row.push(value);
-      rows.push(row);
-      row = [];
-      value = "";
-      continue;
-    }
-    value += char;
-  }
-
-  if (value.length || row.length) {
-    row.push(value);
-    rows.push(row);
-  }
-
-  return rows;
-}
-
-function normalizeLeadImportSheetRows(matrix) {
-  const rows = Array.isArray(matrix) ? matrix.filter((row) => Array.isArray(row)) : [];
-  const nonEmptyRows = rows.filter((row) => row.some((cell) => String(cell ?? "").trim()));
-  if (!nonEmptyRows.length) {
-    return { headers: [], rows: [] };
-  }
-  const width = Math.max(...nonEmptyRows.map((row) => row.length), 0);
-  const paddedRows = nonEmptyRows.map((row) => Array.from({ length: width }, (_, index) => String(row[index] ?? "").trim()));
-  const headers = ensureUniqueLeadImportHeaders(paddedRows[0] || []);
-  return {
-    headers,
-    rows: paddedRows.slice(1).filter((row) => row.some((cell) => String(cell || "").trim()))
-  };
-}
-
-function loadLeadImportXlsxLibrary() {
-  if (window.XLSX) {
-    return Promise.resolve(window.XLSX);
-  }
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector("script[data-xlsx-loader='lead-import']");
-    if (existing) {
-      existing.addEventListener("load", () => resolve(window.XLSX), { once: true });
-      existing.addEventListener("error", () => reject(new Error("Failed to load spreadsheet parser.")), { once: true });
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = LEAD_IMPORT_XLSX_CDN;
-    script.async = true;
-    script.dataset.xlsxLoader = "lead-import";
-    script.addEventListener("load", () => resolve(window.XLSX), { once: true });
-    script.addEventListener("error", () => reject(new Error("Failed to load spreadsheet parser.")), { once: true });
-    document.head.appendChild(script);
-  });
-}
-
-async function parseLeadImportFile(file) {
-  const name = String(file?.name || "").trim();
-  const extension = name.split(".").pop()?.toLowerCase() || "";
-  if (extension === "csv") {
-    const text = await file.text();
-    return normalizeLeadImportSheetRows(parseCsvMatrix(text));
-  }
-  if (extension === "xlsx" || extension === "xls") {
-    const XLSX = await loadLeadImportXlsxLibrary();
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array", cellDates: false });
-    const firstSheetName = workbook.SheetNames?.[0];
-    const worksheet = firstSheetName ? workbook.Sheets[firstSheetName] : null;
-    if (!worksheet) {
-      throw new Error("The spreadsheet does not contain any sheets.");
-    }
-    const matrix = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "", raw: false });
-    return normalizeLeadImportSheetRows(matrix);
-  }
-  throw new Error("Unsupported file type. Use CSV or XLSX.");
 }
 
 function deriveLeadNameFromEmail(email) {
@@ -22869,6 +22892,9 @@ function buildLeadImportReview(draft) {
     if (statusResolution.warning) {
       warnings.push(statusResolution.warning);
     }
+    if (statusResolution.error) {
+      issues.push(statusResolution.error);
+    }
     const tags = raw.tags
       ? raw.tags
           .split(",")
@@ -22944,6 +22970,7 @@ function buildLeadImportReview(draft) {
       result,
       resultLabel,
       isDuplicateMatch: Boolean(duplicateLead || duplicateInFile),
+      duplicateInFile: Boolean(duplicateInFile),
       issues,
       warnings,
       duplicateLeadId: updateImport ? leadId : duplicateLead?.id || "",
@@ -22995,7 +23022,64 @@ function buildLeadImportReview(draft) {
     { total: 0, ready: 0, update: 0, duplicate: 0, review: 0 }
   );
 
-  return { rows: reviewRows, summary, duplicateMode, importMode };
+  const review = { rows: reviewRows, summary, duplicateMode, importMode };
+  return Array.isArray(draft?.workspaceMatches) && draft.workspaceReviewVerified === true
+    ? mergeLeadImportWorkspaceReview(review, draft.workspaceMatches, {
+        duplicateMode,
+        approvedDuplicateRows: draft.approvedDuplicateRows || []
+      })
+    : review;
+}
+
+async function verifyLeadImportWorkspace(draft = state.leadImportDraft) {
+  if (!draft?.rows?.length) {
+    return;
+  }
+  const useCloudReview = state.supabaseConfigured && !isLocalQaSessionActive();
+  const requestId = createId("leadreview");
+  const checkingDraft = {
+    ...draft,
+    workspaceReviewStatus: useCloudReview ? "checking" : "complete",
+    workspaceReviewVerified: false,
+    workspaceReviewError: "",
+    workspaceReviewRequestId: requestId,
+    workspaceMatches: useCloudReview ? [] : (draft.workspaceMatches || [])
+  };
+  checkingDraft.review = buildLeadImportReview(checkingDraft);
+  state.leadImportDraft = checkingDraft;
+  renderLeadImportModalIfOpen();
+
+  if (!useCloudReview) {
+    return;
+  }
+
+  try {
+    const matches = await reviewSupabaseLeadImportRows(checkingDraft.importMode, checkingDraft.review.rows);
+    if (state.leadImportDraft?.workspaceReviewRequestId !== requestId) {
+      return;
+    }
+    const verifiedDraft = {
+      ...state.leadImportDraft,
+      workspaceReviewStatus: "complete",
+      workspaceReviewVerified: true,
+      workspaceReviewError: "",
+      workspaceMatches: matches
+    };
+    verifiedDraft.review = buildLeadImportReview(verifiedDraft);
+    state.leadImportDraft = verifiedDraft;
+  } catch (error) {
+    if (state.leadImportDraft?.workspaceReviewRequestId !== requestId) {
+      return;
+    }
+    state.leadImportDraft = {
+      ...state.leadImportDraft,
+      workspaceReviewStatus: "failed",
+      workspaceReviewVerified: false,
+      workspaceReviewError: formatLeadImportWorkspaceError(error),
+      error: "We could not verify this file against the complete workspace. Nothing can be imported until verification succeeds."
+    };
+  }
+  renderLeadImportModalIfOpen();
 }
 
 function downloadLeadImportIssuesCsv(draft, review) {
@@ -23158,7 +23242,6 @@ function renderLeadImportModal() {
   modalCard.classList.remove(
     "is-lead-drawer",
     "is-task-compose",
-    "is-project-compose",
     "is-profile-compose",
     "is-lead-compose",
     "is-contact-compose",
@@ -23181,8 +23264,17 @@ function renderLeadImportModal() {
         (lead) => !lead.archived && String(lead.ownerId || "").trim() === String(member.id || "").trim()
       ).length
     }));
-  const selectedAssigneeIds = (draft.assigneeIds || []).map((id) => String(id || "").trim()).filter(Boolean);
-  const selectedAssignees = assignableMembers.filter((member) => selectedAssigneeIds.includes(String(member.id || "").trim()));
+  const assignableMemberIds = new Set(assignableMembers.map((member) => String(member.id || "").trim()).filter(Boolean));
+  const selectedAssigneeIds = (draft.assigneeIds || [])
+    .map((id) => String(id || "").trim())
+    .filter((id) => id && assignableMemberIds.has(id));
+  const assigneeSearch = normalizeForMatch(draft.assigneeSearch || "");
+  const visibleAssignableMembers = assignableMembers.filter((member) => {
+    if (!assigneeSearch) {
+      return true;
+    }
+    return normalizeForMatch([member?.name, member?.email, member?.role, member?.team].filter(Boolean).join(" ")).includes(assigneeSearch);
+  });
   const duplicateColumnSelection = getLeadImportDuplicateColumns(draft.headers, draft.duplicateColumns);
   const duplicateColumnsSummary = formatLeadImportDuplicateColumnsSummary(draft.headers, draft.duplicateColumns);
   const issueRows = (review?.rows || []).filter((row) => row.result === "review" || Boolean(row?.isDuplicateMatch));
@@ -23213,97 +23305,43 @@ function renderLeadImportModal() {
   ]
     .map((key) => LEAD_IMPORT_FIELDS.find((field) => field.key === key))
     .filter(Boolean);
-  const mappedFieldRows = orderedImportFields
-    .filter((field) => parseLeadImportColumnIndex(draft.mapping?.[field.key]) !== null)
-    .map((field) => {
-      const headerIndex = parseLeadImportColumnIndex(draft.mapping?.[field.key]);
-      const headerLabel = headerIndex === null ? "" : String(draft.headers?.[headerIndex] || "");
+  const readyCount = summary.ready + summary.update;
+  const skippedCount = summary.review + summary.duplicate;
+  const blockedCount = reviewOnlyRows.length;
+  const warningCount = duplicateRows.length;
+  const mappedFieldCount = orderedImportFields.filter(
+    (field) => parseLeadImportColumnIndex(draft.mapping?.[field.key]) !== null
+  ).length;
+  const statusResetCount =
+    updateImportMode && draft.resetBlankStatus
+      ? readyCount
+      : 0;
+  const selectedCount = selectedAssigneeIds.length;
+  const selectedAssignableMembers = assignableMembers.filter((member) =>
+    selectedAssigneeIds.includes(String(member.id || "").trim())
+  );
+  const selectedAssigneeAvatarsHtml = selectedAssignableMembers
+    .slice(0, 6)
+    .map((member) => {
+      const memberLabel = member.name || member.email || "Team member";
+      const memberAvatarUrl = String(member.avatarUrl || "").trim();
+      const memberAvatarHue = avatarHueFromValue(member.id || member.email || memberLabel);
       return `
-        <div class="lead-import-field-row">
-          <span class="lead-import-field-key">${escapeModalText(field.label)}</span>
-          <strong class="lead-import-field-value">${escapeModalText(headerLabel || "Ignored")}</strong>
-        </div>
+        <span class="lead-import-assignment-avatar" style="--lead-assignee-avatar-hue:${memberAvatarHue}" title="${escapeModalText(memberLabel)}">
+          ${memberAvatarUrl ? `<img src="${escapeModalText(memberAvatarUrl)}" alt="" />` : escapeModalText(initialsFromName(memberLabel))}
+        </span>
       `;
     })
     .join("");
-  const mappingRows = orderedImportFields.map(
-    (field) => {
-      const selectedValue = String(draft.mapping?.[field.key] ?? "").trim();
-      const selectedIndex = parseLeadImportColumnIndex(selectedValue);
-      const selectedLabel = selectedIndex === null ? "" : String(draft.headers?.[selectedIndex] || "");
-      const isOpen = String(draft.openMapField || "") === field.key;
-      return `
-        <div class="lead-import-map-row">
-          <div class="lead-import-map-label">
-            <span>${escapeModalText(field.label)}${field.required ? " *" : ""}</span>
-          </div>
-          <div class="contact-picker-control lead-import-map-control" data-lead-import-map-control="${escapeModalText(field.key)}">
-            <button
-              type="button"
-              class="contact-picker-trigger ${isOpen ? "is-open" : ""}"
-              data-action="lead-import-map-toggle"
-              data-id="${escapeModalText(field.key)}"
-            >
-              <span>${escapeModalText(selectedLabel || "Ignore this field")}</span>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="contact-picker-popover lead-import-map-popover" ${isOpen ? "" : "hidden"}>
-              <div class="contact-picker-list">
-                <button type="button" class="contact-picker-option ${selectedValue ? "" : "is-selected"}" data-action="lead-import-map-select" data-id="${escapeModalText(`${field.key}:`)}">
-                  Ignore this field
-                  <small>Skip this CRM field during import.</small>
-                </button>
-                ${draft.headers
-                  .map(
-                    (header, index) => `
-                      <button
-                        type="button"
-                        class="contact-picker-option ${String(index) === selectedValue ? "is-selected" : ""}"
-                        data-action="lead-import-map-select"
-                        data-id="${escapeModalText(`${field.key}:${index}`)}"
-                      >
-                        ${escapeModalText(header)}
-                        <small>Column ${index + 1}</small>
-                      </button>
-                    `
-                  )
-                  .join("")}
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-  ).join("");
-  const issuePreviewRows = issueRows
-    .slice(0, draft.showIssueRows ? 12 : 4)
-    .map(
-      (row) => `
-        <article class="lead-import-review-row">
-          <div class="lead-import-review-copy">
-            <strong>Row ${row.rowNumber} | ${escapeModalText(row.values.name || row.values.email || "Unnamed lead")}</strong>
-            <p>${escapeModalText([...row.issues, ...row.warnings].join(" | ") || "Needs attention before import.")}</p>
-          </div>
-          ${row.isDuplicateMatch && draft.duplicateMode === "create" ? `<button type="button" class="mini-btn" data-action="lead-import-approve-duplicate" data-id="${row.rowNumber}">${(draft.approvedDuplicateRows || []).includes(row.rowNumber) ? "Revoke approval" : "Approve duplicate"}</button>` : ""}
-          <span class="lead-import-result-pill is-${row.result}">${escapeModalText(row.resultLabel)}</span>
-        </article>
-      `
-    )
-    .join("");
-  const readyCount = summary.ready + summary.update;
-  const skippedCount = summary.review + summary.duplicate;
-  const selectedCount = selectedAssigneeIds.length;
-  const selectedAssigneeChips = selectedAssignees
-    .map(
-      (member) => `
-        <span class="lead-import-selected-chip">
-          <strong>${escapeModalText(member.name || "Team member")}</strong>
-          <span>${escapeModalText([member.role, member.team].filter(Boolean).join(" | ") || "Active")}</span>
-        </span>
-      `
-    )
-    .join("");
-  const actionLabel = draft.busy ? "Importing..." : `Import ${readyCount} lead${readyCount === 1 ? "" : "s"}`;
+  const distributionMinimum = selectedCount ? Math.floor(readyCount / selectedCount) : 0;
+  const distributionMaximum = selectedCount ? Math.ceil(readyCount / selectedCount) : 0;
+  const distributionEstimate = selectedCount
+    ? readyCount < selectedCount
+      ? "round-robin across the selection"
+      : distributionMinimum === distributionMaximum
+      ? `${distributionMinimum} lead${distributionMinimum === 1 ? "" : "s"} each`
+      : `${distributionMinimum}-${distributionMaximum} leads each`
+    : "No distribution calculated";
   const jobStatus = normalizeLeadImportJobStatus(draft.jobStatus);
   const jobRowCount = Number(draft.jobRowCount || review?.rows?.length || draft.rows?.length || 0);
   const jobProcessedCount = Number(draft.jobProcessedCount || 0);
@@ -23340,7 +23378,7 @@ function renderLeadImportModal() {
   const stepperHtml = [
     { label: "Upload", number: 1 },
     { label: "Review", number: 2 },
-    { label: "Import", number: 3 }
+    { label: "Confirm", number: 3 }
   ]
     .map((item, index) => {
       const stateClass = stepIndex > item.number ? "is-complete" : stepIndex === item.number ? "is-active" : "is-pending";
@@ -23361,7 +23399,20 @@ function renderLeadImportModal() {
     })
     .join("");
 
-  modalTitle.textContent = "Import leads";
+  const modalHeading = step === "import" ? "Confirm import" : updateImportMode && step !== "upload" ? "Import exported leads" : "Import leads";
+  const modalSubtitle =
+    step === "upload"
+      ? "Choose a file and review every change before it is added."
+      : step === "review"
+        ? "Review your file before anything changes."
+        : step === "import"
+          ? "Review the final impact. Nothing changes until you start the import."
+          : step === "done"
+            ? "Review the completed import and download its results."
+            : "Your import continues safely in the background.";
+  modalCard.dataset.importStep = step;
+  modalTitle.setAttribute("aria-label", modalHeading);
+  modalTitle.innerHTML = `<span>${escapeModalText(modalHeading)}</span><small aria-hidden="true">${escapeModalText(modalSubtitle)}</small>`;
   modalForm.dataset.mode = "lead-import";
   modalForm.innerHTML = `
     <section class="lead-import-shell">
@@ -23383,12 +23434,12 @@ function renderLeadImportModal() {
               <div class="lead-import-choice-list lead-import-mode-options" role="group" aria-label="Import purpose">
                 <button type="button" class="lead-import-choice ${!updateImportMode ? "is-active" : ""}" data-action="lead-import-mode-select" data-id="${LEAD_IMPORT_MODE_NEW}" aria-pressed="${!updateImportMode ? "true" : "false"}">
                   <span class="lead-import-choice-icon" aria-hidden="true"><i class="bi bi-person-plus"></i></span>
-                  <span class="lead-import-choice-copy"><strong>Add new leads</strong><small>Bring in a source list and review matches before creating leads.</small></span>
+                  <span class="lead-import-choice-copy"><strong>Add new leads</strong><small>Create leads from a purchased or source list.</small></span>
                   <span class="lead-import-choice-state" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
                 </button>
                 <button type="button" class="lead-import-choice ${updateImportMode ? "is-active" : ""}" data-action="lead-import-mode-select" data-id="${LEAD_IMPORT_MODE_UPDATE}" aria-pressed="${updateImportMode ? "true" : "false"}">
                   <span class="lead-import-choice-icon" aria-hidden="true"><i class="bi bi-arrow-repeat"></i></span>
-                  <span class="lead-import-choice-copy"><strong>Update exported leads</strong><small>Use a JoynoSync export to update matching leads without creating new ones.</small></span>
+                  <span class="lead-import-choice-copy"><strong>Update exported leads</strong><small>Update existing JoynoSync leads by Lead ID.</small></span>
                   <span class="lead-import-choice-state" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
                 </button>
               </div>
@@ -23397,7 +23448,7 @@ function renderLeadImportModal() {
                 <span class="lead-import-dropzone-icon" aria-hidden="true"><i class="bi bi-file-earmark-arrow-up"></i></span>
                 <span class="lead-import-dropzone-copy">
                   <strong>${draft.busy ? "Reading your file..." : "Drop a CSV or Excel file here"}</strong>
-                  <span>${updateImportMode ? "We’ll match it to your existing leads and show every proposed update." : "We’ll check the fields and show what is ready before creating leads."}</span>
+                  <span>${updateImportMode ? "We’ll match existing leads by Lead ID before anything changes." : "Maximum 10,000 rows. You’ll review every change before import."}</span>
                 </span>
                 <em class="lead-import-dropzone-chip">${draft.busy ? "Preparing..." : "Choose file"}</em>
               </label>
@@ -23413,265 +23464,178 @@ function renderLeadImportModal() {
 
       ${
         step === "review"
-          ? `
-            <section class="lead-import-panel">
-              <div class="lead-import-panel-head">
-                <div>
-                  <p class="lead-import-section-title">Review fields</p>
-                  <p class="lead-import-section-subtitle">${escapeModalText(draft.fileName)} | ${draft.rows.length} rows detected</p>
-                </div>
-                <div class="lead-import-inline-actions">
-                  <button type="button" class="lead-import-inline-action" data-action="lead-import-reset"><i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>Replace file</span></button>
-                  <button type="button" class="lead-import-inline-action" data-action="lead-import-toggle-mapping">${draft.showMapping ? "Hide mapping" : "Edit mapping"}</button>
-                  ${
-                    issueRows.length
-                      ? `<button type="button" class="lead-import-inline-action is-emphasis" data-action="lead-import-toggle-issues">${draft.showIssueRows ? "Hide issues" : `Issues ${issueRows.length}`}</button>`
-                      : ""
-                  }
-                </div>
-              </div>
-              <div class="lead-import-meta-strip">
-                <span class="lead-import-meta-item"><strong>${summary.total}</strong><span>rows</span></span>
-                <span class="lead-import-meta-item"><strong>${readyCount}</strong><span>ready</span></span>
-                <span class="lead-import-meta-item"><strong>${summary.review + summary.duplicate}</strong><span>need attention</span></span>
-                <span class="lead-import-meta-item"><strong>${updateImportMode ? "Lead ID" : draft.duplicateMode === "update" ? "Update" : draft.duplicateMode === "create" ? "Create" : "Skip"}</strong><span>${updateImportMode ? "matching" : "duplicates"}</span></span>
-              </div>
-              <div class="lead-import-field-summary">
-                ${mappedFieldRows || "<p class='task-meta'>No columns mapped yet.</p>"}
-              </div>
-              ${updateImportMode ? `<section class="lead-import-soft-section">
-                <p class="lead-import-section-title">Blank fields and archived leads</p>
-                <p class="lead-import-section-subtitle">Blank fields preserve current values unless you explicitly select an exception.</p>
-                <label class="profile-check"><input type="checkbox" data-action="lead-import-reset-blank-status" ${draft.resetBlankStatus ? "checked" : ""} /> Reset blank Status values to New</label>
-                <label class="profile-check"><input type="checkbox" data-action="lead-import-restore-archived" ${draft.restoreArchived ? "checked" : ""} /> Restore archived leads included in this update</label>
-                <details>
-                  <summary class="lead-import-inline-action">Choose blank fields to clear</summary>
-                  <div class="lead-import-choice-grid">
-                    ${clearableImportFields.map((field) => `<label class="profile-check"><input type="checkbox" data-action="lead-import-clear-blank-field" data-id="${field.key}" ${(draft.clearBlankFields || []).includes(field.key) ? "checked" : ""} /> Clear blank ${escapeModalText(field.label)}</label>`).join("")}
-                  </div>
-                </details>
-              </section>` : ""}
-              ${
-                draft.showMapping
-                  ? `
-                    <section class="lead-import-soft-section">
-                      <div class="lead-import-soft-section-head">
-                        <div>
-                          <p class="lead-import-section-title">Column mapping</p>
-                          <p class="lead-import-section-subtitle">Adjust automatic matches only if something looks off.</p>
-                        </div>
-                      </div>
-                      <div class="lead-import-map-grid">${mappingRows}</div>
-                      ${
-                        updateImportMode
-                          ? ""
-                          : `<div class="lead-import-toolbar">
-                        <div class="lead-import-picker-field">
-                          <span class="lead-import-picker-label">Duplicates</span>
-                          <div
-                            class="contact-picker-control lead-import-map-control lead-import-duplicate-control"
-                            data-lead-import-duplicate-control
-                          >
-                            <button
-                              type="button"
-                              class="contact-picker-trigger ${draft.openDuplicateMode ? "is-open" : ""}"
-                              data-action="lead-import-duplicate-toggle"
-                            >
-                              <span>${escapeModalText(duplicateModeOption.label)}</span>
-                              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                            </button>
-                            <div class="contact-picker-popover lead-import-map-popover" ${draft.openDuplicateMode ? "" : "hidden"}>
-                              <div class="contact-picker-list">
-                                ${LEAD_IMPORT_DUPLICATE_OPTIONS.map(
-                                  (option) => `
-                                    <button
-                                      type="button"
-                                      class="contact-picker-option ${option.value === draft.duplicateMode ? "is-selected" : ""}"
-                                      data-action="lead-import-duplicate-select"
-                                      data-id="${escapeModalText(option.value)}"
-                                    >
-                                      ${escapeModalText(option.label)}
-                                      <small>${escapeModalText(option.detail || "")}</small>
-                                    </button>
-                                  `
-                                ).join("")}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="lead-import-picker-field">
-                          <span class="lead-import-picker-label">Duplicate columns</span>
-                          <div
-                            class="contact-picker-control lead-import-map-control lead-import-duplicate-control"
-                            data-lead-import-duplicate-columns-control
-                          >
-                            <button
-                              type="button"
-                              class="contact-picker-trigger ${draft.openDuplicateColumns ? "is-open" : ""}"
-                              data-action="lead-import-duplicate-columns-toggle"
-                            >
-                              <span>${escapeModalText(duplicateColumnsSummary)}</span>
-                              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                            </button>
-                            <div class="contact-picker-popover lead-import-map-popover" ${draft.openDuplicateColumns ? "" : "hidden"}>
-                              <div class="contact-picker-list">
-                                ${draft.headers.map(
-                                  (header, index) => `
-                                    <button
-                                      type="button"
-                                      class="contact-picker-option ${duplicateColumnSelection.includes(String(index)) ? "is-selected" : ""}"
-                                      data-action="lead-import-duplicate-column-toggle"
-                                      data-id="${escapeModalText(String(index))}"
-                                    >
-                                      ${escapeModalText(header)}
-                                      <small>Column ${index + 1}</small>
-                                    </button>
-                                  `
-                                ).join("")}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>`
-                      }
-                    </section>
-                  `
-                  : ""
+          ? renderLeadImportReviewView({
+              fileName: draft.fileName,
+              rowCount: draft.rows.length,
+              readyCount,
+              blockedCount,
+              warningCount,
+              attentionCount: issueRows.length,
+              mappedFieldCount,
+              updateImportMode,
+              detectedJoynoSyncExport: Boolean(draft.detectedJoynoSyncExport),
+              workspaceReviewStatus: String(draft.workspaceReviewStatus || "idle"),
+              workspaceReviewError: String(draft.workspaceReviewError || ""),
+              reviewSubview: draft.reviewSubview,
+              issues: issueRows,
+              duplicateCount: duplicateRows.length,
+              approvedDuplicateRows: draft.approvedDuplicateRows || [],
+              duplicateMode: draft.duplicateMode,
+              duplicateExportBusy: draft.duplicateExportBusy,
+              duplicateExportError: draft.duplicateExportError,
+              mappingModel: {
+                fields: orderedImportFields,
+                headers: draft.headers,
+                mapping: draft.mapping,
+                openMapField: draft.openMapField
+              },
+              duplicate: {
+                mode: draft.duplicateMode,
+                modeLabel: duplicateModeOption.label,
+                options: LEAD_IMPORT_DUPLICATE_OPTIONS,
+                openMode: draft.openDuplicateMode,
+                openColumns: draft.openDuplicateColumns,
+                headers: draft.headers,
+                selectedColumns: duplicateColumnSelection,
+                columnsSummary: duplicateColumnsSummary
+              },
+              update: {
+                clearableFields: clearableImportFields,
+                clearBlankFields: draft.clearBlankFields || [],
+                resetBlankStatus: draft.resetBlankStatus,
+                restoreArchived: draft.restoreArchived
               }
-              ${
-                issueRows.length
-                  ? `
-                    <section class="lead-import-soft-section" ${draft.showIssueRows ? "" : "hidden"}>
-                      <div class="lead-import-soft-section-head">
-                        <div>
-                          <p class="lead-import-section-title">Issues to review</p>
-                          <p class="lead-import-section-subtitle">Only rows with warnings or duplicates are shown here.</p>
-                        </div>
-                        <div class="lead-import-inline-actions">
-                          ${duplicateRows.length ? `<button type="button" class="mini-btn" data-action="lead-import-download-duplicates" ${draft.duplicateExportBusy ? "disabled" : ""}>${draft.duplicateExportBusy ? "Exporting..." : "Export duplicates"}</button>` : ""}
-                          ${reviewOnlyRows.length ? `<button type="button" class="mini-btn" data-action="lead-import-download-issues">Export issues</button>` : ""}
-                        </div>
-                      </div>
-                      ${
-                        duplicateRows.length
-                          ? `
-                            <div class="lead-import-soft-section">
-                              <p class="lead-import-section-title">Duplicate export scope</p>
-                              <label class="profile-check"><input type="radio" name="duplicateExportScope" value="new" ${draft.duplicateExportScope !== "date-range" && draft.duplicateExportScope !== "all" ? "checked" : ""} data-action="lead-import-duplicate-export-scope" /> New duplicates only</label>
-                              <label class="profile-check"><input type="radio" name="duplicateExportScope" value="date-range" ${draft.duplicateExportScope === "date-range" ? "checked" : ""} data-action="lead-import-duplicate-export-scope" /> Duplicates detected in date range</label>
-                              <div class="inline-grid two" ${draft.duplicateExportScope === "date-range" ? "" : "hidden"}>
-                                <label>From date<input type="date" name="duplicateExportFrom" value="${escapeModalText(draft.duplicateExportFrom || "")}" /></label>
-                                <label>To date<input type="date" name="duplicateExportTo" value="${escapeModalText(draft.duplicateExportTo || "")}" /></label>
-                              </div>
-                              <label class="profile-check"><input type="radio" name="duplicateExportScope" value="all" ${draft.duplicateExportScope === "all" ? "checked" : ""} data-action="lead-import-duplicate-export-scope" /> All matching duplicates</label>
-                              ${draft.duplicateExportError ? `<p class="lead-import-soft-note lead-import-soft-note-error">${escapeModalText(draft.duplicateExportError)}</p>` : ""}
-                            </div>
-                          `
-                          : ""
-                      }
-                      <div class="lead-import-review-list">
-                        ${issuePreviewRows}
-                      </div>
-                    </section>
-                  `
-                  : `
-                    <section class="lead-import-soft-section">
-                      <p class="lead-import-soft-note">No blocking issues found. The reviewed rows are ready to import.</p>
-                    </section>
-                  `
-              }
-            </section>
-          `
+            })
           : ""
       }
 
       ${
         step === "import"
           ? `
-            <section class="lead-import-panel">
-              <div class="lead-import-panel-head">
-                <div>
-                  <p class="lead-import-section-title">Ready to import</p>
-                  <p class="lead-import-section-subtitle">${updateImportMode ? "Confirm the proposed updates. Ownership stays unchanged unless the file includes an owner." : "Confirm assignment, then import the rows that are ready."}</p>
-                </div>
+            <section class="lead-import-panel lead-import-confirm-panel">
+              <div class="lead-import-confirm-stats" aria-label="Final import summary">
+                <div><i class="bi bi-file-earmark-text" aria-hidden="true"></i><strong>${summary.total}</strong><span>Rows</span></div>
+                <div class="is-ready"><i class="bi bi-check2-circle" aria-hidden="true"></i><strong>${readyCount}</strong><span>Ready</span></div>
+                <div class="${skippedCount ? "is-warning" : ""}"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><strong>${skippedCount}</strong><span>Skipped</span></div>
               </div>
-              <p class="lead-import-final-summary"><strong>${readyCount} lead${readyCount === 1 ? "" : "s"} ready to import.</strong> ${skippedCount} row${skippedCount === 1 ? "" : "s"} will be skipped.</p>
-              ${updateImportMode ? `<section class="lead-import-soft-section"><p class="lead-import-section-title">Update safeguards</p><p class="lead-import-soft-note">Rows are matched by Lead ID. Blank fields preserve current values${draft.resetBlankStatus ? ", except blank Status values will become New" : ""}${(draft.clearBlankFields || []).length ? `; ${(draft.clearBlankFields || []).length} selected blank field${(draft.clearBlankFields || []).length === 1 ? "" : "s"} will be cleared` : ""}. Records changed since export will be skipped for review.</p></section>` : ""}
-              <section class="lead-import-soft-section lead-import-final-section" ${updateImportMode ? "hidden" : ""}>
+              <p class="lead-import-section-title">What will happen</p>
+              <div class="lead-import-impact-list">
+                <div><span>${updateImportMode ? "Existing leads updated" : "New leads created"}</span><strong>${readyCount}</strong></div>
+                ${updateImportMode ? `<div><span>New leads created</span><strong>0</strong></div>` : ""}
+                ${updateImportMode ? `<div><span>Existing leads reassigned</span><strong>${draft.distributionMode === "auto-assign" ? readyCount : 0}</strong></div>` : ""}
+                <div><span>Rows skipped</span><strong>${skippedCount}</strong></div>
+                ${updateImportMode ? `<div><span>Sales cycles restarted at New · 0/3</span><strong>${statusResetCount}</strong></div>
+                <div><span>Archived lead behavior</span><strong>${draft.restoreArchived ? "Restore matched" : "Keep archived"}</strong></div>
+                <div><span>Blank fields selected to clear</span><strong>${(draft.clearBlankFields || []).length}</strong></div>` : ""}
+              </div>
+              ${updateImportMode ? `<div class="lead-import-safeguard-note"><i class="bi bi-lock" aria-hidden="true"></i><p><strong>Update safeguards are active.</strong><span>Leads are matched by Lead ID. Existing values remain when file cells are blank, except for the options you selected. Records changed after export are skipped for review.</span></p></div>` : ""}
+              <section class="lead-import-soft-section lead-import-final-section">
                 <div class="lead-import-soft-section-head">
                   <div>
                     <p class="lead-import-section-title">Assignment</p>
-                    <p class="lead-import-section-subtitle">Choose how the imported leads should be routed.</p>
+                    <p class="lead-import-section-subtitle">${updateImportMode ? "Choose whether matched leads keep their owners or are reassigned." : "Choose how the imported leads should be routed."}</p>
                   </div>
                 </div>
-                <div class="lead-import-choice-list">
-                  <label class="lead-import-choice ${draft.distributionMode === "auto-assign" ? "is-active" : ""}">
+                <div class="lead-import-choice-list lead-import-assignment-modes" role="radiogroup" aria-label="Lead assignment method">
+                  <label class="lead-import-choice lead-import-assignment-mode ${draft.distributionMode === "auto-assign" ? "is-active" : ""}">
                     <input type="radio" name="leadImportDistributionMode" value="auto-assign" ${draft.distributionMode === "auto-assign" ? "checked" : ""} />
+                    <span class="lead-import-assignment-mode-check" aria-hidden="true"><i class="bi bi-check"></i></span>
                     <span class="lead-import-choice-copy">
                       <strong>Auto-distribute</strong>
-                      <small>Round robin across selected active teammates.</small>
+                      <small>${updateImportMode ? "Reassign matched leads round robin across selected teammates." : "Round robin across selected active teammates."}</small>
                     </span>
                   </label>
-                  <label class="lead-import-choice ${draft.distributionMode === "unassigned" ? "is-active" : ""}">
+                  <label class="lead-import-choice lead-import-assignment-mode ${draft.distributionMode === "unassigned" ? "is-active" : ""}">
                     <input type="radio" name="leadImportDistributionMode" value="unassigned" ${draft.distributionMode === "unassigned" ? "checked" : ""} />
+                    <span class="lead-import-assignment-mode-check" aria-hidden="true"><i class="bi bi-check"></i></span>
                     <span class="lead-import-choice-copy">
-                      <strong>Hold as reserve</strong>
-                      <small>Keep new unassigned leads hidden until refill.</small>
+                      <strong>${updateImportMode ? "Keep current owners" : "Hold as reserve"}</strong>
+                      <small>${updateImportMode ? "Update the records without changing their current owners." : "Keep new unassigned leads hidden until refill."}</small>
                     </span>
                   </label>
                 </div>
                 ${
                   draft.distributionMode === "auto-assign"
                     ? `
-                      <p class="lead-import-soft-note">
-                        ${
-                          selectedCount
-                            ? `${readyCount} ready lead${readyCount === 1 ? "" : "s"} will be distributed across ${selectedCount} selected teammate${selectedCount === 1 ? "" : "s"}.`
-                            : "Choose at least one active teammate to auto-distribute imported leads."
-                        }
-                      </p>
-                      <div class="lead-import-selected-row">
-                        <div class="lead-import-selected-list">
-                          ${selectedAssigneeChips || "<span class='lead-import-selected-empty'>No teammates selected yet.</span>"}
-                        </div>
-                        <button type="button" class="mini-btn" data-action="lead-import-toggle-assignees">${draft.showAssignees || !selectedCount ? "Hide teammates" : "Edit teammates"}</button>
-                      </div>
+                      <section class="lead-import-assignment-picker ${selectedCount ? "has-selection" : "needs-selection"}">
+                        <button type="button" class="lead-import-assignment-summary" data-action="lead-import-toggle-assignees" aria-expanded="${draft.showAssignees || !selectedCount ? "true" : "false"}" aria-label="${selectedCount ? `${selectedCount} teammate${selectedCount === 1 ? "" : "s"} selected. Change teammates` : "Choose teammates"}">
+                          <span class="lead-import-assignment-avatars" aria-hidden="true">
+                            ${selectedAssigneeAvatarsHtml || `<span class="lead-import-assignment-summary-icon"><i class="bi bi-people"></i></span>`}
+                            ${selectedCount > 6 ? `<span class="lead-import-assignment-avatar is-overflow">+${selectedCount - 6}</span>` : ""}
+                          </span>
+                          <div class="lead-import-assignment-summary-copy">
+                            <span class="lead-import-assignment-property-name">Teammates</span>
+                            <strong>${selectedCount ? `${selectedCount} teammate${selectedCount === 1 ? "" : "s"} selected` : "Choose teammates"}</strong>
+                            <span>${selectedCount ? `${readyCount} ready lead${readyCount === 1 ? "" : "s"} · ${readyCount < selectedCount ? distributionEstimate : `approximately ${distributionEstimate}`}` : "Select at least one active teammate for automatic distribution."}</span>
+                          </div>
+                          <i class="bi ${draft.showAssignees || !selectedCount ? "bi-chevron-up" : "bi-chevron-down"} lead-import-assignment-summary-chevron" aria-hidden="true"></i>
+                        </button>
                       ${
                         draft.showAssignees || !selectedCount
                           ? `
-                            <div class="lead-import-assignee-list lead-import-assignee-list-compact">
-                              ${
-                                assignableMembers.length
-                                  ? assignableMembers
-                                      .map(
-                                        (member) => `
-                                          <label class="lead-import-assignee-row lead-import-assignee-row-compact">
+                            <div class="lead-import-assignment-editor">
+                              <div class="lead-import-assignment-toolbar">
+                                <label class="lead-import-assignee-search">
+                                  <i class="bi bi-search" aria-hidden="true"></i>
+                                  <span class="sr-only">Search teammates</span>
+                                  <input type="search" value="${escapeModalText(draft.assigneeSearch || "")}" placeholder="Search teammates..." data-lead-import-assignee-search />
+                                </label>
+                                <div class="lead-import-assignment-actions">
+                                  <button type="button" data-action="lead-import-select-all-assignees">Select all</button>
+                                  <button type="button" data-action="lead-import-clear-assignees" ${selectedCount ? "" : "disabled"}>Clear</button>
+                                </div>
+                              </div>
+                              <div class="lead-import-assignee-grid" role="group" aria-label="Eligible teammates">
+                              ${visibleAssignableMembers
+                                .map(
+                                        (member) => {
+                                          const memberId = String(member.id || "").trim();
+                                          const memberLabel = member.name || member.email || "Team member";
+                                          const memberAvatarUrl = String(member.avatarUrl || "").trim();
+                                          const memberAvatarHue = avatarHueFromValue(memberId || member.email || memberLabel);
+                                          const isSelected = selectedAssigneeIds.includes(memberId);
+                                          const selectedIndex = selectedAssigneeIds.indexOf(memberId);
+                                          const projectedCount = isSelected
+                                            ? distributionMinimum + (selectedIndex >= 0 && selectedIndex < readyCount % selectedCount ? 1 : 0)
+                                            : 0;
+                                          return `
+                                          <label class="lead-import-assignee-card ${isSelected ? "is-selected" : ""}">
                                             <input
+                                              class="lead-import-assignee-input"
                                               type="checkbox"
                                               name="leadImportAssignee"
-                                              value="${escapeModalText(String(member.id || ""))}"
-                                              ${selectedAssigneeIds.includes(String(member.id || "").trim()) ? "checked" : ""}
+                                              value="${escapeModalText(memberId)}"
+                                              ${isSelected ? "checked" : ""}
                                             />
-                                            <span class="lead-import-assignee-main">
-                                              <strong>${escapeModalText(member.name || "Team member")}</strong>
-                                              <small>${escapeModalText([member.role, member.team].filter(Boolean).join(" | "))}</small>
+                                            <span class="lead-import-assignee-avatar ${memberAvatarUrl ? "has-image" : ""}" style="--lead-assignee-avatar-hue:${memberAvatarHue}" aria-hidden="true">
+                                              ${memberAvatarUrl ? `<img src="${escapeModalText(memberAvatarUrl)}" alt="" />` : escapeModalText(initialsFromName(memberLabel))}
                                             </span>
+                                            <span class="lead-import-assignee-main">
+                                              <strong>${escapeModalText(memberLabel)}</strong>
+                                              <small>${escapeModalText(member.team || member.role || "Active teammate")}</small>
+                                            </span>
+                                            <span class="lead-import-assignee-allocation">${isSelected ? projectedCount ? `${projectedCount} lead${projectedCount === 1 ? "" : "s"}` : "In rotation" : "Not selected"}</span>
+                                            <span class="lead-import-assignee-check" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
                                           </label>
-                                        `
-                                      )
-                                      .join("")
-                                  : "<p class='task-meta'>No active assignable team members found.</p>"
-                              }
+                                        `;
+                                        }
+                                )
+                                .join("")}
+                              <p class="lead-import-assignee-empty" data-lead-import-assignee-empty ${visibleAssignableMembers.length ? "hidden" : ""}>${assigneeSearch ? "No eligible teammates match your search." : "No active lead-eligible teammates are available."}</p>
+                              </div>
+                              <p class="lead-import-assignment-policy"><i class="bi bi-shield-check" aria-hidden="true"></i> Only active, non-IT teammates are eligible for lead assignment.</p>
                             </div>
                           `
                           : ""
                       }
+                      </section>
                     `
                     : `
-                      <p class="lead-import-soft-note">Imported leads will be counted as reserve and kept out of the active Leads page.</p>
+                      <p class="lead-import-soft-note">${updateImportMode ? "Matched leads will keep their current owners." : "Imported leads will be counted as reserve and kept out of the active Leads page."}</p>
                     `
                 }
               </section>
+              <p class="lead-import-report-note"><i class="bi bi-shield-check" aria-hidden="true"></i> JoynoSync will create an import report with assigned and skipped leads.</p>
             </section>
           `
           : ""
@@ -23679,65 +23643,31 @@ function renderLeadImportModal() {
 
       ${
         step === "processing"
-          ? `
-            <section class="lead-import-panel">
-              <div class="lead-import-panel-head">
-                <div>
-                  <p class="lead-import-section-title">${escapeModalText(processingStateCopy.title)}</p>
-                  <p class="lead-import-section-subtitle">${escapeModalText(processingStateCopy.subtitle)}</p>
-                </div>
-                <span class="lead-import-status-chip is-${escapeModalText(jobStatus)}">${escapeModalText(processingStateCopy.label)}</span>
-              </div>
-              <section class="lead-import-progress-card">
-                <div class="lead-import-progress-head">
-                  <strong>${escapeModalText(String(jobProcessedCount))} / ${escapeModalText(String(jobRowCount))} rows processed</strong>
-                  <span>${escapeModalText(String(jobProgressPercent))}%</span>
-                </div>
-                <div class="lead-import-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${escapeModalText(String(jobProgressPercent))}">
-                  <span class="lead-import-progress-fill" style="width:${escapeModalText(String(jobProgressPercent))}%"></span>
-                </div>
-                <div class="lead-import-meta-strip">
-                  <span class="lead-import-meta-item"><strong>${escapeModalText(String(jobCreatedCount))}</strong><span>created</span></span>
-                  <span class="lead-import-meta-item"><strong>${escapeModalText(String(jobUpdatedCount))}</strong><span>updated</span></span>
-                  <span class="lead-import-meta-item"><strong>${escapeModalText(String(jobSkippedCount))}</strong><span>skipped</span></span>
-                  <span class="lead-import-meta-item"><strong>${escapeModalText(String(jobAssignedCount))}</strong><span>assigned</span></span>
-                  <span class="lead-import-meta-item"><strong>${escapeModalText(String(jobLeftUnassignedCount))}</strong><span>reserve</span></span>
-                </div>
-              </section>
-              ${
-                draft.error
-                  ? `<p class="lead-import-soft-note lead-import-soft-note-error">${escapeModalText(draft.error)}</p>`
-                  : jobStatus === "processing" || jobStatus === "queued"
-                    ? `<p class="lead-import-soft-note">This import keeps running in the background while progress updates here.</p>`
-                    : ""
-              }
-            </section>
-          `
+          ? renderLeadImportProcessingView({
+              ...processingStateCopy,
+              status: jobStatus,
+              fileName: draft.fileName,
+              rowCount: jobRowCount,
+              processedCount: jobProcessedCount,
+              progressPercent: jobProgressPercent,
+              createdCount: jobCreatedCount,
+              updatedCount: jobUpdatedCount,
+              skippedCount: jobSkippedCount,
+              assignedCount: jobAssignedCount,
+              leftUnassignedCount: jobLeftUnassignedCount,
+              error: draft.error
+            })
           : ""
       }
 
       ${
         step === "done"
-          ? `
-            <section class="lead-import-panel">
-              <div class="lead-import-panel-head">
-                <div>
-                  <p class="lead-import-section-title">Import complete</p>
-                  <p class="lead-import-section-subtitle">${escapeModalText(draft.fileName || "Lead import")} has finished importing.</p>
-                </div>
-              </div>
-              <div class="lead-import-meta-strip lead-import-meta-strip-success">
-                <span class="lead-import-meta-item"><strong>${escapeModalText(String(draft.importSummary?.created || 0))}</strong><span>created</span></span>
-                <span class="lead-import-meta-item"><strong>${escapeModalText(String(draft.importSummary?.updated || 0))}</strong><span>updated</span></span>
-                <span class="lead-import-meta-item"><strong>${escapeModalText(String(draft.importSummary?.skipped || 0))}</strong><span>skipped</span></span>
-                <span class="lead-import-meta-item"><strong>${escapeModalText(String(draft.importSummary?.total || 0))}</strong><span>rows</span></span>
-                <span class="lead-import-meta-item"><strong>${escapeModalText(String(draft.importSummary?.assigned || 0))}</strong><span>assigned</span></span>
-                <span class="lead-import-meta-item"><strong>${escapeModalText(String(draft.importSummary?.leftUnassigned || 0))}</strong><span>reserve</span></span>
-              </div>
-              <p class="lead-import-done-copy">The summary reflects the leads changed by this import.</p>
-              ${draft.error ? `<p class="lead-import-soft-note lead-import-soft-note-error">${escapeModalText(draft.error)}</p>` : ""}
-            </section>
-          `
+          ? renderLeadImportDoneView({
+              fileName: draft.fileName,
+              summary: draft.importSummary,
+              resultSummaryHtml: renderLeadImportResultSummary(draft.importResults),
+              error: draft.error
+            })
           : ""
       }
     </section>
@@ -23755,15 +23685,17 @@ function renderLeadImportModal() {
       </div>
       <div class="lead-import-actions-end">
         ${step === "upload" ? `<span class="lead-import-safe-note"><i class="bi bi-shield-check" aria-hidden="true"></i> Nothing changes until you confirm</span>` : ""}
-        ${step === "review" ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="lead-import-import-step" ${readyCount ? "" : "disabled"}><span>Continue</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>` : ""}
+        ${step === "review" ? draft.reviewSubview
+          ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="lead-import-review-overview"><span>Done</span><i class="bi bi-check2" aria-hidden="true"></i></button>`
+          : `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="lead-import-import-step" ${readyCount && (!state.supabaseConfigured || draft.workspaceReviewStatus === "complete") ? "" : "disabled"}><span>${draft.workspaceReviewStatus === "checking" ? "Checking workspace..." : "Continue to confirm"}</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>` : ""}
         ${step === "import" ? `<button type="button" class="lead-import-footer-action" data-action="lead-import-back-review"><i class="bi bi-arrow-left" aria-hidden="true"></i><span>Back</span></button>` : ""}
         ${
           step === "import"
-            ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="lead-import-commit" ${draft.busy || (draft.distributionMode === "auto-assign" && !selectedAssigneeIds.length) ? "disabled" : ""}><span>${actionLabel}</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>`
+            ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="lead-import-commit" ${draft.busy || (draft.distributionMode === "auto-assign" && !selectedAssigneeIds.length) ? "disabled" : ""}><span>${draft.busy ? "Importing..." : "Start import"}</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>`
             : ""
         }
         ${step === "processing" ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="close-modal"><span>${jobStatus === "failed" ? "Close" : "Hide"}</span><i class="bi bi-check2" aria-hidden="true"></i></button>` : ""}
-        ${step === "done" ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="close-modal"><span>Done</span><i class="bi bi-check2" aria-hidden="true"></i></button>` : ""}
+        ${step === "done" ? `<button type="button" class="btn btn-accent lead-import-primary-btn" data-action="lead-import-view-results"><span>View imported leads</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>` : ""}
       </div>
     </div>
   `;
@@ -23799,7 +23731,12 @@ async function handleLeadImportFileSelection(file) {
     if (!parsed.headers.length || !parsed.rows.length) {
       throw new Error("The file does not contain any importable rows.");
     }
-    const inferredMode = modeWasExplicit ? selectedMode : inferLeadImportMode(parsed.headers);
+    const detectedJoynoSyncExport = isJoynoSyncLeadExport(parsed.headers);
+    const inferredMode = detectedJoynoSyncExport
+      ? LEAD_IMPORT_MODE_UPDATE
+      : modeWasExplicit
+        ? selectedMode
+        : inferLeadImportMode(parsed.headers);
     state.leadImportDraft = {
       ...createEmptyLeadImportDraft(),
       step: "review",
@@ -23808,13 +23745,15 @@ async function handleLeadImportFileSelection(file) {
       headers: parsed.headers,
       rows: parsed.rows,
       importMode: inferredMode,
-      importModeExplicit: modeWasExplicit,
+      importModeExplicit: detectedJoynoSyncExport ? false : modeWasExplicit,
+      detectedJoynoSyncExport,
       duplicateMode: inferredMode === LEAD_IMPORT_MODE_UPDATE ? "update" : "skip",
-      distributionMode: inferredMode === LEAD_IMPORT_MODE_UPDATE ? "unassigned" : "auto-assign",
+      distributionMode: "auto-assign",
       mapping: buildLeadImportDefaultMapping(parsed.headers),
       duplicateColumns: getDefaultLeadImportDuplicateColumns(parsed.headers)
     };
     state.leadImportDraft.review = buildLeadImportReview(state.leadImportDraft);
+    await verifyLeadImportWorkspace(state.leadImportDraft);
   } catch (error) {
     state.leadImportDraft = {
       ...(state.leadImportDraft || createEmptyLeadImportDraft()),
@@ -23829,7 +23768,12 @@ function buildLeadImportCommitPayload(draft, review) {
   const workspaceId = String(state.data.workspace?.id || "").trim();
   const distributionMode = String(draft?.distributionMode || "auto-assign") === "unassigned" ? "unassigned" : "auto-assign";
   const distributionMethod = "round-robin";
-  const assigneeIds = ((draft?.assigneeIds || []).map((id) => String(id || "").trim()).filter(Boolean));
+  const assignableMemberIds = new Set(
+    getLeadAssignableTeamMembers().map((member) => String(member.id || "").trim()).filter(Boolean)
+  );
+  const assigneeIds = (draft?.assigneeIds || [])
+    .map((id) => String(id || "").trim())
+    .filter((id) => id && assignableMemberIds.has(id));
   const rows = (review?.rows || []).map((row) => ({
     rowNumber: Number(row.rowNumber || 0) || 0,
     result: String(row.result || "").trim(),
@@ -23960,14 +23904,47 @@ function applyLeadImportJobToDraft(job, options = {}) {
 async function finalizeLeadImportJob(job) {
   const currentDraft = state.leadImportDraft || createEmptyLeadImportDraft();
   const summary = buildLeadImportSummaryFromJob(job);
-  const synced = await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
-  const refreshWarning = synced ? "" : "Leads were imported, but CRM refresh failed. Reload the app to verify the new records.";
+  const jobId = String(job?.id || currentDraft.jobId || "").trim();
+  let importResults = [];
+  let resultWarning = "";
+  try {
+    importResults = await fetchSupabaseLeadImportResults(jobId);
+  } catch (error) {
+    console.error("Lead import results fetch failed:", error);
+    resultWarning = "The import completed, but its row-by-row report could not be loaded.";
+  }
+  state.leadsImportJobId = jobId;
+  state.leadsImportResultCount = summary.created + summary.updated;
+  state.leadsImportViewActive = true;
+  state.leadsScope = "all";
+  state.leadsStatusFilter = "all";
+  state.leadsDateFilter = "all";
+  state.leadsSourceFilter = "all";
+  state.leadsTimezoneFilter = "all";
+  state.leadsOwnerFilter = "all";
+  state.searchTerm = "";
+  resetCrmPage("leads");
+  clearQueryCache();
+  invalidateDashboardCaches(String(state.data.workspace?.id || "").trim());
+  state.leadsPageData = createEmptyLeadsPageData();
+  const synced = await refreshSupabaseLeadsPageData({
+    render: false,
+    persist: false,
+    alertOnError: false,
+    force: true,
+    skipInitialRender: true
+  });
+  const refreshWarning = synced
+    ? resultWarning
+    : [resultWarning, "The import completed, but the result list could not be loaded. Use Last import to retry."]
+        .filter(Boolean)
+        .join(" ");
   state.lastLeadImportBatch = null;
   state.leadImportDraft = {
     ...currentDraft,
     step: "done",
     busy: false,
-    jobId: String(job?.id || currentDraft.jobId || "").trim(),
+    jobId,
     jobStatus: "completed",
     jobRowCount: Number(job?.rowCount || summary.total),
     jobProcessedCount: Number(job?.processedCount || summary.total),
@@ -23980,14 +23957,15 @@ async function finalizeLeadImportJob(job) {
     jobCompletedAt: String(job?.completedAt || ""),
     jobLastError: "",
     error: refreshWarning,
-    importSummary: summary
+    importSummary: summary,
+    importResults
   };
   persistDataAndRefresh();
   renderLeadImportModalIfOpen();
   showToast(
     synced
       ? `Lead import complete: ${summary.created} created, ${summary.updated} updated.`
-      : "Lead import finished, but CRM refresh needs a manual reload.",
+      : "Lead import finished. Open Last import to retry the result list.",
     { tone: synced ? "success" : "warning" }
   );
 }
@@ -24353,15 +24331,6 @@ function taskRecurrenceShortLabel(value) {
   return "None";
 }
 
-function taskProjectLabel(projectId) {
-  const id = String(projectId || "").trim();
-  if (!id) {
-    return "None";
-  }
-  const project = (state.data.projects || []).find((item) => item.id === id);
-  return project?.name || "None";
-}
-
 function taskTypeChipLabel(value) {
   const type = canonicalTaskType(value, "General");
   const option = TASK_COMPOSER_TYPE_OPTIONS.find((item) => item.value === type);
@@ -24463,18 +24432,16 @@ function syncTaskAdvancedUi(form) {
   if (!form) {
     return;
   }
-  const projectInput = form.querySelector("input[name='projectId']");
   const taskTypeInput = form.querySelector("input[name='taskType']");
   const reminderInput = form.querySelector("input[name='reminderMinutes']");
   const recurrenceInput = form.querySelector("input[name='recurrence']");
   const slaInput = form.querySelector("input[name='slaHours']");
   const notesInput = form.querySelector("textarea[name='notes']");
 
-  if (!projectInput || !taskTypeInput || !reminderInput || !recurrenceInput || !slaInput || !notesInput) {
+  if (!taskTypeInput || !reminderInput || !recurrenceInput || !slaInput || !notesInput) {
     return;
   }
 
-  projectInput.value = String(projectInput.value || "").trim();
   taskTypeInput.value = canonicalTaskType(taskTypeInput.value, "General");
   const reminderNormalized = Number(reminderInput.value);
   reminderInput.value = String(Number.isFinite(reminderNormalized) && reminderNormalized >= 0 ? reminderNormalized : 15);
@@ -24484,10 +24451,6 @@ function syncTaskAdvancedUi(form) {
   const slaNormalized = Number(slaInput.value);
   slaInput.value = Number.isFinite(slaNormalized) && slaNormalized > 0 ? String(slaNormalized) : "";
 
-  const projectLabelNode = form.querySelector("[data-task-chip-project-label]");
-  if (projectLabelNode) {
-    projectLabelNode.textContent = taskProjectLabel(projectInput.value);
-  }
   const taskTypeLabelNode = form.querySelector("[data-task-chip-type-label]");
   if (taskTypeLabelNode) {
     taskTypeLabelNode.textContent = taskTypeChipLabel(taskTypeInput.value);
@@ -24513,20 +24476,15 @@ function syncTaskAdvancedUi(form) {
     node.closest("[data-task-chip-field]")?.classList.toggle("is-open", isOpen);
   });
 
-  const notesOpen = form.dataset.taskNotesOpen === "1";
-  const notesEditor = form.querySelector("[data-task-notes-editor]");
-  if (notesEditor) {
-    notesEditor.hidden = !notesOpen;
+  const advancedOpen = form.dataset.taskAdvancedOpen === "1";
+  const advancedBody = form.querySelector("[data-task-advanced-body]");
+  if (advancedBody) {
+    advancedBody.hidden = !advancedOpen;
   }
-  const notesToggle = form.querySelector("[data-task-notes-toggle]");
-  if (notesToggle) {
-    notesToggle.classList.toggle("is-open", notesOpen);
-    notesToggle.setAttribute("aria-expanded", notesOpen ? "true" : "false");
-  }
-  const notesPreview = form.querySelector("[data-task-notes-preview]");
-  if (notesPreview) {
-    const text = String(notesInput.value || "").trim();
-    notesPreview.textContent = text ? (text.length > 64 ? `${text.slice(0, 64)}...` : text) : "Add notes";
+  const advancedToggle = form.querySelector("[data-task-advanced-toggle]");
+  if (advancedToggle) {
+    advancedToggle.classList.toggle("is-open", advancedOpen);
+    advancedToggle.setAttribute("aria-expanded", advancedOpen ? "true" : "false");
   }
 
   const slaCustomInput = form.querySelector("[data-task-chip-sla-input]");
@@ -24534,9 +24492,6 @@ function syncTaskAdvancedUi(form) {
     slaCustomInput.value = slaInput.value;
   }
 
-  form.querySelectorAll("[data-action='task-chip-project-select']").forEach((button) => {
-    button.classList.toggle("is-selected", String(button.dataset.id || "") === String(projectInput.value || ""));
-  });
   form.querySelectorAll("[data-action='task-chip-type-select']").forEach((button) => {
     button.classList.toggle("is-selected", String(button.dataset.id || "") === String(taskTypeInput.value || ""));
   });
@@ -24715,17 +24670,6 @@ function resolveTaskDraft(task = null) {
     state.taskComposePrefillDate = "";
     state.taskComposePrefill = null;
   }
-  let defaultProjectId = "";
-  if (task || composePrefill) {
-    defaultProjectId = String(base.projectId || "").trim();
-    if (!defaultProjectId && base.projectName) {
-      const matchedProject = (state.data.projects || []).find(
-        (project) => String(project.name || "").toLowerCase() === String(base.projectName || "").toLowerCase()
-      );
-      defaultProjectId = matchedProject ? matchedProject.id : "";
-    }
-  }
-
   const fallbackDeadline = composeDeadlineAt(base.dueDate || prefillDueDate || todayIso(0), base.startTime || "09:00");
   const deadlineBits = splitDeadlineAt(base.deadlineAt || fallbackDeadline);
 
@@ -24736,7 +24680,6 @@ function resolveTaskDraft(task = null) {
     endTime: normalizeTimeValue(base.endTime, ""),
     status: TASK_STATUS_FLOW.includes(base.status) ? base.status : "New",
     priority: normalizeTaskPriority(base.priority, "low"),
-    projectId: defaultProjectId,
     taskType: canonicalTaskType(base.taskType, "General"),
     callPhone: String(base.callPhone || "").trim(),
     linkType: canonicalTaskType(base.linkType, ""),
@@ -24987,22 +24930,27 @@ function openTaskComposerModal(taskId = "") {
   modalCard.classList.remove("is-account-compose");
   const draft = resolveTaskDraft(task);
   const composeTitle = task
-    ? "Edit Task"
+    ? "Edit task"
     : draft.taskType === "Callback"
-      ? "Create Callback"
+      ? "Create callback"
       : draft.taskType === "Call"
-        ? "Schedule Call"
-        : "Add Task";
+        ? "Schedule call"
+        : "New task";
   const submitLabel = task
-    ? "Save Changes"
+    ? "Save changes"
     : draft.taskType === "Callback"
-      ? "Create Callback"
+      ? "Create callback"
       : draft.taskType === "Call"
-        ? "Schedule Call"
-        : "Create Task";
+        ? "Schedule call"
+        : "Create task";
   const presets = getTaskDeadlinePresets();
   const draftDate = splitDeadlineAt(draft.deadlineAt).dueDate;
-  const notesOpen = Boolean(String(draft.notes || "").trim());
+  const advancedOpen = Boolean(
+    String(draft.notes || "").trim() ||
+      String(draft.recurrence || "none").toLowerCase() !== "none" ||
+      Number(draft.slaHours) > 0 ||
+      isCallTaskType(draft.taskType)
+  );
   const canReassignTaskMember = task ? canTaskReassign(task) : true;
   const draftAssigneeCandidate =
     getTaskAssigneeCandidates(draft.assignee).find((candidate) => candidate.id === String(draft.assignee || "").trim()) || {
@@ -25013,7 +24961,6 @@ function openTaskComposerModal(taskId = "") {
 
   modalCard.classList.add("is-wide");
   modalCard.classList.add("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalTitle.textContent = composeTitle;
   modalForm.dataset.mode = "task-compose";
@@ -25023,16 +24970,9 @@ function openTaskComposerModal(taskId = "") {
   modalForm.dataset.taskDeadlineOpen = "0";
   modalForm.dataset.taskAssigneeOpen = "0";
   modalForm.dataset.taskChipOpen = "";
-  modalForm.dataset.taskNotesOpen = notesOpen ? "1" : "0";
+  modalForm.dataset.taskAdvancedOpen = advancedOpen ? "1" : "0";
   modalForm.dataset.submitting = "0";
   modalForm.dataset.taskCreateRequestId = task ? "" : createId("taskreq");
-  const projectChipOptions = [
-    `<button type="button" class="task-chip-option" data-action="task-chip-project-select" data-id="">None</button>`,
-    ...(Array.isArray(state.data.projects) ? state.data.projects : []).map(
-      (project) =>
-        `<button type="button" class="task-chip-option" data-action="task-chip-project-select" data-id="${escapeModalText(project.id)}">${escapeModalText(project.name)}</button>`
-    )
-  ].join("");
   const taskTypeChipOptions = buildTaskTypeOptionsMarkup(draft.taskType);
   const reminderChipOptions = TASK_REMINDER_OPTIONS.map(
     (option) =>
@@ -25058,7 +24998,7 @@ function openTaskComposerModal(taskId = "") {
       <section class="task-compose-hero">
         <div class="task-compose-title-row">
           <label class="form-field task-compose-title">
-            <input type="text" name="title" required value="${escapeModalText(draft.title)}" placeholder="Task name" />
+            <input type="text" name="title" required value="${escapeModalText(draft.title)}" placeholder="Untitled task" autofocus />
           </label>
           <div class="task-priority-inline">
             <input type="hidden" name="priority" value="${escapeModalText(normalizeTaskPriority(draft.priority, "low"))}" />
@@ -25069,6 +25009,7 @@ function openTaskComposerModal(taskId = "") {
                 data-action="task-priority-cycle"
                 data-id="cycle"
                 data-task-priority-trigger
+                aria-label="Change task priority"
                 aria-describedby="taskPriorityTooltip"
               >
                 <i class="bi bi-flag" aria-hidden="true"></i>
@@ -25096,7 +25037,7 @@ function openTaskComposerModal(taskId = "") {
                 <span class="task-assignee-avatar" data-task-assignee-avatar>${escapeModalText(initialsFromName(draftAssigneeCandidate.name))}</span>
                 <span class="task-assignee-copy">
                   <strong data-task-assignee-label>${escapeModalText(draftAssigneeCandidate.name)}</strong>
-                  <small data-task-assignee-subtitle>${canReassignTaskMember ? "Assignee" : "Assignee locked for your role"}</small>
+                  <small data-task-assignee-subtitle>${canReassignTaskMember ? escapeModalText(draftAssigneeCandidate.meta || "Assignee") : "Assignee locked for your role"}</small>
                 </span>
                 <i class="bi bi-chevron-down" aria-hidden="true"></i>
               </button>
@@ -25178,21 +25119,6 @@ function openTaskComposerModal(taskId = "") {
         </div>
       </section>
       <section class="task-advanced-flat">
-        <div class="task-advanced-head">
-          <p data-task-notes-heading>More options</p>
-          <button
-            type="button"
-            class="task-notes-toggle"
-            data-action="task-notes-toggle"
-            data-id="toggle"
-            data-task-notes-toggle
-          >
-            <i class="bi bi-journal-text" aria-hidden="true"></i>
-            <span data-task-notes-preview>Add notes</span>
-            <i class="bi bi-chevron-down" aria-hidden="true"></i>
-          </button>
-        </div>
-        <input type="hidden" name="projectId" value="${escapeModalText(draft.projectId)}" />
         <input type="hidden" name="taskType" value="${escapeModalText(draft.taskType)}" />
         <input type="hidden" name="linkType" value="${escapeModalText(draft.linkType)}" />
         <input type="hidden" name="linkId" value="${escapeModalText(draft.linkId)}" />
@@ -25201,9 +25127,9 @@ function openTaskComposerModal(taskId = "") {
         <input type="hidden" name="reminderMinutes" value="${escapeModalText(draft.reminderMinutes)}" />
         <input type="hidden" name="recurrence" value="${escapeModalText(draft.recurrence)}" />
         <input type="hidden" name="slaHours" value="${escapeModalText(draft.slaHours)}" />
-        <div class="task-chip-grid">
+        <div class="task-chip-grid task-essential-properties">
           <div class="task-chip-field" data-task-chip-field="type">
-            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="type">
+            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="type" aria-label="Choose task type">
               <i class="bi bi-tag" aria-hidden="true"></i>
               <span>Type</span>
               <strong data-task-chip-type-label>${escapeModalText(taskTypeChipLabel(draft.taskType))}</strong>
@@ -25213,19 +25139,8 @@ function openTaskComposerModal(taskId = "") {
               ${taskTypeChipOptions}
             </div>
           </div>
-          <div class="task-chip-field" data-task-chip-field="project">
-            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="project">
-              <i class="bi bi-folder2-open" aria-hidden="true"></i>
-              <span>Project</span>
-              <strong data-task-chip-project-label>None</strong>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="task-chip-popover" data-task-chip-popover="project" hidden>
-              ${projectChipOptions}
-            </div>
-          </div>
           <div class="task-chip-field" data-task-chip-field="reminder">
-            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="reminder">
+            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="reminder" aria-label="Choose reminder">
               <i class="bi bi-bell" aria-hidden="true"></i>
               <span>Reminder</span>
               <strong data-task-chip-reminder-label>15m before</strong>
@@ -25235,61 +25150,78 @@ function openTaskComposerModal(taskId = "") {
               ${reminderChipOptions}
             </div>
           </div>
-          <div class="task-chip-field" data-task-chip-field="recurrence">
-            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="recurrence">
-              <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-              <span>Repeat</span>
-              <strong data-task-chip-recurrence-label>None</strong>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="task-chip-popover" data-task-chip-popover="recurrence" hidden>
-              ${recurrenceChipOptions}
+        </div>
+        <button
+          type="button"
+          class="task-advanced-toggle"
+          data-action="task-advanced-toggle"
+          data-id="toggle"
+          data-task-advanced-toggle
+          aria-controls="taskAdvancedBody"
+          aria-expanded="${advancedOpen ? "true" : "false"}"
+        >
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          <span>More options</span>
+        </button>
+        <div id="taskAdvancedBody" class="task-advanced-body" data-task-advanced-body ${advancedOpen ? "" : "hidden"}>
+          <div class="task-chip-grid task-secondary-properties">
+            <div class="task-chip-field" data-task-chip-field="recurrence">
+              <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="recurrence" aria-label="Choose repeat schedule">
+                <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                <span>Repeat</span>
+                <strong data-task-chip-recurrence-label>None</strong>
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+              </button>
+              <div class="task-chip-popover" data-task-chip-popover="recurrence" hidden>
+                ${recurrenceChipOptions}
+              </div>
             </div>
-          </div>
-          <div class="task-chip-field" data-task-chip-field="sla">
-            <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="sla">
-              <i class="bi bi-hourglass-split" aria-hidden="true"></i>
-              <span>SLA</span>
-              <strong data-task-chip-sla-label>Off</strong>
-              <i class="bi bi-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="task-chip-popover" data-task-chip-popover="sla" hidden>
-              ${slaChipOptions}
-              <div class="task-chip-sla-custom">
-                <input type="number" min="1" max="720" step="1" data-task-chip-sla-input placeholder="Custom hours" />
-                <button type="button" class="task-chip-apply" data-action="task-chip-sla-apply" data-id="apply">Apply</button>
+            <div class="task-chip-field" data-task-chip-field="sla">
+              <button type="button" class="task-chip-btn" data-action="task-chip-toggle" data-id="sla" aria-label="Choose SLA">
+                <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                <span>SLA</span>
+                <strong data-task-chip-sla-label>Off</strong>
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+              </button>
+              <div class="task-chip-popover" data-task-chip-popover="sla" hidden>
+                ${slaChipOptions}
+                <div class="task-chip-sla-custom">
+                  <input type="number" min="1" max="720" step="1" data-task-chip-sla-input placeholder="Custom hours" />
+                  <button type="button" class="task-chip-apply" data-action="task-chip-sla-apply" data-id="apply">Apply</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="task-call-fields" data-task-call-fields hidden>
-          <div class="task-call-mode-row">
-            <span class="task-call-label">Schedule</span>
-            <div class="task-call-mode-buttons">
-              <button type="button" class="task-call-mode-btn" data-action="task-call-mode" data-id="exact" data-task-call-mode>Exact time</button>
-              <button type="button" class="task-call-mode-btn" data-action="task-call-mode" data-id="window" data-task-call-mode>Time window</button>
+          <div class="task-call-fields" data-task-call-fields hidden>
+            <div class="task-call-mode-row">
+              <span class="task-call-label">Schedule</span>
+              <div class="task-call-mode-buttons">
+                <button type="button" class="task-call-mode-btn" data-action="task-call-mode" data-id="exact" data-task-call-mode>Exact time</button>
+                <button type="button" class="task-call-mode-btn" data-action="task-call-mode" data-id="window" data-task-call-mode>Time window</button>
+              </div>
             </div>
+            <div class="task-call-grid">
+              <label class="form-field task-call-field" data-task-call-end-field hidden>
+                <span>Window ends</span>
+                <input type="time" name="endTime" value="${escapeModalText(draft.endTime)}" />
+              </label>
+              <label class="form-field task-call-field">
+                <span data-task-call-phone-label>Phone number</span>
+                <input type="tel" name="callPhone" value="${escapeModalText(draft.callPhone)}" placeholder="+1-555-000-0000" />
+              </label>
+            </div>
+            <div class="task-call-link-preview" data-task-call-link></div>
           </div>
-          <div class="task-call-grid">
-            <label class="form-field task-call-field" data-task-call-end-field hidden>
-              <span>Window ends</span>
-              <input type="time" name="endTime" value="${escapeModalText(draft.endTime)}" />
+          <div class="task-notes-wrap">
+            <label class="task-notes-editor" data-task-notes-editor>
+              <span>Notes</span>
+              <textarea
+                name="notes"
+                rows="3"
+                data-task-notes-textarea
+                placeholder="Add context, a checklist, or blockers"
+              >${escapeModalText(draft.notes)}</textarea>
             </label>
-            <label class="form-field task-call-field">
-              <span data-task-call-phone-label>Phone number</span>
-              <input type="tel" name="callPhone" value="${escapeModalText(draft.callPhone)}" placeholder="+1-555-000-0000" />
-            </label>
-          </div>
-          <div class="task-call-link-preview" data-task-call-link></div>
-        </div>
-        <div class="task-notes-wrap">
-          <div class="task-notes-editor" data-task-notes-editor hidden>
-            <textarea
-              name="notes"
-              rows="4"
-              data-task-notes-textarea
-              placeholder="Context, checklist, blockers..."
-            >${escapeModalText(draft.notes)}</textarea>
           </div>
         </div>
       </section>
@@ -25305,6 +25237,7 @@ function openTaskComposerModal(taskId = "") {
   syncTaskPriorityUi(modalForm);
   syncTaskAdvancedUi(modalForm);
   modalOverlay.hidden = false;
+  window.requestAnimationFrame(() => modalForm.querySelector("input[name='title']")?.focus());
 }
 
 function applyTaskPreset(presetId) {
@@ -25395,7 +25328,6 @@ async function submitTaskComposerForm(form) {
     const deadlineAtRaw = String(formData.get("deadlineAt") || "").trim();
     const endTimeRaw = String(formData.get("endTime") || "").trim();
     const priority = String(formData.get("priority") || "").trim().toLowerCase();
-    const projectId = String(formData.get("projectId") || "").trim();
     const taskType = canonicalTaskType(formData.get("taskType"), "General");
     const callPhone = String(formData.get("callPhone") || "").trim();
     const recurrence = String(formData.get("recurrence") || "none").trim().toLowerCase();
@@ -25434,16 +25366,14 @@ async function submitTaskComposerForm(form) {
       return;
     }
 
-    const project = state.data.projects.find((item) => item.id === projectId) || null;
     const assignee = findTeamMemberById(assigneeId);
-    const projectAccountName = project ? String(project.accountName || project.account || "").trim() : "";
     const slaHoursParsed = Number(slaHoursRaw);
     const safeSla = slaHoursRaw && Number.isFinite(slaHoursParsed) && slaHoursParsed > 0 ? slaHoursParsed : "";
     const safeReminder = Number.isFinite(reminderMinutes) && reminderMinutes >= 0 ? reminderMinutes : 0;
-    const linkedType = String(formData.get("linkType") || "").trim() || (project ? "Project" : "");
-    const linkedId = String(formData.get("linkId") || "").trim() || (project ? project.id : "");
-    const linkedLabel = String(formData.get("linkLabel") || "").trim() || (project ? project.name : "");
-    const accountName = String(formData.get("accountName") || "").trim() || projectAccountName;
+    const linkedType = String(formData.get("linkType") || "").trim();
+    const linkedId = String(formData.get("linkId") || "").trim();
+    const linkedLabel = String(formData.get("linkLabel") || "").trim();
+    const accountName = String(formData.get("accountName") || "").trim();
     const explicitTaskType = isCallTask ? taskType : taskType === "General" ? (recurrence === "none" ? "General" : "Recurring") : taskType;
     const nextTaskType = recurrence !== "none" && !isCallTask ? "Recurring" : explicitTaskType;
     const nextStatus = isEdit ? (target?.status || "New") : (isCallTask ? "Scheduled" : "New");
@@ -25455,7 +25385,6 @@ async function submitTaskComposerForm(form) {
       startTime,
       endTime,
       priority,
-      projectId: project ? project.id : "",
       linkType: linkedType,
       linkId: linkedId,
       linkLabel: linkedLabel,
@@ -25502,7 +25431,6 @@ async function submitTaskComposerForm(form) {
           assignee: String(target.assignee || ""),
           dueDate: String(target.dueDate || ""),
           endTime: String(target.endTime || ""),
-          projectName: String(target.projectName || ""),
           notes: String(target.notes || ""),
           taskType: String(target.taskType || ""),
           callPhone: String(target.callPhone || ""),
@@ -25526,8 +25454,6 @@ async function submitTaskComposerForm(form) {
     const status = nextStatus;
     nextTask.status = status;
     nextTask.priority = priority;
-    nextTask.projectId = project ? project.id : "";
-    nextTask.projectName = project ? project.name : "";
     nextTask.linkType = linkedType;
     nextTask.linkId = linkedId;
     nextTask.linkLabel = linkedLabel;
@@ -25557,9 +25483,6 @@ async function submitTaskComposerForm(form) {
       }
       if (String(previousSnapshot.endTime || "") !== String(endTime || "")) {
         recordTaskActivity(nextTask, endTime ? `Time window updated to ${formatTaskTimeRange(startTime, endTime)}` : "Call window cleared", "schedule");
-      }
-      if (previousSnapshot.projectName !== nextTask.projectName) {
-        recordTaskActivity(nextTask, `Linked project updated to ${nextTask.projectName || "None"}`, "link");
       }
       if (previousSnapshot.taskType !== nextTaskType) {
         recordTaskActivity(nextTask, `Task type changed to ${nextTaskType}`, "update");
@@ -25606,6 +25529,7 @@ function closeTaskDetailSheet(options = {}) {
   if (layer) {
     layer.hidden = true;
   }
+  document.querySelector(".app-shell")?.classList.remove("has-task-drawer");
 }
 
 function renderTaskDetailSheet() {
@@ -25623,7 +25547,6 @@ function renderTaskDetailSheet() {
   }
 
   const quick = getTaskQuickContextAction(task);
-  const projectLabel = String(task.projectName || "").trim() || "No project linked";
   const linkedLabel = String(task.linkLabel || task.accountName || "").trim() || "No linked CRM record";
   const taskTypeLabel = canonicalTaskType(task.taskType, "General");
   const slaLabel = task.slaHours ? `${task.slaHours}h` : "Off";
@@ -25809,10 +25732,6 @@ function renderTaskDetailSheet() {
           <i class="bi bi-calendar3" aria-hidden="true"></i>
           <span>${dueSummaryLabel}</span>
         </span>
-        <span class="task-sheet-summary-item">
-          <i class="bi bi-folder2-open" aria-hidden="true"></i>
-          <span>${escapeModalText(projectLabel)}</span>
-        </span>
         ${
           isCallTask
             ? `
@@ -25988,16 +25907,12 @@ function renderTaskDetailSheet() {
             ? `<button type="button" class="btn btn-light" data-action="task-delete" data-id="${task.id}">Delete</button>`
             : ""
         }
-        ${
-          task.projectId
-            ? `<button type="button" class="btn btn-light" data-action="task-open-project" data-id="${task.id}">Open Project</button>`
-            : ""
-        }
       </div>
       <button type="button" class="btn btn-light" data-action="task-sheet-close" data-id="${task.id}">Close</button>
     </footer>
   `;
   warmTaskAttachmentThumbnails(attachments);
+  document.querySelector(".app-shell")?.classList.add("has-task-drawer");
   layer.hidden = false;
 }
 
@@ -26073,7 +25988,6 @@ function renderTaskAttachmentPreviewModal() {
   modalCard.classList.remove("is-contact-compose");
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-lead-import");
@@ -26821,8 +26735,6 @@ async function createFollowUpTaskFromDeal(deal, notes = "") {
     day: getWeekdayLabelFromIso(dueDate) || "Mon",
     status: "New",
     priority: "low",
-    projectId: "",
-    projectName: "",
     linkType: "Deal",
     linkId: deal.id,
     linkLabel: deal.name,
@@ -26886,7 +26798,6 @@ function openDealComposerModal(dealId = "", options = {}) {
   modalCard.classList.remove("is-lead-compose");
   modalCard.classList.remove("is-contact-compose");
   modalCard.classList.remove("is-account-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-task-compose");
   modalCard.classList.add("is-wide");
@@ -27256,239 +27167,6 @@ function openDealDetailModal(dealId) {
   setDealProfileRoute(deal.id);
 }
 
-function openProjectComposerModal(projectId = "") {
-  const project = projectId ? state.data.projects.find((item) => item.id === projectId) : null;
-  if (projectId && !project) {
-    window.alert("Project not found.");
-    return;
-  }
-
-  const modalOverlay = document.getElementById("modalOverlay");
-  const modalTitle = document.getElementById("modalTitle");
-  const modalForm = document.getElementById("modalForm");
-  const modalCard = document.querySelector(".modal-card");
-  if (!modalOverlay || !modalTitle || !modalForm || !modalCard) {
-    return;
-  }
-
-  state.leadConversionDraft = null;
-  modalOverlay.classList.remove("is-lead-drawer");
-  modalCard.classList.remove("is-lead-drawer");
-  modalCard.classList.remove("is-lead-compose");
-  modalCard.classList.remove("is-contact-compose");
-  modalCard.classList.remove("is-account-compose");
-
-  const draft = resolveProjectDraft(project);
-  const detailsOpen = Boolean(draft.description || draft.risks);
-
-  modalCard.classList.remove("is-wide");
-  modalCard.classList.remove("is-task-compose");
-  modalCard.classList.add("is-project-compose");
-  modalTitle.textContent = project ? "Edit Project" : "Add Project";
-  modalForm.dataset.mode = "project-compose";
-  modalForm.dataset.projectId = project ? project.id : "";
-  modalForm.dataset.projectDetailsOpen = detailsOpen ? "1" : "0";
-  modalForm.dataset.route = state.routeId;
-  modalForm.innerHTML = `
-    <section class="project-compose-shell">
-      <section class="project-compose-hero">
-        <label class="form-field project-compose-title">
-          <input type="text" name="name" required value="${escapeModalText(draft.name)}" placeholder="Project name" />
-        </label>
-        <div class="project-compose-meta-grid">
-          <label class="form-field">
-            <span>Owner</span>
-            <select name="owner" required>
-              ${buildProjectOwnerOptionsMarkup(draft.owner)}
-            </select>
-          </label>
-          <div class="form-field">
-            <span>Status</span>
-            <input type="hidden" name="status" value="${escapeModalText(draft.status)}" />
-            <div class="project-status-segment">
-              ${PROJECT_STATUS_FLOW.map(
-                (status) => `
-                  <button
-                    type="button"
-                    class="project-status-btn"
-                    data-action="project-status-select"
-                    data-id="${status}"
-                  >
-                    ${status}
-                  </button>
-                `
-              ).join("")}
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="project-compose-panel">
-        <div class="project-compose-grid">
-          <label class="form-field">
-            <span>Target deadline</span>
-            <input type="date" name="deadline" required value="${escapeModalText(draft.deadline)}" />
-          </label>
-          <label class="form-field">
-            <span>Linked account</span>
-            <select name="accountName">
-              ${buildProjectAccountOptionsMarkup(draft.accountName)}
-            </select>
-          </label>
-          <div class="form-field project-progress-field">
-            <div class="project-progress-head">
-              <span>Progress</span>
-              <strong data-project-progress-value>${draft.progress}%</strong>
-            </div>
-            <input type="range" name="progress" min="0" max="100" step="1" value="${draft.progress}" data-project-progress-input />
-          </div>
-          <div class="form-field project-team-field">
-            <span>Team</span>
-            <input type="hidden" name="teamMembers" value="${escapeModalText(draft.teamMembers.join("|"))}" />
-            <div class="project-team-chips">
-              ${buildProjectTeamOptionsMarkup(draft.teamMembers)}
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="project-compose-details">
-        <button
-          type="button"
-          class="project-details-toggle"
-          data-action="project-details-toggle"
-          data-id="toggle"
-          data-project-details-toggle
-        >
-          <span data-project-details-label>Add details</span>
-          <i class="bi bi-chevron-down" aria-hidden="true"></i>
-        </button>
-        <div class="project-details-body" data-project-details-body hidden>
-          <label class="form-field">
-            <span>Description</span>
-            <textarea name="description" rows="3" placeholder="Scope, outcomes, and success criteria...">${escapeModalText(draft.description)}</textarea>
-          </label>
-          <label class="form-field">
-            <span>Risks / blockers</span>
-            <textarea name="risks" rows="3" placeholder="Dependencies, blockers, and concerns...">${escapeModalText(draft.risks)}</textarea>
-          </label>
-        </div>
-      </section>
-    </section>
-    <div class="form-actions project-compose-actions">
-      <button type="button" class="btn btn-light" data-action="close-modal">Cancel</button>
-      <button type="submit" class="btn btn-accent" data-submit-default-label="${escapeModalText(project ? "Save Project" : "Create Project")}" data-submit-busy-label="${escapeModalText(project ? "Saving..." : "Creating Project...")}">${project ? "Save Project" : "Create Project"}</button>
-    </div>
-  `;
-
-  syncProjectComposerUi(modalForm);
-  modalOverlay.hidden = false;
-}
-
-async function submitProjectComposerForm(form, submitter = null) {
-  if (!(form instanceof HTMLFormElement) || form.dataset.submitting === "1") {
-    return;
-  }
-  setManagedFormSubmittingState(form, true, submitter);
-  try {
-    clearFormFeedback(form);
-    const formData = new FormData(form);
-    const projectId = String(form.dataset.projectId || "").trim();
-    const isEdit = Boolean(projectId);
-    const target = isEdit ? state.data.projects.find((item) => item.id === projectId) : null;
-    if (isEdit && !target) {
-      window.alert("Project not found.");
-      return;
-    }
-
-    const name = String(formData.get("name") || "").trim();
-    const ownerId = String(formData.get("owner") || "").trim();
-    const status = normalizeProjectStatus(formData.get("status"));
-    const deadline = String(formData.get("deadline") || "").trim();
-    const accountName = String(formData.get("accountName") || "").trim();
-    const progressRaw = Number(formData.get("progress"));
-    const progress = Number.isFinite(progressRaw) ? Math.max(0, Math.min(100, Math.round(progressRaw))) : 0;
-    const teamMemberIds = parseProjectTeamMembers(formData.get("teamMembers"));
-    const description = String(formData.get("description") || "").trim();
-    const risks = String(formData.get("risks") || "").trim();
-
-    if (!name) {
-      showFormFeedback(form, "Project name is required.", { fieldSelector: "input[name='name']" });
-      return;
-    }
-    if (!ownerId || !findTeamMemberById(ownerId)) {
-      showFormFeedback(form, "Owner is required.", { fieldSelector: "select[name='owner']" });
-      return;
-    }
-    if (!parseIsoDateLocal(deadline)) {
-      showFormFeedback(form, "Target deadline is required.", { fieldSelector: "input[name='deadline']" });
-      return;
-    }
-
-    const payload = {
-      name,
-      ownerId,
-      status,
-      deadline,
-      accountName,
-      progress,
-      teamMemberIds,
-      description,
-      risks
-    };
-
-    if (isSupabaseWorkWriteEnabled()) {
-      try {
-        const snapshot = isEdit
-          ? await updateSupabaseProject(projectId, payload)
-          : await createSupabaseProject(payload);
-        applyWorkSnapshotResult(snapshot);
-        const projectName = isEdit ? target?.name || name : name;
-        const matchedProject = (state.data.projects || []).find((item) => String(item.name || "").trim() === projectName) || null;
-        state.selectedProjectId = String(matchedProject?.id || state.selectedProjectId || "");
-        closeModal();
-        renderRoute();
-        return;
-      } catch (error) {
-        showFormFeedback(form, `${isEdit ? "Save project failed" : "Create project failed"}: ${error.message}`);
-        return;
-      }
-    }
-
-    if (blockConnectedModeLocalFallback(isEdit ? "Saving projects" : "Creating projects", { form })) {
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const nextProject = target || {
-      id: createId("proj"),
-      createdAt: now
-    };
-
-    nextProject.name = name;
-    nextProject.ownerId = ownerId;
-    nextProject.owner = String(findTeamMemberById(ownerId)?.name || state.data.currentUser.name);
-    nextProject.status = status;
-    nextProject.progress = progress;
-    nextProject.deadline = deadline;
-    nextProject.accountName = accountName;
-    nextProject.account = accountName;
-    nextProject.teamMemberIds = [...new Set(teamMemberIds)];
-    nextProject.teamMembers = nextProject.teamMemberIds.map((memberId) => String(findTeamMemberById(memberId)?.name || "")).filter(Boolean);
-    nextProject.description = description;
-    nextProject.risks = risks;
-    nextProject.updatedAt = now;
-
-    if (!isEdit) {
-      state.data.projects.unshift(nextProject);
-    }
-    state.selectedProjectId = nextProject.id;
-
-    closeModal();
-    persistDataAndRefresh();
-  } finally {
-    setManagedFormSubmittingState(form, false);
-  }
-}
-
 function openAttendanceRequestModal() {
   const modalOverlay = document.getElementById("modalOverlay");
   const modalTitle = document.getElementById("modalTitle");
@@ -27506,7 +27184,6 @@ function openAttendanceRequestModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
 
@@ -27671,7 +27348,6 @@ function openAttendanceBreakStartModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
 
@@ -27764,158 +27440,77 @@ function openAttendancePolicyModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.add("is-attendance-policy");
 
-  modalTitle.textContent = "Attendance Policy";
+  modalTitle.textContent = "Edit attendance policy";
   modalForm.dataset.mode = "attendance-policy-compose";
   modalForm.dataset.route = "attendance";
   modalForm.dataset.attendancePolicyTimeOpen = "";
   modalForm.dataset.attendancePolicyTimezoneOpen = "0";
   modalForm.innerHTML = `
     <div class="attendance-policy-shell">
-      <div class="attendance-policy-grid">
-        <label class="form-field">
-          <span>Shift Start</span>
-          ${attendancePolicyTimeControlMarkup("shiftStart", "shiftStart", normalizeTimeValue(policy.shiftStart, "09:00"))}
-        </label>
-        <label class="form-field">
-          <span>Shift End</span>
-          ${attendancePolicyTimeControlMarkup("shiftEnd", "shiftEnd", normalizeTimeValue(policy.shiftEnd, "18:00"))}
-        </label>
-        <label class="form-field">
-          <span>Late After (min)</span>
-          <input type="number" name="lateAfterMinutes" min="0" max="240" value="${escapeModalText(
-            String(Math.max(0, Number(policy.lateAfterMinutes ?? policy.graceMinutes ?? 10)))
-          )}" required />
-        </label>
-        <label class="form-field">
-          <span>Half-day After (min)</span>
-          <input type="number" name="halfDayAfterMinutes" min="0" max="480" value="${escapeModalText(
-            String(Math.max(0, Number(policy.halfDayAfterMinutes ?? 120)))
-          )}" required />
-        </label>
-        <label class="form-field">
-          <span>Auto Absent After (min)</span>
-          <input type="number" name="autoAbsentAfterMinutes" min="0" max="720" value="${escapeModalText(
-            String(Math.max(0, Number(policy.autoAbsentAfterMinutes ?? 0)))
-          )}" />
-          <small class="task-meta">Set 0 to disable auto-absent.</small>
-        </label>
-        <label class="form-field">
-          <span>Timezone</span>
-          ${attendancePolicyTimezoneControlMarkup(String(policy.timezone || "Local"))}
-        </label>
-      </div>
-      <fieldset class="form-field">
-        <span>Break Plan</span>
-        <div class="attendance-policy-break-grid">
-          <article class="attendance-policy-break-card">
-            <h4>Morning Break</h4>
-            <label>
-              <span>Duration (min)</span>
-              <input type="number" name="morningDuration" min="1" max="60" value="${escapeModalText(String(morning?.durationMinutes || 15))}" required />
-            </label>
-            <div class="form-field">
-              <span>Window</span>
-              <div class="attendance-policy-time-range">
-                <div class="form-field attendance-inline-field">
-                  <span>From</span>
-                  ${attendancePolicyTimeControlMarkup(
-                    "morningWindowStart",
-                    "morningWindowStart",
-                    normalizeTimeValue(morning?.windowStart, "09:30")
-                  )}
-                </div>
-                <div class="form-field attendance-inline-field">
-                  <span>To</span>
-                  ${attendancePolicyTimeControlMarkup(
-                    "morningWindowEnd",
-                    "morningWindowEnd",
-                    normalizeTimeValue(morning?.windowEnd, "11:30")
-                  )}
-                </div>
-              </div>
+      <p class="attendance-policy-modal-subtitle">Update work schedule, attendance rules, and breaks.</p>
+      <section class="attendance-policy-form-section">
+        <h4>1. Work schedule</h4>
+        <div class="attendance-policy-form-grid">
+          <label class="form-field"><span>Shift start</span>${attendancePolicyTimeControlMarkup("shiftStart", "shiftStart", normalizeTimeValue(policy.shiftStart, "09:00"))}</label>
+          <label class="form-field"><span>Shift end</span>${attendancePolicyTimeControlMarkup("shiftEnd", "shiftEnd", normalizeTimeValue(policy.shiftEnd, "18:00"))}</label>
+          <label class="form-field"><span>Timezone</span>${attendancePolicyTimezoneControlMarkup(String(policy.timezone || "Local"))}</label>
+          <fieldset class="form-field attendance-policy-workdays-field">
+            <span>Work days</span>
+            <div class="attendance-workdays">
+              ${dayLabels
+                .map(
+                  (label, index) => `
+                    <label class="attendance-day-option">
+                      <input type="checkbox" name="workDays" value="${index}" ${selectedDays.has(index) ? "checked" : ""} />
+                      <span>${label}</span>
+                    </label>
+                  `
+                )
+                .join("")}
             </div>
-          </article>
-          <article class="attendance-policy-break-card">
-            <h4>Lunch Break</h4>
-            <label>
-              <span>Duration (min)</span>
-              <input type="number" name="lunchDuration" min="30" max="120" value="${escapeModalText(String(lunch?.durationMinutes || 60))}" required />
-            </label>
-            <div class="form-field">
-              <span>Window</span>
-              <div class="attendance-policy-time-range">
-                <div class="form-field attendance-inline-field">
-                  <span>From</span>
-                  ${attendancePolicyTimeControlMarkup(
-                    "lunchWindowStart",
-                    "lunchWindowStart",
-                    normalizeTimeValue(lunch?.windowStart, "11:30")
-                  )}
-                </div>
-                <div class="form-field attendance-inline-field">
-                  <span>To</span>
-                  ${attendancePolicyTimeControlMarkup(
-                    "lunchWindowEnd",
-                    "lunchWindowEnd",
-                    normalizeTimeValue(lunch?.windowEnd, "14:30")
-                  )}
-                </div>
-              </div>
-            </div>
-          </article>
-          <article class="attendance-policy-break-card">
-            <h4>Afternoon Break</h4>
-            <label>
-              <span>Duration (min)</span>
-              <input type="number" name="afternoonDuration" min="1" max="60" value="${escapeModalText(String(afternoon?.durationMinutes || 15))}" required />
-            </label>
-            <div class="form-field">
-              <span>Window</span>
-              <div class="attendance-policy-time-range">
-                <div class="form-field attendance-inline-field">
-                  <span>From</span>
-                  ${attendancePolicyTimeControlMarkup(
-                    "afternoonWindowStart",
-                    "afternoonWindowStart",
-                    normalizeTimeValue(afternoon?.windowStart, "14:30")
-                  )}
-                </div>
-                <div class="form-field attendance-inline-field">
-                  <span>To</span>
-                  ${attendancePolicyTimeControlMarkup(
-                    "afternoonWindowEnd",
-                    "afternoonWindowEnd",
-                    normalizeTimeValue(afternoon?.windowEnd, "17:30")
-                  )}
-                </div>
-              </div>
-            </div>
-          </article>
+          </fieldset>
         </div>
-      </fieldset>
-      <fieldset class="form-field">
-        <span>Work Days</span>
-        <div class="attendance-workdays">
-          ${dayLabels
-            .map(
-              (label, index) => `
-                <label class="attendance-day-option">
-                  <input type="checkbox" name="workDays" value="${index}" ${selectedDays.has(index) ? "checked" : ""} />
-                  <span>${label}</span>
-                </label>
-              `
-            )
-            .join("")}
+      </section>
+      <section class="attendance-policy-form-section">
+        <h4>2. Attendance rules</h4>
+        <div class="attendance-policy-rules-grid">
+          <label class="form-field"><span>Late after</span><span class="attendance-policy-number-field"><input type="number" name="lateAfterMinutes" min="0" max="240" value="${escapeModalText(String(Math.max(0, Number(policy.lateAfterMinutes ?? policy.graceMinutes ?? 10))))}" required /><small>min</small></span></label>
+          <label class="form-field"><span>Half-day after</span><span class="attendance-policy-number-field"><input type="number" name="halfDayAfterMinutes" min="0" max="480" value="${escapeModalText(String(Math.max(0, Number(policy.halfDayAfterMinutes ?? 120))))}" required /><small>min</small></span></label>
+          <label class="form-field"><span>Auto absent after</span><span class="attendance-policy-number-field"><input type="number" name="autoAbsentAfterMinutes" min="0" max="720" value="${escapeModalText(String(Math.max(0, Number(policy.autoAbsentAfterMinutes ?? 0))))}" /><small>min</small></span><small class="task-meta">0 disables auto-absent.</small></label>
         </div>
-      </fieldset>
+      </section>
+      <section class="attendance-policy-form-section">
+        <h4>3. Break plan</h4>
+        <div class="attendance-policy-break-editor-head" aria-hidden="true"><span>Break</span><span>Duration</span><span>From</span><span>To</span><span>Payment</span></div>
+        <div class="attendance-policy-break-editor-row">
+          <strong>Morning break</strong>
+          <span class="attendance-policy-number-field"><input type="number" name="morningDuration" min="1" max="60" value="${escapeModalText(String(morning?.durationMinutes || 15))}" required /><small>min</small></span>
+          ${attendancePolicyTimeControlMarkup("morningWindowStart", "morningWindowStart", normalizeTimeValue(morning?.windowStart, "09:30"))}
+          ${attendancePolicyTimeControlMarkup("morningWindowEnd", "morningWindowEnd", normalizeTimeValue(morning?.windowEnd, "11:30"))}
+          <span>Paid</span>
+        </div>
+        <div class="attendance-policy-break-editor-row">
+          <strong>Lunch</strong>
+          <span class="attendance-policy-number-field"><input type="number" name="lunchDuration" min="30" max="120" value="${escapeModalText(String(lunch?.durationMinutes || 60))}" required /><small>min</small></span>
+          ${attendancePolicyTimeControlMarkup("lunchWindowStart", "lunchWindowStart", normalizeTimeValue(lunch?.windowStart, "11:30"))}
+          ${attendancePolicyTimeControlMarkup("lunchWindowEnd", "lunchWindowEnd", normalizeTimeValue(lunch?.windowEnd, "14:30"))}
+          <span>Unpaid</span>
+        </div>
+        <div class="attendance-policy-break-editor-row">
+          <strong>Afternoon break</strong>
+          <span class="attendance-policy-number-field"><input type="number" name="afternoonDuration" min="1" max="60" value="${escapeModalText(String(afternoon?.durationMinutes || 15))}" required /><small>min</small></span>
+          ${attendancePolicyTimeControlMarkup("afternoonWindowStart", "afternoonWindowStart", normalizeTimeValue(afternoon?.windowStart, "14:30"))}
+          ${attendancePolicyTimeControlMarkup("afternoonWindowEnd", "afternoonWindowEnd", normalizeTimeValue(afternoon?.windowEnd, "17:30"))}
+          <span>Paid</span>
+        </div>
+      </section>
       <div class="form-actions">
         <button type="button" class="btn btn-light" data-action="close-modal">Cancel</button>
-        <button type="submit" class="btn btn-accent">Save Policy</button>
+        <button type="submit" class="btn btn-accent">Save policy</button>
       </div>
     </div>
   `;
@@ -28167,8 +27762,10 @@ function syncCurrentUserFromMember(member) {
   };
   state.data.currentUser.notifications = {
     inApp: member.notifications?.inApp === undefined ? state.data.currentUser.notifications?.inApp !== false : Boolean(member.notifications.inApp),
-    email: member.notifications?.email === undefined ? state.data.currentUser.notifications?.email !== false : Boolean(member.notifications.email),
-    sms: member.notifications?.sms === undefined ? Boolean(state.data.currentUser.notifications?.sms) : Boolean(member.notifications.sms)
+    messages: member.notifications?.messages === undefined ? state.data.currentUser.notifications?.messages !== false : Boolean(member.notifications.messages),
+    tasks: member.notifications?.tasks === undefined ? state.data.currentUser.notifications?.tasks !== false : Boolean(member.notifications.tasks),
+    crm: member.notifications?.crm === undefined ? state.data.currentUser.notifications?.crm !== false : Boolean(member.notifications.crm),
+    calls: member.notifications?.calls === undefined ? state.data.currentUser.notifications?.calls !== false : Boolean(member.notifications.calls)
   };
   state.data.currentUser.scope = String(member.scope || state.data.currentUser.scope || "own").trim().toLowerCase() || "own";
   state.data.currentUser.permissions = normalizeMemberPermissions(member);
@@ -28290,7 +27887,6 @@ function openTeamInviteModal(prefill = {}) {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.add("is-profile-compose");
 
@@ -28600,7 +28196,6 @@ function openMyProfileModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.add("is-profile-compose");
@@ -28692,8 +28287,10 @@ function openMyProfileModal() {
         <h4>Notifications</h4>
         <div class="profile-toggle-row">
           <label class="profile-check"><input type="checkbox" name="notifyInApp" ${notifications.inApp === false ? "" : "checked"} /> In-app</label>
-          <label class="profile-check"><input type="checkbox" name="notifyEmail" ${notifications.email === false ? "" : "checked"} /> Email</label>
-          <label class="profile-check"><input type="checkbox" name="notifySms" ${notifications.sms ? "checked" : ""} /> SMS</label>
+          <label class="profile-check"><input type="checkbox" name="notifyMessages" ${notifications.messages === false ? "" : "checked"} /> Messages</label>
+          <label class="profile-check"><input type="checkbox" name="notifyTasks" ${notifications.tasks === false ? "" : "checked"} /> Tasks</label>
+          <label class="profile-check"><input type="checkbox" name="notifyCrm" ${notifications.crm === false ? "" : "checked"} /> Leads and deals</label>
+          <label class="profile-check"><input type="checkbox" name="notifyCalls" ${notifications.calls === false ? "" : "checked"} /> Calls</label>
         </div>
       </section>
 
@@ -28805,13 +28402,13 @@ function syncProfileAvatarEditorModal(form) {
 
   if (statusNode instanceof HTMLElement) {
     if (removeAvatar) {
-      statusNode.textContent = "Your current photo will be removed when you save this change.";
+      statusNode.textContent = "Photo will be removed when you save.";
     } else if (previewUrl || fileSelected) {
-      statusNode.textContent = "A new photo is selected. Save to replace the current photo.";
+      statusNode.textContent = "New photo selected.";
     } else if (baseAvatarUrl) {
-      statusNode.textContent = "Your current photo is active.";
+      statusNode.textContent = "Current photo";
     } else {
-      statusNode.textContent = "No profile photo has been added yet.";
+      statusNode.textContent = "No photo added";
     }
   }
 }
@@ -28889,7 +28486,6 @@ function openProfileAvatarEditorModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-attendance-manual");
@@ -28910,41 +28506,37 @@ function openProfileAvatarEditorModal() {
           ${buildProfileAvatarPreviewMarkup(avatar.avatarUrl, identity.fullName, identity.initials)}
         </div>
         <div class="profile-avatar-modal-copy">
-          <h4>${escapeModalText(identity.fullName)}</h4>
-          <p>${escapeModalText(identity.email)}</p>
-          <p>${escapeModalText(identity.title)}</p>
+          <p>Choose a square JPG, PNG, or WebP image.</p>
+          <div class="profile-avatar-modal-actions">
+            <label class="profile-avatar-modal-upload">
+              <input type="file" name="avatarFile" accept="image/png,image/jpeg,image/webp" />
+              <i class="bi bi-upload" aria-hidden="true"></i>
+              <span>Choose image</span>
+            </label>
+            <button
+              type="button"
+              class="profile-avatar-modal-secondary"
+              data-action="profile-avatar-secondary"
+              ${avatar.avatarUrl ? "" : "hidden"}
+            >
+              Remove
+            </button>
+          </div>
+          <p class="profile-avatar-modal-status" data-profile-avatar-modal-status role="status" aria-live="polite">
+            ${avatar.avatarUrl ? "Current photo" : "No photo added"}
+          </p>
         </div>
       </div>
-      <div class="profile-avatar-modal-actions">
-        <label class="profile-avatar-modal-upload">
-          <input type="file" name="avatarFile" accept="image/png,image/jpeg,image/webp" />
-          <span>Upload new photo</span>
-        </label>
-        <button
-          type="button"
-          class="btn btn-light profile-avatar-modal-secondary"
-          data-action="profile-avatar-secondary"
-          ${avatar.avatarUrl ? "" : "hidden"}
-        >
-          Remove photo
-        </button>
-      </div>
       <input type="hidden" name="avatarRemove" value="0" />
-      <p class="task-meta profile-avatar-modal-status" data-profile-avatar-modal-status>
-        ${
-          avatar.avatarUrl
-            ? "Your current photo is active."
-            : "No profile photo has been added yet."
-        }
-      </p>
     </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-light" data-action="close-modal">Cancel</button>
-      <button type="submit" class="btn btn-accent">Use Photo</button>
+    <div class="form-actions profile-avatar-modal-footer">
+      <button type="button" class="profile-avatar-modal-cancel" data-action="close-modal">Cancel</button>
+      <button type="submit" class="profile-avatar-modal-save">Save</button>
     </div>
   `;
   syncProfileAvatarEditorModal(modalForm);
   modalOverlay.hidden = false;
+  window.requestAnimationFrame(() => document.getElementById("modalCloseButton")?.focus());
 }
 
 async function submitProfileAvatarEditorForm(form) {
@@ -29169,7 +28761,6 @@ function openWorkspaceLogoEditorModal() {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.remove("is-new-direct-chat");
@@ -29289,6 +28880,51 @@ async function submitWorkspaceLogoEditorForm(form) {
   }
 }
 
+async function submitNotificationSettingsForm(form) {
+  if (!(form instanceof HTMLFormElement)) {
+    return false;
+  }
+  const formData = new FormData(form);
+  const notifications = {
+    inApp: formData.get("notifyInApp") === "on",
+    messages: formData.get("notifyMessages") === "on",
+    tasks: formData.get("notifyTasks") === "on",
+    crm: formData.get("notifyCrm") === "on",
+    calls: formData.get("notifyCalls") === "on"
+  };
+  const currentMember = getCurrentUserTeamMember(state.data);
+  const status = form.querySelector("[data-settings-notification-status]");
+  try {
+    if (state.supabaseConfigured && state.signedInUser && currentMember?.id) {
+      await updateSupabaseTeamMember(currentMember.id, {
+        notifications,
+        updatedBy: resolveCurrentUserName(state.data),
+        updatedAt: new Date().toISOString()
+      });
+    }
+    state.data.currentUser.notifications = { ...notifications };
+    if (currentMember) {
+      currentMember.notifications = { ...notifications };
+    }
+    saveData(state.data);
+    form.classList.remove("is-dirty");
+    delete form.dataset.settingsDirty;
+    if (status) {
+      status.textContent = "Preferences saved.";
+    }
+    void refreshSupabaseNotifications({ render: false, alertOnError: false, showToasts: false, force: true });
+    showToast("Notification preferences saved.", { tone: "success" });
+    return true;
+  } catch (error) {
+    console.warn("Notification preferences update failed:", error);
+    if (status) {
+      status.textContent = "Preferences could not be saved. Try again.";
+    }
+    showToast("Notification preferences could not be saved.", { tone: "danger" });
+    return false;
+  }
+}
+
 async function submitMyProfileForm(form) {
   ensureProfileCollections(state.data);
   clearFormFeedback(form);
@@ -29307,6 +28943,7 @@ async function submitMyProfileForm(form) {
   const currentUser = state.data.currentUser;
   const oldName = String(currentUser.name || "").trim();
   const currentMember = getCurrentUserTeamMember(state.data);
+  const isAccountSettingsForm = form.dataset.settingsScope === "account";
   const avatarDraft =
     form.id === "myProfileForm" && state.profileAvatarDraft && typeof state.profileAvatarDraft === "object"
       ? state.profileAvatarDraft
@@ -29327,17 +28964,25 @@ async function submitMyProfileForm(form) {
     avatarUrl: removeAvatar ? "" : previousAvatarUrl,
     avatarStoragePath: removeAvatar ? "" : previousAvatarStoragePath,
     timezone: String(formData.get("timezone") || "Local").trim() || "Local",
-    language: String(formData.get("language") || "English").trim() || "English",
-    communication: {
-      ...(currentUser.communication && typeof currentUser.communication === "object" ? currentUser.communication : {}),
-      senderName: String(formData.get("senderName") || "").trim() || name,
-      signature: String(formData.get("signature") || "").trim()
-    },
-    notifications: {
-      inApp: formData.get("notifyInApp") === "on",
-      email: formData.get("notifyEmail") === "on",
-      sms: formData.get("notifySms") === "on"
-    },
+    language: isAccountSettingsForm
+      ? String(currentUser.language || currentMember?.language || "English").trim() || "English"
+      : String(formData.get("language") || "English").trim() || "English",
+    communication: isAccountSettingsForm
+      ? { ...(currentUser.communication && typeof currentUser.communication === "object" ? currentUser.communication : {}) }
+      : {
+          ...(currentUser.communication && typeof currentUser.communication === "object" ? currentUser.communication : {}),
+          senderName: String(formData.get("senderName") || "").trim() || name,
+          signature: String(formData.get("signature") || "").trim()
+        },
+    notifications: isAccountSettingsForm
+      ? { ...(currentUser.notifications && typeof currentUser.notifications === "object" ? currentUser.notifications : {}) }
+      : {
+          inApp: formData.get("notifyInApp") === "on",
+          messages: formData.get("notifyMessages") === "on",
+          tasks: formData.get("notifyTasks") === "on",
+          crm: formData.get("notifyCrm") === "on",
+          calls: formData.get("notifyCalls") === "on"
+        },
     security: {
       ...(currentUser.security && typeof currentUser.security === "object" ? currentUser.security : {}),
       activeSessions: Math.max(1, Number(currentUser.security?.activeSessions || 1) || 1),
@@ -29489,7 +29134,6 @@ function openTeamMemberProfileModal(memberId) {
   modalCard.classList.remove("is-account-compose");
   modalCard.classList.remove("is-wide");
   modalCard.classList.remove("is-task-compose");
-  modalCard.classList.remove("is-project-compose");
   modalCard.classList.remove("is-profile-compose");
   modalCard.classList.remove("is-attendance-policy");
   modalCard.classList.add("is-profile-compose");
@@ -29804,10 +29448,17 @@ async function submitWorkspaceProfileForm(form) {
     .getAll("businessDays")
     .map((day) => Number(day))
     .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6);
+  if (!selectedBusinessDays.length) {
+    showFormFeedback(form, "Select at least one business day.", {
+      fieldSelector: "input[name='businessDays']"
+    });
+    return;
+  }
   const businessDays = normalizeWorkspaceBusinessDays(selectedBusinessDays);
   const workspaceTimezone = String(formData.get("workspaceTimezone") || "Local").trim() || "Local";
+  const currentWorkspace = state.data.workspace && typeof state.data.workspace === "object" ? state.data.workspace : {};
   const nextWorkspace = {
-    ...(state.data.workspace && typeof state.data.workspace === "object" ? state.data.workspace : {}),
+    ...currentWorkspace,
     name: workspaceName,
     legalName: String(formData.get("legalName") || "").trim() || workspaceName,
     logoUrl: String(state.data.workspace?.logoUrl || "").trim(),
@@ -29815,20 +29466,38 @@ async function submitWorkspaceProfileForm(form) {
     brandColor: normalizeInviteBrandColor(formData.get("brandColor")),
     appLabel: normalizeSystemAppLabel(formData.get("appLabel")),
     timezone: workspaceTimezone,
-    dateFormat: String(formData.get("dateFormat") || "YYYY-MM-DD").trim() || "YYYY-MM-DD",
+    dateFormat: formData.has("dateFormat")
+      ? String(formData.get("dateFormat") || "YYYY-MM-DD").trim() || "YYYY-MM-DD"
+      : String(currentWorkspace.dateFormat || "YYYY-MM-DD"),
     currency: String(formData.get("currency") || "USD").trim() || "USD",
-    weekStart: String(formData.get("weekStart") || "Mon").trim() || "Mon",
+    weekStart: formData.has("weekStart")
+      ? String(formData.get("weekStart") || "Mon").trim() || "Mon"
+      : String(currentWorkspace.weekStart || "Mon"),
     businessStart: normalizeTimeValue(formData.get("businessStart"), "09:00"),
     businessEnd: normalizeTimeValue(formData.get("businessEnd"), "18:00"),
     businessDays,
-    website: String(formData.get("website") || "").trim(),
-    supportEmail: String(formData.get("supportEmail") || "").trim(),
-    supportPhone: String(formData.get("supportPhone") || "").trim(),
-    businessAddress: String(formData.get("businessAddress") || "").trim(),
-    crmDefaultStage: String(formData.get("crmDefaultStage") || "Prospecting").trim() || "Prospecting",
-    crmDefaultOwner: String(formData.get("crmDefaultOwner") || "").trim() || resolveCurrentUserName(state.data),
-    crmSlaHours: Math.max(0, Number(formData.get("crmSlaHours") || 24) || 24),
-    crmFollowUpDays: Math.max(0, Number(formData.get("crmFollowUpDays") || 2) || 2)
+    website: formData.has("website") ? String(formData.get("website") || "").trim() : String(currentWorkspace.website || ""),
+    supportEmail: formData.has("supportEmail")
+      ? String(formData.get("supportEmail") || "").trim()
+      : String(currentWorkspace.supportEmail || ""),
+    supportPhone: formData.has("supportPhone")
+      ? String(formData.get("supportPhone") || "").trim()
+      : String(currentWorkspace.supportPhone || ""),
+    businessAddress: formData.has("businessAddress")
+      ? String(formData.get("businessAddress") || "").trim()
+      : String(currentWorkspace.businessAddress || ""),
+    crmDefaultStage: formData.has("crmDefaultStage")
+      ? String(formData.get("crmDefaultStage") || "Prospecting").trim() || "Prospecting"
+      : String(currentWorkspace.crmDefaultStage || "Prospecting"),
+    crmDefaultOwner: formData.has("crmDefaultOwner")
+      ? String(formData.get("crmDefaultOwner") || "").trim() || resolveCurrentUserName(state.data)
+      : String(currentWorkspace.crmDefaultOwner || ""),
+    crmSlaHours: formData.has("crmSlaHours")
+      ? Math.max(0, Number(formData.get("crmSlaHours") || 24) || 24)
+      : Math.max(0, Number(currentWorkspace.crmSlaHours || 24) || 24),
+    crmFollowUpDays: formData.has("crmFollowUpDays")
+      ? Math.max(0, Number(formData.get("crmFollowUpDays") || 2) || 2)
+      : Math.max(0, Number(currentWorkspace.crmFollowUpDays || 2) || 2)
   };
 
   const nextAttendancePolicy = {
@@ -29882,11 +29551,6 @@ function openCreateModal() {
     return;
   }
 
-  if (config.collection === "projects") {
-    openProjectComposerModal();
-    return;
-  }
-
   if (config.collection === "leads") {
     openLeadComposerModal();
     return;
@@ -29922,12 +29586,12 @@ function openCreateModal() {
   modalOverlay?.classList.remove("is-file-preview");
   modalOverlay?.classList.remove("is-file-preview");
   modalCard?.classList.remove("is-lead-drawer");
+  modalCard?.classList.remove("is-lead-attempt");
   modalCard?.classList.remove("is-lead-compose");
   modalCard?.classList.remove("is-contact-compose");
   modalCard?.classList.remove("is-account-compose");
   modalCard?.classList.remove("is-wide");
   modalCard?.classList.remove("is-task-compose");
-  modalCard?.classList.remove("is-project-compose");
   modalCard?.classList.remove("is-profile-compose");
   modalCard?.classList.remove("is-profile-avatar");
   modalCard?.classList.remove("is-attendance-policy");
@@ -29964,12 +29628,12 @@ function closeModal(options = {}) {
     modalForm.dataset.contactId = "";
     modalForm.dataset.accountId = "";
     modalForm.dataset.taskId = "";
-    modalForm.dataset.projectId = "";
     modalForm.dataset.dealId = "";
     modalForm.dataset.memberId = "";
     modalForm.dataset.taskDeadlineOpen = "0";
     modalForm.dataset.taskAssigneeOpen = "0";
-    modalForm.dataset.projectDetailsOpen = "0";
+    modalForm.dataset.taskAdvancedOpen = "0";
+    modalForm.dataset.taskChipOpen = "";
     modalForm.dataset.leadComposeMoreOpen = "0";
     modalForm.dataset.leadComposeIgnoredSignature = "";
     modalForm.dataset.leadOwnerOpen = "0";
@@ -30001,6 +29665,10 @@ function closeModal(options = {}) {
     modalForm.dataset.conversationKey = "";
     modalForm.dataset.selectedThemeKey = "";
     modalForm.dataset.selectedParticipantName = "";
+    modalForm.dataset.initialGroupName = "";
+    modalForm.dataset.initialMemberIds = "";
+    modalForm.dataset.groupBusy = "";
+    modalForm.dataset.groupReviewMode = "";
   }
   modalOverlay?.classList.remove("is-lead-drawer");
   modalCard?.classList.remove("is-lead-drawer");
@@ -30010,7 +29678,6 @@ function closeModal(options = {}) {
   modalCard?.classList.remove("is-account-compose");
   modalCard?.classList.remove("is-wide");
   modalCard?.classList.remove("is-task-compose");
-  modalCard?.classList.remove("is-project-compose");
   modalCard?.classList.remove("is-profile-compose");
   modalCard?.classList.remove("is-attendance-policy");
   modalCard?.classList.remove("is-attendance-manual");
@@ -30023,8 +29690,10 @@ function closeModal(options = {}) {
   modalCard?.classList.remove("is-messenger-customize");
   modalCard?.classList.remove("is-messenger-theme");
   modalCard?.classList.remove("is-messenger-nickname");
+  modalCard?.classList.remove("is-messenger-workflow");
   if (modalCloseButton instanceof HTMLButtonElement) {
     modalCloseButton.dataset.action = "close-modal";
+    modalCloseButton.dataset.id = "";
   }
   state.leadConversionDraft = null;
   state.activeLeadDrawerId = "";
@@ -30045,54 +29714,6 @@ function openConfirmModal(options = {}) {
 
 async function resolveConfirmModal(confirmed) {
   await confirmModalController.resolve(confirmed);
-}
-
-function resetDemoWorkspaceState() {
-  state.data = resetData();
-  clearLocalWorkCollections(state.data);
-  if (state.supabaseConfigured) {
-    clearLocalCrmCollections(state.data);
-  }
-  clearLocalAttendanceCollections(state.data);
-  ensureMessagingCollections(state.data);
-  ensureProfileCollections(state.data);
-  ensureAttendanceCollections(state.data);
-  ensureCallsCollections(state.data);
-  state.searchTerm = "";
-  state.selectedConversationKey = getDefaultConversationKey(state.data);
-  state.selectedEmailMessageId = "";
-  state.callDraftTo = "";
-  state.callDraftNote = "";
-  state.callDraftRecord = false;
-  state.callRecentNumbers = [];
-  state.callInboundPopupId = "";
-  state.dealsView = "table";
-  state.projectsQuickFilter = "all";
-  state.projectsSearchTerm = "";
-  state.projectsSort = "recent:desc";
-  state.selectedProjectId = "";
-  state.selectedTeamMemberId = String(state.data.teamMembers?.[0]?.id || "");
-  state.attendanceTeamFilter = "all";
-  state.attendanceTeamSearch = "";
-  state.attendanceTeamDepartment = "all";
-  state.attendanceTab = "today";
-  state.attendanceManagerMonth = "";
-  state.attendanceHistoryRange = "today";
-  state.attendanceHistoryMember = "all";
-  state.attendanceHistoryStatus = "all";
-  state.attendanceHistoryDateStart = "";
-  state.attendanceHistoryDateEnd = "";
-  state.attendanceHistorySelectedLogId = "";
-  state.attendanceTablePage = 1;
-  state.attendanceTablePageSize = 10;
-  state.attendanceSortKey = "";
-  state.attendanceSortDir = "none";
-  state.emailComposeOpen = false;
-  state.emailComposeMinimized = false;
-  clearEmailComposeDraft();
-  clearSupabaseCallsState();
-  closeCallSession();
-  persistDataAndRefresh();
 }
 
 function getFormConfig(routeId) {
@@ -30220,11 +29841,8 @@ function getRouteForLinkedType(linkedType) {
   if (normalized === "contact") {
     return "contacts";
   }
-  if (normalized === "project") {
-    return "projects";
-  }
   if (normalized === "task") {
-    return "my-work";
+    return "kanban";
   }
   return "";
 }
@@ -32413,6 +32031,113 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "dashboard-compare-toggle") {
+    const currentUiState =
+      state.dashboardUiState && typeof state.dashboardUiState === "object"
+        ? state.dashboardUiState
+        : createDefaultDashboardUiState();
+    state.dashboardUiState = {
+      ...currentUiState,
+      compare: currentUiState.compare === false
+    };
+    renderRoute();
+    return;
+  }
+
+  if (action === "dashboard-refresh") {
+    state.dashboardLoading = true;
+    state.dashboardSnapshotError = "";
+    renderRoute();
+    void refreshSupabaseDashboardData({ render: true, alertOnError: true, force: true });
+    return;
+  }
+
+  if (action === "dashboard-metric-open" || action === "dashboard-stage-open") {
+    const target = String(id || "").trim().toLowerCase();
+    if (["pipeline", "proposal", "closed", "won"].includes(target)) {
+      state.dealsQuickFilter = "all";
+      state.dealsStageFilter = target === "proposal" ? "Proposal" : ["closed", "won"].includes(target) ? "Won" : "all";
+      state.dealsView = "table";
+      resetCrmPage("deals");
+      setRoute("deals");
+      return;
+    }
+    const statusByTarget = {
+      "new-leads": "New",
+      contacted: "Contacted",
+      qualified: "Qualified"
+    };
+    clearLeadImportResultView();
+    state.leadsScope = "all";
+    state.leadsStatusFilter = statusByTarget[target] || "all";
+    state.leadsDateFilter = "all";
+    state.leadsSourceFilter = "all";
+    state.leadsOwnerFilter = "all";
+    resetCrmPage("leads");
+    setRoute("leads");
+    return;
+  }
+
+  if (action === "dashboard-attention-open") {
+    const target = String(id || "").trim().toLowerCase();
+    if (target === "stale-deals") {
+      state.dealsQuickFilter = "all";
+      state.dealsStageFilter = "all";
+      state.dealsView = "table";
+      resetCrmPage("deals");
+      setRoute("deals");
+      return;
+    }
+    clearLeadImportResultView();
+    state.leadsScope = target === "unassigned-qualified" ? "unassigned" : "all";
+    state.leadsStatusFilter = target === "awaiting-contact" ? "New" : target === "unassigned-qualified" ? "Qualified" : "all";
+    state.leadsDateFilter = target === "overdue-followups" ? "overdue" : "all";
+    state.leadsSourceFilter = "all";
+    state.leadsOwnerFilter = "all";
+    resetCrmPage("leads");
+    setRoute("leads");
+    return;
+  }
+
+  if (action === "dashboard-today-open") {
+    const target = String(id || "").trim().toLowerCase();
+    if (target === "calls") {
+      setRoute("comms-calls");
+      return;
+    }
+    if (target === "tasks") {
+      state.kanbanView = "table";
+      state.tablePage = 1;
+      setRoute("kanban");
+      return;
+    }
+    clearLeadImportResultView();
+    state.leadsScope = "all";
+    state.leadsStatusFilter = "all";
+    state.leadsDateFilter = "today";
+    state.leadsSourceFilter = "all";
+    state.leadsOwnerFilter = "all";
+    resetCrmPage("leads");
+    setRoute("leads");
+    return;
+  }
+
+  if (action === "dashboard-source-open") {
+    const source = String(id || "").trim();
+    if (!source) {
+      return;
+    }
+    clearLeadImportResultView();
+    state.leadsScope = "all";
+    state.leadsStatusFilter = "all";
+    state.leadsDateFilter = "all";
+    state.leadsSourceFilter = source;
+    state.leadsOwnerFilter = "all";
+    resetCrmPage("leads");
+    setRoute("leads");
+    return;
+  }
+
   if (action === "invite-google-sign-in") {
     const inviteContext = getInviteAcceptanceContext(window.location.hash);
     persistInviteContext(inviteContext || {});
@@ -32522,6 +32247,11 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "login-forgot-password") {
+    showToast("Contact your workspace administrator to reset your password.", { tone: "info" });
+    return;
+  }
+
   if (action === "lead-export-leads" || action === "lead-export-unqualified") {
     openLeadExportModal(action === "lead-export-unqualified" ? "unqualified" : "leads");
     return;
@@ -32544,7 +32274,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
       importMode,
       importModeExplicit: true,
       duplicateMode: importMode === LEAD_IMPORT_MODE_UPDATE ? "update" : "skip",
-      distributionMode: importMode === LEAD_IMPORT_MODE_UPDATE ? "unassigned" : "auto-assign"
+      distributionMode: "auto-assign"
     };
     renderLeadImportModal();
     return;
@@ -32555,6 +32285,17 @@ async function handleRecordAction(action, id, sourceEl = null) {
     const nextDraft = {
       ...(state.leadImportDraft || createEmptyLeadImportDraft()),
       [key]: Boolean(sourceEl?.checked)
+    };
+    nextDraft.review = buildLeadImportReview(nextDraft);
+    state.leadImportDraft = nextDraft;
+    renderLeadImportModal();
+    return;
+  }
+
+  if (action === "lead-import-status-behavior") {
+    const nextDraft = {
+      ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+      resetBlankStatus: String(sourceEl?.value || "preserve") === "reset"
     };
     nextDraft.review = buildLeadImportReview(nextDraft);
     state.leadImportDraft = nextDraft;
@@ -32594,10 +32335,40 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-import-review-subview") {
+    const reviewSubview = ["mapping", "warnings"].includes(id) ? id : "";
+    state.leadImportDraft = {
+      ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+      reviewSubview,
+      openMapField: "",
+      openDuplicateMode: false,
+      openDuplicateColumns: false
+    };
+    renderLeadImportModal();
+    return;
+  }
+
+  if (action === "lead-import-review-overview") {
+    state.leadImportDraft = {
+      ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+      reviewSubview: "",
+      openMapField: "",
+      openDuplicateMode: false,
+      openDuplicateColumns: false
+    };
+    renderLeadImportModal();
+    return;
+  }
+
+  if (action === "lead-import-review-retry") {
+    await verifyLeadImportWorkspace(state.leadImportDraft);
+    return;
+  }
+
   if (action === "lead-import-toggle-mapping") {
     state.leadImportDraft = {
       ...(state.leadImportDraft || createEmptyLeadImportDraft()),
-      showMapping: !Boolean(state.leadImportDraft?.showMapping),
+      reviewSubview: String(state.leadImportDraft?.reviewSubview || "") === "mapping" ? "" : "mapping",
       openMapField: "",
       openDuplicateMode: false,
       openDuplicateColumns: false
@@ -32609,7 +32380,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   if (action === "lead-import-toggle-issues") {
     state.leadImportDraft = {
       ...(state.leadImportDraft || createEmptyLeadImportDraft()),
-      showIssueRows: !Boolean(state.leadImportDraft?.showIssueRows)
+      reviewSubview: String(state.leadImportDraft?.reviewSubview || "") === "warnings" ? "" : "warnings"
     };
     renderLeadImportModal();
     return;
@@ -32636,6 +32407,32 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-import-select-all-assignees") {
+    const currentDraft = state.leadImportDraft || createEmptyLeadImportDraft();
+    const search = normalizeForMatch(currentDraft.assigneeSearch || "");
+    const visibleIds = getLeadAssignableTeamMembers()
+      .filter((member) =>
+        !search || normalizeForMatch([member?.name, member?.email, member?.role, member?.team].filter(Boolean).join(" ")).includes(search)
+      )
+      .map((member) => String(member.id || "").trim())
+      .filter(Boolean);
+    state.leadImportDraft = {
+      ...currentDraft,
+      assigneeIds: [...new Set([...(currentDraft.assigneeIds || []), ...visibleIds])]
+    };
+    renderLeadImportModal();
+    return;
+  }
+
+  if (action === "lead-import-clear-assignees") {
+    state.leadImportDraft = {
+      ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+      assigneeIds: []
+    };
+    renderLeadImportModal();
+    return;
+  }
+
   if (action === "lead-import-map-select") {
     const raw = String(id || "");
     const separatorIndex = raw.indexOf(":");
@@ -32653,6 +32450,10 @@ async function handleRecordAction(action, id, sourceEl = null) {
       openMapField: "",
       openDuplicateMode: false,
       openDuplicateColumns: false,
+      workspaceReviewStatus: "idle",
+      workspaceReviewVerified: false,
+      workspaceReviewError: "",
+      workspaceMatches: [],
       review: null
     };
     if (normalizeLeadImportStep(nextDraft.step) === "review") {
@@ -32660,6 +32461,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
     }
     state.leadImportDraft = nextDraft;
     renderLeadImportModal();
+    await verifyLeadImportWorkspace(nextDraft);
     return;
   }
 
@@ -32692,6 +32494,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
     }
     state.leadImportDraft = nextDraft;
     renderLeadImportModal();
+    await verifyLeadImportWorkspace(nextDraft);
     return;
   }
 
@@ -32749,6 +32552,10 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-import-import-step") {
+    if (state.supabaseConfigured && state.leadImportDraft?.workspaceReviewStatus !== "complete") {
+      window.alert("Wait for the complete workspace duplicate check before continuing.");
+      return;
+    }
     if (!state.leadImportDraft?.review) {
       state.leadImportDraft = {
         ...(state.leadImportDraft || createEmptyLeadImportDraft()),
@@ -32788,15 +32595,25 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-import-commit") {
+    if (state.supabaseConfigured && state.leadImportDraft?.workspaceReviewStatus !== "complete") {
+      window.alert("The complete workspace duplicate check must finish before importing.");
+      return;
+    }
     if (!state.leadImportDraft?.review) {
       state.leadImportDraft = {
         ...(state.leadImportDraft || createEmptyLeadImportDraft()),
         review: buildLeadImportReview(state.leadImportDraft)
       };
     }
+    const selectedAssignableIds = new Set(
+      getLeadAssignableTeamMembers().map((member) => String(member.id || "").trim()).filter(Boolean)
+    );
+    const hasSelectedAssignee = (state.leadImportDraft?.assigneeIds || []).some((memberId) =>
+      selectedAssignableIds.has(String(memberId || "").trim())
+    );
     if (
       String(state.leadImportDraft?.distributionMode || "auto-assign") === "auto-assign" &&
-      !((state.leadImportDraft?.assigneeIds || []).length)
+      !hasSelectedAssignee
     ) {
       window.alert("Select at least one active team member for auto-assignment, or hold the import as reserve.");
       return;
@@ -32856,6 +32673,31 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-import-view-results") {
+    const jobId = String(state.leadImportDraft?.jobId || state.leadsImportJobId || "").trim();
+    if (!jobId) {
+      showToast("The import result list is unavailable.", { tone: "warning" });
+      return;
+    }
+    state.leadsImportJobId = jobId;
+    state.leadsImportResultCount = Number(
+      state.leadImportDraft?.importSummary?.created || 0
+    ) + Number(state.leadImportDraft?.importSummary?.updated || 0);
+    state.leadsImportViewActive = true;
+    state.leadsScope = "all";
+    state.leadsStatusFilter = "all";
+    state.leadsDateFilter = "all";
+    state.leadsSourceFilter = "all";
+    state.leadsTimezoneFilter = "all";
+    state.leadsOwnerFilter = "all";
+    state.searchTerm = "";
+    resetCrmPage("leads");
+    state.leadsPageData = createEmptyLeadsPageData();
+    closeModal({ reopenTaskSheet: false });
+    setRoute("leads");
+    return;
+  }
+
   if (action === "lead-import-rollback") {
     const jobId = String(state.leadImportDraft?.jobId || "").trim();
     openConfirmModal({
@@ -32873,61 +32715,11 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "settings-fill-field") {
-    const form = document.getElementById("workspaceProfileForm");
-    const fieldName = String(sourceEl?.dataset.field || "").trim();
-    const nextValue = String(sourceEl?.dataset.value || "").trim();
-    if (!(form instanceof HTMLFormElement) || !fieldName) {
-      return;
-    }
-    const field = form.querySelector(`[name="${fieldName}"]`);
-    if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
-      return;
-    }
-    field.value = nextValue;
-    updateWorkspaceProfilePreview(form);
-    return;
-  }
-
-  if (action === "settings-set-hours") {
-    const form = document.getElementById("workspaceProfileForm");
-    if (!(form instanceof HTMLFormElement)) {
-      return;
-    }
-    const startField = form.querySelector("input[name='businessStart']");
-    const endField = form.querySelector("input[name='businessEnd']");
-    if (!(startField instanceof HTMLInputElement) || !(endField instanceof HTMLInputElement)) {
-      return;
-    }
-    startField.value = normalizeTimeValue(sourceEl?.dataset.start, startField.value || "09:00");
-    endField.value = normalizeTimeValue(sourceEl?.dataset.end, endField.value || "18:00");
-    updateWorkspaceProfilePreview(form);
-    return;
-  }
-
-  if (action === "settings-reset-demo") {
-    if (!canEditWorkspaceProfile()) {
-      window.alert("Only workspace Owners and Admins can reset demo data.");
-      return;
-    }
-    if (state.supabaseConfigured && state.authAccessState === "granted") {
-      window.alert("Demo reset is disabled for connected production workspaces.");
-      return;
-    }
-    openConfirmModal({
-      title: "Reset demo data?",
-      message: "Reset demo data to the original seed?",
-      confirmLabel: "Reset",
-      danger: true,
-      onConfirm: () => {
-        resetDemoWorkspaceState();
-      }
-    });
-    return;
-  }
-
   if (action === "profile-open") {
-    setRoute("settings-me");
+    if ((state.routeId === "settings" || state.routeId === "settings-workspace") && !confirmSettingsNavigation()) {
+      return;
+    }
+    setRoute("settings");
     return;
   }
 
@@ -33033,6 +32825,43 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "settings-scroll") {
+    scrollToSettingsSection(id);
+    return;
+  }
+
+  if (action === "settings-edit-field") {
+    const settingsForm = sourceEl?.closest?.(".settings-editor");
+    if (settingsForm instanceof HTMLFormElement) {
+      clearFormFeedback(settingsForm);
+    }
+    openSettingsInlineEditor(id);
+    return;
+  }
+
+  if (action === "settings-retry-profile") {
+    settingsProfileLoadedEmail = "";
+    settingsProfileLoadError = "";
+    settingsProfileLastRefreshAt = 0;
+    renderRoute();
+    return;
+  }
+
+  if (action === "settings-cancel-field") {
+    cancelSettingsInlineEditor(id);
+    return;
+  }
+
+  if (action === "settings-confirm-cancel") {
+    cancelSettingsSaveConfirmation(sourceEl);
+    return;
+  }
+
+  if (action === "settings-confirm-save") {
+    confirmSettingsSave(sourceEl);
+    return;
+  }
+
   if (action === "ui-theme") {
     const nextTheme = normalizeUiTheme(id);
     if (nextTheme === state.uiTheme) {
@@ -33041,6 +32870,10 @@ async function handleRecordAction(action, id, sourceEl = null) {
     state.uiTheme = nextTheme;
     saveUiPrefs();
     applyUiTheme(state.uiTheme);
+    if (state.routeId === "settings" || state.routeId === "settings-workspace") {
+      syncSettingsThemeChoice(state.uiTheme);
+      return;
+    }
     renderRoute();
     return;
   }
@@ -33140,6 +32973,43 @@ async function handleRecordAction(action, id, sourceEl = null) {
       state.callsPerformanceDate = getCallsPerformanceTodayShiftDate();
       state.callsPerformanceMonth = monthStartIso(state.callsPerformanceDate);
     }
+    resetCallsPerformanceTablePage();
+    clearCallsPerformanceDeferredRender();
+    renderRoute();
+    return;
+  }
+
+  if (action === "calls-performance-clear") {
+    const currentShiftDate = getCallsPerformanceTodayShiftDate();
+    state.callsPerformanceCalendarTouched = true;
+    state.callsPerformanceDate = currentShiftDate;
+    state.callsPerformanceMonth = monthStartIso(currentShiftDate);
+    state.callsPerformanceRange = "today";
+    state.callsPerformanceAgentId = "all";
+    state.callsPerformanceDepartment = "all";
+    state.callsPerformanceOutcome = "all";
+    state.callsPerformanceSearch = "";
+    resetCallsPerformanceTablePage();
+    clearCallsPerformanceDeferredRender();
+    renderRoute();
+    return;
+  }
+
+  if (action === "calls-performance-period") {
+    const direction = String(id || "").trim().toLowerCase();
+    const todayShiftDate = getCallsPerformanceTodayShiftDate();
+    const currentDate = String(state.callsPerformanceDate || todayShiftDate).trim() || todayShiftDate;
+    const range = String(state.callsPerformanceRange || "today").trim().toLowerCase();
+    let nextDate = todayShiftDate;
+    if (direction !== "today") {
+      const offset = direction === "prev" ? -1 : 1;
+      nextDate = range === "month"
+        ? shiftMonthIso(currentDate, offset)
+        : addDaysToIso(currentDate, range === "week" ? offset * 7 : offset);
+    }
+    state.callsPerformanceCalendarTouched = true;
+    state.callsPerformanceDate = nextDate;
+    state.callsPerformanceMonth = monthStartIso(nextDate);
     resetCallsPerformanceTablePage();
     clearCallsPerformanceDeferredRender();
     renderRoute();
@@ -33299,6 +33169,57 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "attendance-range-calendar-month") {
+    const modalForm = document.getElementById("modalForm");
+    if (!(modalForm instanceof HTMLFormElement) || modalForm.dataset.mode !== "attendance-range-compose") {
+      return;
+    }
+    const [target, direction] = String(id || "").split("::");
+    if (!["start", "end"].includes(target) || !["prev", "next"].includes(direction)) {
+      return;
+    }
+    const datasetKey = target === "start" ? "rangeStartMonth" : "rangeEndMonth";
+    modalForm.dataset[datasetKey] = shiftAttendanceRangeMonth(
+      modalForm.dataset[datasetKey],
+      direction === "prev" ? -1 : 1
+    );
+    syncAttendanceRangeCalendarUi(modalForm);
+    return;
+  }
+
+  if (action === "attendance-range-calendar-day") {
+    const modalForm = document.getElementById("modalForm");
+    if (!(modalForm instanceof HTMLFormElement) || modalForm.dataset.mode !== "attendance-range-compose") {
+      return;
+    }
+    const [target, isoDate] = String(id || "").split("::");
+    if (!["start", "end"].includes(target) || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate || "")) {
+      return;
+    }
+    const startInput = modalForm.querySelector('input[name="startDate"]');
+    const endInput = modalForm.querySelector('input[name="endDate"]');
+    if (!(startInput instanceof HTMLInputElement) || !(endInput instanceof HTMLInputElement)) {
+      return;
+    }
+    if (target === "start") {
+      startInput.value = isoDate;
+      modalForm.dataset.rangeStartMonth = `${isoDate.slice(0, 7)}-01`;
+      if (endInput.value < isoDate) {
+        endInput.value = isoDate;
+        modalForm.dataset.rangeEndMonth = `${isoDate.slice(0, 7)}-01`;
+      }
+    } else {
+      endInput.value = isoDate;
+      modalForm.dataset.rangeEndMonth = `${isoDate.slice(0, 7)}-01`;
+      if (startInput.value > isoDate) {
+        startInput.value = isoDate;
+        modalForm.dataset.rangeStartMonth = `${isoDate.slice(0, 7)}-01`;
+      }
+    }
+    syncAttendanceRangeCalendarUi(modalForm);
+    return;
+  }
+
   if (action === "attendance-range-modal") {
     openAttendanceRangeModal(id);
     return;
@@ -33324,6 +33245,16 @@ async function handleRecordAction(action, id, sourceEl = null) {
 
   if (action === "attendance-request-create") {
     openAttendanceRequestModal();
+    return;
+  }
+
+  if (action === "attendance-request-filter") {
+    setAttendanceRequestFilter(sourceEl, id);
+    return;
+  }
+
+  if (action === "attendance-request-page") {
+    changeAttendanceRequestPage(sourceEl, id);
     return;
   }
 
@@ -33667,7 +33598,6 @@ async function handleRecordAction(action, id, sourceEl = null) {
       confirmLabel: "Delete",
       danger: true,
       onConfirm: async () => {
-        state.selectedTaskIds.delete(id);
         if (isSupabaseWorkWriteEnabled()) {
           try {
             const attachments = Array.isArray(task?.attachments) ? task.attachments.filter((attachment) => attachment?.id) : [];
@@ -33706,17 +33636,6 @@ async function handleRecordAction(action, id, sourceEl = null) {
     }
     closeTaskDetailSheet({ preserveSelection: true });
     openTaskComposerModal(id);
-    return;
-  }
-
-  if (action === "task-open-project") {
-    const task = state.data.tasks.find((item) => item.id === id);
-    if (task?.projectName) {
-      closeTaskDetailSheet();
-      closeModal();
-      state.searchTerm = task.projectName;
-      setRoute("projects");
-    }
     return;
   }
 
@@ -34703,21 +34622,6 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "task-chip-project-select") {
-    const modalForm = document.getElementById("modalForm");
-    if (!modalForm || modalForm.dataset.mode !== "task-compose") {
-      return;
-    }
-    const projectInput = modalForm.querySelector("input[name='projectId']");
-    if (!projectInput) {
-      return;
-    }
-    projectInput.value = String(id || "").trim();
-    modalForm.dataset.taskChipOpen = "";
-    syncTaskAdvancedUi(modalForm);
-    return;
-  }
-
   if (action === "task-chip-type-select") {
     const modalForm = document.getElementById("modalForm");
     if (!modalForm || modalForm.dataset.mode !== "task-compose") {
@@ -34729,6 +34633,9 @@ async function handleRecordAction(action, id, sourceEl = null) {
     }
     taskTypeInput.value = canonicalTaskType(id, "General");
     modalForm.dataset.taskChipOpen = "";
+    if (isCallTaskType(taskTypeInput.value)) {
+      modalForm.dataset.taskAdvancedOpen = "1";
+    }
     syncTaskAdvancedUi(modalForm);
     return;
   }
@@ -34802,95 +34709,17 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "task-notes-toggle") {
+  if (action === "task-advanced-toggle") {
     const modalForm = document.getElementById("modalForm");
     if (!modalForm || modalForm.dataset.mode !== "task-compose") {
       return;
     }
-    const next = modalForm.dataset.taskNotesOpen === "1" ? "0" : "1";
-    modalForm.dataset.taskNotesOpen = next;
+    const next = modalForm.dataset.taskAdvancedOpen === "1" ? "0" : "1";
+    modalForm.dataset.taskAdvancedOpen = next;
+    if (next === "0") {
+      modalForm.dataset.taskChipOpen = "";
+    }
     syncTaskAdvancedUi(modalForm);
-    if (next === "1") {
-      const notesInput = modalForm.querySelector("[data-task-notes-textarea]");
-      window.setTimeout(() => notesInput?.focus(), 0);
-    }
-    return;
-  }
-
-  if (action === "project-status-select") {
-    const modalForm = document.getElementById("modalForm");
-    if (!modalForm || modalForm.dataset.mode !== "project-compose") {
-      return;
-    }
-    const statusInput = modalForm.querySelector("input[name='status']");
-    if (!statusInput) {
-      return;
-    }
-    statusInput.value = normalizeProjectStatus(id);
-    syncProjectComposerUi(modalForm);
-    return;
-  }
-
-  if (action === "project-team-toggle") {
-    const modalForm = document.getElementById("modalForm");
-    if (!modalForm || modalForm.dataset.mode !== "project-compose") {
-      return;
-    }
-    const teamInput = modalForm.querySelector("input[name='teamMembers']");
-    if (!teamInput) {
-      return;
-    }
-    const member = String(id || "").trim();
-    if (!member) {
-      return;
-    }
-    const next = new Set(parseProjectTeamMembers(teamInput.value));
-    if (next.has(member)) {
-      next.delete(member);
-    } else {
-      next.add(member);
-    }
-    teamInput.value = [...next].join("|");
-    syncProjectComposerUi(modalForm);
-    return;
-  }
-
-  if (action === "project-details-toggle") {
-    const modalForm = document.getElementById("modalForm");
-    if (!modalForm || modalForm.dataset.mode !== "project-compose") {
-      return;
-    }
-    modalForm.dataset.projectDetailsOpen = modalForm.dataset.projectDetailsOpen === "1" ? "0" : "1";
-    syncProjectComposerUi(modalForm);
-    return;
-  }
-
-  if (action === "task-bulk-status") {
-    const selected = getSelectedTasks();
-    if (!selected.length || !TASK_STATUS_FLOW.includes(id) || !selected.every((task) => canTaskUpdateProgress(task))) {
-      return;
-    }
-    if (isSupabaseWorkWriteEnabled()) {
-      void (async () => {
-        try {
-          let snapshot = null;
-          for (const task of selected) {
-            snapshot = await setSupabaseTaskStatus(task.id, id);
-          }
-          if (snapshot) {
-            applyWorkSnapshotResult(snapshot);
-          }
-        } catch (error) {
-          window.alert(`Bulk task update failed: ${error.message}`);
-        }
-      })();
-      return;
-    }
-    if (blockConnectedModeLocalFallback("Bulk task updates")) {
-      return;
-    }
-    selected.forEach((task) => setTaskStatus(task, id));
-    persistDataAndRefresh();
     return;
   }
 
@@ -34898,6 +34727,11 @@ async function handleRecordAction(action, id, sourceEl = null) {
     const nextStatus = String(id || "").trim();
     const selected = getSelectedLeads();
     if (!selected.length || !LEAD_STATUS_TABLE_OPTIONS.includes(nextStatus) || state.leadBulkStatusSaving) {
+      return;
+    }
+    if (nextStatus === "Qualified") {
+      state.leadBulkStatusOpen = false;
+      void executeQualifiedLeadHandoff(selected);
       return;
     }
     void (async () => {
@@ -35014,136 +34848,9 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "task-bulk-shift") {
-    const selected = getSelectedTasks();
-    if (!selected.length || !selected.every((task) => canTaskEditCore(task))) {
-      return;
-    }
-    const dayOffset = Number(id || 0);
-    if (!Number.isFinite(dayOffset) || dayOffset === 0) {
-      return;
-    }
-    if (isSupabaseWorkWriteEnabled()) {
-      void (async () => {
-        try {
-          let snapshot = null;
-          for (const task of selected) {
-            snapshot = await moveSupabaseTaskSchedule(
-              task.id,
-              addDaysToIso(task.dueDate, dayOffset),
-              task.startTime || splitDeadlineAt(task.deadlineAt).startTime,
-              task.backlogState || "scheduled"
-            );
-          }
-          if (snapshot) {
-            applyWorkSnapshotResult(snapshot);
-          }
-        } catch (error) {
-          window.alert(`Bulk task reschedule failed: ${error.message}`);
-        }
-      })();
-      return;
-    }
-    if (blockConnectedModeLocalFallback("Bulk task rescheduling")) {
-      return;
-    }
-    selected.forEach((task) => shiftTaskDueDate(task, dayOffset));
-    persistDataAndRefresh();
-    return;
-  }
-
-  if (action === "task-bulk-clear-selection") {
-    clearTaskSelection();
-    renderRoute();
-    return;
-  }
-
-  if (action === "task-bulk-delete") {
-    const selected = getSelectedTasks();
-    if (!selected.length || !selected.every((task) => canTaskDelete(task))) {
-      return;
-    }
-    openConfirmModal({
-      title: "Delete selected tasks?",
-      message: `Delete ${selected.length} selected task${selected.length === 1 ? "" : "s"}?`,
-      confirmLabel: "Delete",
-      danger: true,
-      onConfirm: async () => {
-        if (isSupabaseWorkWriteEnabled()) {
-          try {
-            let snapshot = null;
-            for (const task of selected) {
-              for (const attachment of Array.isArray(task.attachments) ? task.attachments : []) {
-                if (attachment?.id) {
-                  await deleteSupabaseTaskAttachment(attachment.id, attachment.storagePath || "");
-                }
-              }
-              snapshot = await deleteSupabaseTask(task.id);
-            }
-            clearTaskSelection();
-            if (snapshot) {
-              applyWorkSnapshotResult(snapshot, { render: false });
-            }
-            renderRoute();
-            return;
-          } catch (error) {
-            window.alert(`Bulk task delete failed: ${error.message}`);
-            return;
-          }
-        }
-        if (blockConnectedModeLocalFallback("Bulk task deletion")) {
-          return;
-        }
-        const selectedIds = new Set(selected.map((task) => task.id));
-        state.data.tasks = state.data.tasks.filter((task) => !selectedIds.has(task.id));
-        clearTaskSelection();
-        persistDataAndRefresh();
-      }
-    });
-    return;
-  }
-
-  if (action === "table-sort") {
-    const nextKey = String(id || "").trim();
-    if (!nextKey) {
-      return;
-    }
-    if (state.tableSortKey !== nextKey) {
-      state.tableSortKey = nextKey;
-      state.tableSortDir = "asc";
-      resetTaskTablePage();
-      renderRoute();
-      return;
-    }
-    if (state.tableSortDir === "asc") {
-      state.tableSortDir = "desc";
-      resetTaskTablePage();
-      renderRoute();
-      return;
-    }
-    if (state.tableSortDir === "desc") {
-      state.tableSortKey = "";
-      state.tableSortDir = "none";
-      resetTaskTablePage();
-      renderRoute();
-      return;
-    }
-    state.tableSortDir = "asc";
-    resetTaskTablePage();
-    renderRoute();
-    return;
-  }
-
   if (action === "table-page") {
     const nextPage = Math.max(1, Number.parseInt(String(id || "1"), 10) || 1);
     state.tablePage = nextPage;
-    renderRoute();
-    return;
-  }
-
-  if (action === "table-page-size") {
-    state.tablePageSize = normalizeTaskTablePageSize(id);
-    resetTaskTablePage();
     renderRoute();
     return;
   }
@@ -35189,17 +34896,52 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "project-filter") {
-    const next = String(id || "").toLowerCase();
-    state.projectsQuickFilter = ["all", "mine", "at-risk", "completed"].includes(next)
-      ? next
-      : "all";
+  if (action === "kanban-open-filters") {
+    state.kanbanFiltersOpen = !state.kanbanFiltersOpen;
+    state.kanbanPropertiesOpen = false;
     renderRoute();
     return;
   }
 
-  if (action === "kanban-open-filters") {
-    state.kanbanFiltersOpen = !state.kanbanFiltersOpen;
+  if (action === "kanban-view") {
+    const nextView = String(id || "board").toLowerCase();
+    state.kanbanView = ["board", "detailed", "table"].includes(nextView) ? nextView : "board";
+    state.kanbanFiltersOpen = false;
+    state.kanbanPropertiesOpen = false;
+    resetTaskTablePage();
+    renderRoute();
+    return;
+  }
+
+  if (action === "kanban-sort") {
+    const order = ["due-asc", "due-desc", "title"];
+    const currentIndex = Math.max(0, order.indexOf(state.kanbanSort));
+    state.kanbanSort = order[(currentIndex + 1) % order.length];
+    resetTaskTablePage();
+    renderRoute();
+    return;
+  }
+
+  if (action === "kanban-properties") {
+    state.kanbanPropertiesOpen = !state.kanbanPropertiesOpen;
+    state.kanbanFiltersOpen = false;
+    renderRoute();
+    return;
+  }
+
+  if (action === "kanban-properties-close") {
+    state.kanbanPropertiesOpen = false;
+    renderRoute();
+    return;
+  }
+
+  if (action === "kanban-property-toggle") {
+    const property = String(id || "").trim();
+    if (!["assignee", "due", "priority"].includes(property)) return;
+    const hidden = new Set(state.kanbanHiddenProperties || []);
+    hidden.has(property) ? hidden.delete(property) : hidden.add(property);
+    state.kanbanHiddenProperties = [...hidden];
+    state.kanbanPropertiesOpen = true;
     renderRoute();
     return;
   }
@@ -35234,6 +34976,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-filters-clear") {
+    clearLeadImportResultView();
     state.searchTerm = "";
     state.leadsStatusFilter = "all";
     state.leadsOwnerFilter = "all";
@@ -35246,7 +34989,33 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-admin-view") {
+    if (applyLeadAdminViewState(state, id)) {
+      resetCrmPage("leads");
+      renderRoute();
+    }
+    return;
+  }
+
+  if (action === "lead-agent-view") {
+    if (applyLeadAgentViewState(state, id)) {
+      resetCrmPage("leads");
+      renderRoute();
+    }
+    return;
+  }
+
+  if (action === "lead-admin-refresh") {
+    void refreshSupabaseLeadsPageData({
+      render: true,
+      force: true,
+      skipInitialRender: true
+    });
+    return;
+  }
+
   if (action === "lead-review-unqualified") {
+    clearLeadImportResultView();
     state.leadsStatusFilter = "Unqualified";
     state.leadFiltersOpen = false;
     resetCrmPage("leads");
@@ -35262,6 +35031,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-source-filter") {
+    clearLeadImportResultView();
     const next = String(id || "").trim();
     state.leadsSourceFilter = next || "all";
     resetCrmPage("leads");
@@ -35270,6 +35040,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-status-filter") {
+    clearLeadImportResultView();
     state.leadsStatusFilter = String(id || "all").trim() || "all";
     resetCrmPage("leads");
     renderRoute();
@@ -35277,6 +35048,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-date-filter") {
+    clearLeadImportResultView();
     state.leadsDateFilter = String(id || "all").trim() || "all";
     resetCrmPage("leads");
     renderRoute();
@@ -35284,6 +35056,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-owner-filter") {
+    clearLeadImportResultView();
     const next = String(id || "").trim();
     state.leadsOwnerFilter = next || "all";
     resetCrmPage("leads");
@@ -35292,6 +35065,7 @@ async function handleRecordAction(action, id, sourceEl = null) {
   }
 
   if (action === "lead-scope-filter") {
+    clearLeadImportResultView();
     const next = String(id || "").trim().toLowerCase();
     state.leadsScope = ["all", "mine", "unassigned", "assigned"].includes(next) ? next : "all";
     if (state.leadsScope === "mine") {
@@ -35367,6 +35141,16 @@ async function handleRecordAction(action, id, sourceEl = null) {
     if (!leadId || !nextStatus || String(state.leadStatusSavingId || "").trim() === leadId) {
       return;
     }
+    if (nextStatus === "Qualified") {
+      state.leadStatusOpenId = "";
+      state.leadStatusOpenPlacement = "down";
+      state.leadStatusPopoverStyle = "";
+      const lead = getLeadById(leadId);
+      if (lead) {
+        void executeQualifiedLeadHandoff([lead]);
+      }
+      return;
+    }
     state.leadStatusOpenId = "";
     state.leadStatusOpenPlacement = "down";
     state.leadStatusPopoverStyle = "";
@@ -35440,37 +35224,6 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "project-sort") {
-    const next = String(id || "").trim().toLowerCase();
-    state.projectsSort = [
-      "recent:desc",
-      "name:asc",
-      "name:desc",
-      "owner:asc",
-      "progress:desc",
-      "progress:asc",
-      "deadline:asc",
-      "risk:desc"
-    ].includes(next)
-      ? next
-      : "recent:desc";
-    renderRoute();
-    return;
-  }
-
-  if (action === "project-select") {
-    const nextId = String(id || "").trim();
-    if (!nextId) {
-      return;
-    }
-    if (state.selectedProjectId === nextId) {
-      return;
-    }
-    state.selectedProjectId = nextId;
-    renderRoute();
-    return;
-  }
-
   if (action === "crm-table-sort") {
     const routeKey = String(state.routeId || "").trim();
     if (!["leads", "contacts", "accounts", "deals", "team"].includes(routeKey)) {
@@ -35483,43 +35236,27 @@ async function handleRecordAction(action, id, sourceEl = null) {
     const current = getCrmSortState(routeKey);
     if (current.key !== nextKey) {
       state.crmSortByRoute[routeKey] = { key: nextKey, dir: "asc" };
-      if (routeKey === "leads") {
-        clearLeadSelection();
-      }
-      resetCrmPage(routeKey);
-      renderRoute();
+      applyCrmSortChange(routeKey);
       return;
     }
     if (current.dir === "asc") {
       state.crmSortByRoute[routeKey] = { key: nextKey, dir: "desc" };
-      if (routeKey === "leads") {
-        clearLeadSelection();
-      }
-      resetCrmPage(routeKey);
-      renderRoute();
+      applyCrmSortChange(routeKey);
       return;
     }
     if (current.dir === "desc") {
       state.crmSortByRoute[routeKey] = { key: "", dir: "none" };
-      if (routeKey === "leads") {
-        clearLeadSelection();
-      }
-      resetCrmPage(routeKey);
-      renderRoute();
+      applyCrmSortChange(routeKey);
       return;
     }
     state.crmSortByRoute[routeKey] = { key: nextKey, dir: "asc" };
-    if (routeKey === "leads") {
-      clearLeadSelection();
-    }
-    resetCrmPage(routeKey);
-    renderRoute();
+    applyCrmSortChange(routeKey);
     return;
   }
 
   if (action === "crm-table-page") {
     const routeKey = String(state.routeId || "").trim();
-    if (!["leads", "contacts", "accounts", "deals"].includes(routeKey)) {
+    if (!["leads", "contacts", "accounts", "deals", "team"].includes(routeKey)) {
       return;
     }
     if (
@@ -35648,89 +35385,6 @@ async function handleRecordAction(action, id, sourceEl = null) {
     state.calendarSideCollapsed = !state.calendarSideCollapsed;
     saveUiPrefs();
     renderRoute();
-    return;
-  }
-
-  if (action === "project-edit") {
-    openProjectComposerModal(id);
-    return;
-  }
-
-  if (action === "project-create-task") {
-    const project = state.data.projects.find((item) => item.id === id);
-    if (!project) {
-      window.alert("Project not found.");
-      return;
-    }
-    state.taskComposePrefillDate = todayIso(0);
-    openTaskComposerModal();
-    const modalForm = document.getElementById("modalForm");
-    if (modalForm && modalForm.dataset.mode === "task-compose") {
-      const projectInput = modalForm.querySelector("input[name='projectId']");
-      if (projectInput) {
-        projectInput.value = project.id;
-      }
-      syncTaskAdvancedUi(modalForm);
-    }
-    return;
-  }
-
-  if (action === "project-progress") {
-    const project = state.data.projects.find((item) => item.id === id);
-    if (project) {
-      if (isSupabaseWorkWriteEnabled()) {
-        void (async () => {
-          try {
-            applyWorkSnapshotResult(await setSupabaseProjectProgress(id, Math.min(100, Number(project.progress || 0) + 10)));
-          } catch (error) {
-            window.alert(`Project progress update failed: ${error.message}`);
-          }
-        })();
-        return;
-      }
-      if (blockConnectedModeLocalFallback("Updating project progress")) {
-        return;
-      }
-      project.progress = Math.min(100, Number(project.progress || 0) + 10);
-      if (project.progress >= 100) {
-        project.status = "On Track";
-      }
-      persistDataAndRefresh();
-    }
-    return;
-  }
-
-  if (action === "project-delete") {
-    const project = (state.data.projects || []).find((item) => item.id === id);
-    const label = project ? `"${project.name}"` : "this project";
-    openConfirmModal({
-      title: "Delete project?",
-      message: `Delete ${label}? This cannot be undone.`,
-      confirmLabel: "Delete",
-      danger: true,
-      onConfirm: async () => {
-        if (isSupabaseWorkWriteEnabled()) {
-          try {
-            applyWorkSnapshotResult(await deleteSupabaseProject(id));
-            if (state.selectedProjectId === id) {
-              state.selectedProjectId = "";
-            }
-            return;
-          } catch (error) {
-            window.alert(`Delete project failed: ${error.message}`);
-            return;
-          }
-        }
-        if (blockConnectedModeLocalFallback("Deleting projects")) {
-          return;
-        }
-        deleteById("projects", id);
-        if (state.selectedProjectId === id) {
-          state.selectedProjectId = "";
-        }
-        persistDataAndRefresh();
-      }
-    });
     return;
   }
 
@@ -35897,6 +35551,37 @@ async function handleRecordAction(action, id, sourceEl = null) {
 
   if (action === "lead-reassign-owner") {
     openLeadReassignModal(id);
+    return;
+  }
+
+  if (action === "lead-archive-refresh") {
+    void leadArchivePageController.refresh();
+    return;
+  }
+
+  if (action === "lead-archive-page") {
+    leadArchivePageController.changePage(id);
+    return;
+  }
+
+  if (action === "lead-archive-restore") {
+    leadArchivePageController.restore(id);
+    return;
+  }
+
+  if (action === "lead-archive-delete-permanently") {
+    leadArchivePageController.permanentlyDelete(id);
+    return;
+  }
+
+  if (action === "lead-archive-clear-filters") {
+    state.searchTerm = "";
+    state.leadArchiveData = createEmptyLeadArchiveData({
+      ...state.leadArchiveData,
+      page: 1,
+      statusFilter: "all"
+    });
+    void leadArchivePageController.refresh();
     return;
   }
 
@@ -37780,11 +37465,6 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
-  if (action === "table-add-task") {
-    openCreateModal();
-    return;
-  }
-
   if (action === "lead-convert") {
     openLeadConversionModal(id);
     return;
@@ -38338,6 +38018,15 @@ function onToggle(event) {
     });
   }
 
+  if (target.id === "notifMenu" && target.open) {
+    void refreshSupabaseNotifications({
+      render: true,
+      alertOnError: false,
+      showToasts: false,
+      force: true
+    });
+  }
+
   if (target.classList.contains("table-actions-menu")) {
     if (target.open) {
       closeTableActionMenus(target);
@@ -38390,15 +38079,29 @@ async function onClick(event) {
   if (!target) {
     return;
   }
+  if (handleSettingsPickerClick(event)) {
+    return;
+  }
   let closedKanbanFilters = false;
   if (state.kanbanFiltersOpen && !target.closest(".kanban-filter-shell")) {
     state.kanbanFiltersOpen = false;
     closedKanbanFilters = true;
   }
+  let closedKanbanProperties = false;
+  if (state.kanbanPropertiesOpen && !target.closest(".kanban-n-popover-shell")) {
+    state.kanbanPropertiesOpen = false;
+    closedKanbanProperties = true;
+  }
   let closedLeadFilters = false;
   if (state.leadFiltersOpen && !target.closest(".lead-filter-shell")) {
     state.leadFiltersOpen = false;
     closedLeadFilters = true;
+  }
+  if (state.leadFiltersOpen) {
+    const clickedFilterDropdown = target.closest("[data-lead-filter-dropdown]");
+    document.querySelectorAll("#leadFilterForm [data-lead-filter-dropdown][open]").forEach((dropdown) => {
+      if (dropdown !== clickedFilterDropdown) dropdown.open = false;
+    });
   }
   const clickedInsideContextMenu = Boolean(target.closest("#contextMenu"));
   if (contextMenuState.open && !clickedInsideContextMenu) {
@@ -38892,12 +38595,6 @@ async function onClick(event) {
     return;
   }
 
-  const chipProject = target.closest("[data-action='task-chip-project-select']");
-  if (chipProject) {
-    handleRecordAction("task-chip-project-select", chipProject.dataset.id || "");
-    return;
-  }
-
   const chipType = target.closest("[data-action='task-chip-type-select']");
   if (chipType) {
     handleRecordAction("task-chip-type-select", chipType.dataset.id || "");
@@ -38928,9 +38625,9 @@ async function onClick(event) {
     return;
   }
 
-  const notesToggle = target.closest("[data-action='task-notes-toggle']");
-  if (notesToggle) {
-    handleRecordAction("task-notes-toggle", notesToggle.dataset.id || "toggle");
+  const advancedToggle = target.closest("[data-action='task-advanced-toggle']");
+  if (advancedToggle) {
+    handleRecordAction("task-advanced-toggle", advancedToggle.dataset.id || "toggle");
     return;
   }
 
@@ -38990,6 +38687,13 @@ async function onClick(event) {
     return;
   }
 
+  const leadFilterOption = target.closest("[data-lead-filter-option]");
+  if (leadFilterOption) {
+    event.preventDefault();
+    selectLeadFilterDropdownOption(leadFilterOption);
+    return;
+  }
+
   const routeButton = target.closest("[data-route]");
   const profileAvatarTrigger = target.closest("[data-profile-avatar-trigger]");
   const workspaceLogoTrigger = target.closest("[data-workspace-logo-trigger]");
@@ -39020,6 +38724,9 @@ async function onClick(event) {
       if (attendanceMenu) {
         attendanceMenu.open = false;
       }
+    }
+    if ((state.routeId === "settings" || state.routeId === "settings-workspace") && !confirmSettingsNavigation()) {
+      return;
     }
     setRoute(routeButton.dataset.route);
     if (window.innerWidth <= 1024) {
@@ -39082,6 +38789,43 @@ async function onClick(event) {
       return;
     }
 
+    if (action === "notifications-filter") {
+      const filter = ["unread", "read"].includes(String(id || "").trim()) ? String(id).trim() : "all";
+      state.notificationCenterData = createEmptyNotificationCenterData({
+        ...state.notificationCenterData,
+        loaded: false,
+        filter,
+        offset: 0
+      });
+      renderRoute();
+      void refreshSupabaseNotificationCenter({ render: true, force: true });
+      return;
+    }
+
+    if (action === "notifications-page") {
+      const center = state.notificationCenterData || createEmptyNotificationCenterData();
+      const direction = String(id || "").trim();
+      const nextOffset = direction === "previous"
+        ? Math.max(0, Number(center.offset || 0) - Number(center.limit || 24))
+        : Number(center.offset || 0) + Number(center.limit || 24);
+      state.notificationCenterData = createEmptyNotificationCenterData({
+        ...center,
+        loaded: false,
+        offset: nextOffset
+      });
+      renderRoute();
+      void refreshSupabaseNotificationCenter({ render: true, force: true });
+      return;
+    }
+
+    if (action === "notifications-retry") {
+      void refreshSupabaseNotifications({ render: true, alertOnError: false, showToasts: false, force: true });
+      if (state.routeId === "notifications") {
+        void refreshSupabaseNotificationCenter({ render: true, force: true });
+      }
+      return;
+    }
+
     if (action === "close-modal") {
       closeModal();
       closeContextMenu();
@@ -39123,13 +38867,6 @@ async function onClick(event) {
 
     if (action === "lead-convert-next" || action === "lead-convert-back") {
       handleLeadConversionStep(action);
-      return;
-    }
-
-    if (action === "task-bulk-clear-selection") {
-      handleRecordAction(action, "");
-      closeContextMenu();
-      closeTableActionMenus();
       return;
     }
 
@@ -39179,7 +38916,7 @@ async function onClick(event) {
   }
 
   if (
-    closedKanbanFilters &&
+    (closedKanbanFilters || closedKanbanProperties) &&
     !target.closest(
       "button,a,input,select,textarea,summary,details,[data-action],[data-route],[contenteditable='true']"
     )
@@ -39228,6 +38965,14 @@ async function onClick(event) {
       void resolveConfirmModal(false);
       return;
     }
+    if (modalForm instanceof HTMLFormElement && modalForm.dataset.mode === "messenger-group-manage") {
+      void messengerController.handleAction(
+        "messenger-group-cancel",
+        modalForm.dataset.conversationKey || "",
+        modalForm
+      );
+      return;
+    }
     closeModal();
   }
 }
@@ -39235,9 +38980,24 @@ async function onClick(event) {
 function onInput(event) {
   if (handleIntegrationMarketplaceFilter(event)) return;
 
+  if (event.target.matches("[data-lead-owner-filter-search]")) {
+    filterLeadOwnerDropdown(event.target);
+    return;
+  }
+
+  if (event.target.matches("[data-attendance-request-search]")) {
+    syncAttendanceRequestList(event.target, { resetPage: true });
+    return;
+  }
+
   const feedbackForm = event.target.closest("form");
   if (feedbackForm instanceof HTMLFormElement && feedbackForm.querySelector(".form-feedback")) {
     clearFormFeedback(feedbackForm);
+  }
+
+  if (event.target.closest?.("#modalForm")?.dataset.mode === "messenger-group-manage") {
+    void messengerController.handleAction("messenger-group-sync", "", event.target);
+    return;
   }
 
   const ownershipForm = event.target.closest("#modalForm");
@@ -39295,10 +39055,16 @@ function onInput(event) {
     return;
   }
 
+  markSettingsFormDirty(event.target);
+
   const workspaceProfileForm = event.target.closest("#workspaceProfileForm");
   if (workspaceProfileForm instanceof HTMLFormElement) {
-    updateWorkspaceProfilePreview(workspaceProfileForm);
-    return;
+    if (event.target.matches("input[type='color'][name='brandColor']")) {
+      const output = event.target.closest(".settings-color-control")?.querySelector("output");
+      if (output) {
+        output.textContent = String(event.target.value || "").toUpperCase();
+      }
+    }
   }
 
   const myProfileForm = event.target.closest("#myProfileForm");
@@ -39310,6 +39076,27 @@ function onInput(event) {
   }
 
   const modalForm = event.target.closest("#modalForm");
+  if (modalForm && modalForm.dataset.mode === "lead-import" && event.target.matches("[data-lead-import-assignee-search]")) {
+    const query = String(event.target.value || "");
+    state.leadImportDraft = {
+      ...(state.leadImportDraft || createEmptyLeadImportDraft()),
+      assigneeSearch: query
+    };
+    const normalizedQuery = normalizeForMatch(query);
+    let visibleCount = 0;
+    modalForm.querySelectorAll(".lead-import-assignee-card").forEach((card) => {
+      const matches = !normalizedQuery || normalizeForMatch(card.textContent || "").includes(normalizedQuery);
+      card.hidden = !matches;
+      if (matches) {
+        visibleCount += 1;
+      }
+    });
+    const emptyState = modalForm.querySelector("[data-lead-import-assignee-empty]");
+    if (emptyState) {
+      emptyState.hidden = visibleCount > 0;
+    }
+    return;
+  }
   if (modalForm && modalForm.dataset.mode === "lead-convert") {
     if (state.leadConversionDraft) {
       state.leadConversionDraft.errorMessage = "";
@@ -39373,18 +39160,6 @@ function onInput(event) {
     return;
   }
 
-  if (modalForm && modalForm.dataset.mode === "project-compose") {
-    if (event.target.matches("[data-project-progress-input]")) {
-      syncProjectComposerUi(modalForm);
-      return;
-    }
-    if (event.target.name === "description" || event.target.name === "risks") {
-      syncProjectComposerUi(modalForm);
-      return;
-    }
-    return;
-  }
-
   if (modalForm && isLeadComposeMode(modalForm.dataset.mode)) {
     syncLeadComposerUi(modalForm);
     return;
@@ -39413,35 +39188,6 @@ function onInput(event) {
       syncNewDirectChatModal(modalForm);
       return;
     }
-    return;
-  }
-
-  if (event.target.id === "tableCurrentOnly") {
-    state.tableCurrentOnly = Boolean(event.target.checked);
-    resetTaskTablePage();
-    renderRoute();
-    return;
-  }
-
-  if (event.target.id === "tableTaskScope") {
-    const scope = String(event.target.value || "all").toLowerCase();
-    state.tableScope = ["all", "open", "completed"].includes(scope) ? scope : "all";
-    resetTaskTablePage();
-    renderRoute();
-    return;
-  }
-
-  if (event.target.id === "tableInlineSearch") {
-    state.searchTerm = String(event.target.value || "");
-    resetTaskTablePage();
-    scheduleRenderRoutePreservingInput("tableInlineSearch", event.target.selectionStart, event.target.selectionEnd);
-    return;
-  }
-
-  if (event.target.id === "tablePageSize") {
-    state.tablePageSize = normalizeTaskTablePageSize(event.target.value);
-    resetTaskTablePage();
-    renderRoute();
     return;
   }
 
@@ -39510,49 +39256,18 @@ function onInput(event) {
     return;
   }
 
-  if (event.target.id === "projectsInlineSearch") {
-    state.projectsSearchTerm = String(event.target.value || "");
-    scheduleRenderRoutePreservingInput(
-      "projectsInlineSearch",
-      event.target.selectionStart,
-      event.target.selectionEnd
-    );
-    return;
-  }
-
-  if (event.target.id === "taskSelectAll") {
-    const rowCheckboxes = [...document.querySelectorAll("input[name='taskSelect']")];
-    const checked = Boolean(event.target.checked);
-    rowCheckboxes.forEach((checkbox) => {
-      checkbox.checked = checked;
-      const taskId = String(checkbox.value || "");
-      if (!taskId) {
-        return;
-      }
-      if (checked) {
-        state.selectedTaskIds.add(taskId);
-      } else {
-        state.selectedTaskIds.delete(taskId);
-      }
-    });
-    renderRoute();
-    return;
-  }
-
-  if (event.target.name === "taskSelect") {
-    const taskId = String(event.target.value || "");
-    if (taskId) {
-      if (event.target.checked) {
-        state.selectedTaskIds.add(taskId);
-      } else {
-        state.selectedTaskIds.delete(taskId);
-      }
-    }
-    renderRoute();
-    return;
-  }
-
   if (event.target.id === "globalSearch") {
+    if (state.routeId === "leads") {
+      clearLeadImportResultView();
+    }
+    if (state.routeId === "lead-archive") {
+      leadArchivePageController.scheduleSearch(event.target.value, {
+        inputId: "globalSearch",
+        caretStart: event.target.selectionStart,
+        caretEnd: event.target.selectionEnd
+      });
+      return;
+    }
     state.searchTerm = String(event.target.value || "");
     resetCrmPage();
     if (state.routeId === "leads") {
@@ -39760,16 +39475,8 @@ async function downloadLeadImportResultReport(jobId) {
   if (!normalizedJobId) {
     throw new Error("Import job ID is unavailable.");
   }
-  const client = getSupabaseClient();
-  const { data, error } = await client.rpc("get_lead_import_results", { p_job_id: normalizedJobId });
-  if (error) {
-    throw error;
-  }
-  const rows = Array.isArray(data?.rows) ? data.rows : [];
-  const lines = [
-    ["Row", "Result", "Lead ID", "Reason"].map(csvEscape).join(","),
-    ...rows.map((row) => [row.rowNumber, row.operation, row.leadId, row.reason].map(csvEscape).join(","))
-  ];
+  const rows = await fetchSupabaseLeadImportResults(normalizedJobId);
+  const lines = buildLeadImportResultCsv(rows, csvEscape);
   downloadCsvFile(lines, `lead-import-results-${normalizedJobId}`);
 }
 
@@ -39784,21 +39491,32 @@ async function rollbackCloudLeadImport(jobId) {
     throw error;
   }
   await refreshSupabaseCrmData({ render: false, persist: false, alertOnError: false });
-  persistDataAndRefresh();
+  saveData(state.data);
+  renderRoute();
   return data;
 }
 
 function onChange(event) {
   if (handleIntegrationMarketplaceFilter(event)) return;
 
+  if (event.target.matches("[data-lead-archive-status]")) {
+    leadArchivePageController.setStatusFilter(event.target.value);
+    return;
+  }
+
   const feedbackForm = event.target.closest("form");
   if (feedbackForm instanceof HTMLFormElement && feedbackForm.querySelector(".form-feedback")) {
     clearFormFeedback(feedbackForm);
   }
 
+  if (event.target.closest?.("#modalForm")?.dataset.mode === "messenger-group-manage") {
+    void messengerController.handleAction("messenger-group-sync", "", event.target);
+    return;
+  }
+
   const workspaceProfileForm = event.target.closest("#workspaceProfileForm");
   if (workspaceProfileForm instanceof HTMLFormElement) {
-    updateWorkspaceProfilePreview(workspaceProfileForm);
+    markSettingsFormDirty(event.target);
   }
 
   const activeModalForm = document.getElementById("modalForm");
@@ -39830,7 +39548,12 @@ function onChange(event) {
     }
   }
   if (modalForm instanceof HTMLFormElement && modalForm.dataset.mode === "lead-ownership-manager") {
-    if (event.target.matches("[name='ownershipAction'], [name='leadStatus'], [name='archiveScope'], [name='amountMode'], [name='leadLimit']")) {
+    if (event.target.matches("[name='sourceOwnerMemberId'], [name='leadStatus'], [name='archiveScope']")) {
+      syncLeadOwnershipManagerModal(modalForm);
+      void refreshLeadOwnershipAvailability(modalForm);
+      return;
+    }
+    if (event.target.matches("[name='amountMode'], [name='leadLimit'], [name='destinationOwnerMemberIds'], [name='leadOrder']")) {
       syncLeadOwnershipManagerModal(modalForm);
       return;
     }
@@ -39841,6 +39564,7 @@ function onChange(event) {
   }
 
   if (event.target.matches("[data-lead-source-select]")) {
+    clearLeadImportResultView();
     state.leadsSourceFilter = String(event.target.value || "all").trim();
     resetCrmPage("leads");
     renderRoute();
@@ -39848,6 +39572,7 @@ function onChange(event) {
   }
 
   if (event.target.matches("[data-lead-status-select]")) {
+    clearLeadImportResultView();
     state.leadsStatusFilter = String(event.target.value || "all").trim() || "all";
     resetCrmPage("leads");
     renderRoute();
@@ -39855,6 +39580,7 @@ function onChange(event) {
   }
 
   if (event.target.matches("[data-lead-date-select]")) {
+    clearLeadImportResultView();
     state.leadsDateFilter = String(event.target.value || "all").trim() || "all";
     resetCrmPage("leads");
     renderRoute();
@@ -39862,6 +39588,7 @@ function onChange(event) {
   }
 
   if (event.target.matches("[data-lead-owner-select]")) {
+    clearLeadImportResultView();
     state.leadsOwnerFilter = String(event.target.value || "all").trim() || "all";
     resetCrmPage("leads");
     renderRoute();
@@ -40031,12 +39758,19 @@ function onChange(event) {
           ...((state.leadImportDraft && state.leadImportDraft.mapping) || {}),
           [mapKey]: String(event.target.value || "")
         },
+        workspaceReviewStatus: "idle",
+        workspaceReviewVerified: false,
+        workspaceReviewError: "",
+        workspaceMatches: [],
         review: null
       };
       if (normalizeLeadImportStep(nextDraft.step) === "review") {
         nextDraft.review = buildLeadImportReview(nextDraft);
         state.leadImportDraft = nextDraft;
         renderLeadImportModal();
+        verifyLeadImportWorkspace(nextDraft).catch((error) => {
+          console.error("Lead import workspace review failed", error);
+        });
         return;
       }
       state.leadImportDraft = nextDraft;
@@ -40315,6 +40049,17 @@ async function onSubmit(event) {
       await submitNewGroupChatForm(event.target);
       return;
     }
+    if (event.target.dataset.mode === "messenger-group-manage") {
+      const conversationId = String(event.target.dataset.conversationId || "").trim();
+      if (conversationId) {
+        await messengerController.handleAction(
+          "messenger-group-confirm",
+          conversationKey("channel", conversationId),
+          event.submitter || event.target.querySelector("[data-action='messenger-group-confirm']")
+        );
+      }
+      return;
+    }
     if (event.target.dataset.mode === "lead-export") {
       await submitLeadExportModal(event.target, event.submitter);
       return;
@@ -40361,10 +40106,6 @@ async function onSubmit(event) {
     }
     if (event.target.dataset.mode === "task-compose") {
       await submitTaskComposerForm(event.target);
-      return;
-    }
-    if (event.target.dataset.mode === "project-compose") {
-      await submitProjectComposerForm(event.target, event.submitter);
       return;
     }
     if (event.target.dataset.mode === "attendance-request-compose") {
@@ -40419,15 +40160,29 @@ async function onSubmit(event) {
     return;
   }
 
+  if (event.target.id === "notificationSettingsForm") {
+    event.preventDefault();
+    await runSettingsSave(event.target, event.submitter, () => submitNotificationSettingsForm(event.target));
+    return;
+  }
+
   if (event.target.id === "workspaceProfileForm") {
     event.preventDefault();
-    await submitWorkspaceProfileForm(event.target);
+    if (!consumeSettingsSaveConfirmation(event.target, event.submitter)) {
+      openSettingsSaveConfirmation(event.submitter);
+      return;
+    }
+    await runSettingsSave(event.target, event.submitter, () => submitWorkspaceProfileForm(event.target));
     return;
   }
 
   if (event.target.id === "myProfileForm") {
     event.preventDefault();
-    submitMyProfileForm(event.target);
+    if (!consumeSettingsSaveConfirmation(event.target, event.submitter)) {
+      openSettingsSaveConfirmation(event.submitter);
+      return;
+    }
+    await runSettingsSave(event.target, event.submitter, () => submitMyProfileForm(event.target));
     return;
   }
 
@@ -40457,14 +40212,33 @@ async function onSubmit(event) {
 }
 
 function onKeyDown(event) {
+  if (handleSettingsEditorKeydown(event)) {
+    return;
+  }
+
+  const openLeadFilterDropdown = event.target?.closest?.("[data-lead-filter-dropdown][open]");
+  if (event.key === "Escape" && openLeadFilterDropdown instanceof HTMLDetailsElement) {
+    event.preventDefault();
+    openLeadFilterDropdown.open = false;
+    openLeadFilterDropdown.querySelector("summary")?.focus();
+    return;
+  }
+
+  if ((event.key === "Enter" || event.key === " ") && event.target?.matches?.("[data-task-open]")) {
+    event.preventDefault();
+    openTaskDetailModal(event.target.dataset.taskOpen || "");
+    return;
+  }
+
   if (event.key === "Escape" && state.leadFiltersOpen) {
     state.leadFiltersOpen = false;
     renderRoute();
     return;
   }
 
-  if (event.key === "Escape" && state.kanbanFiltersOpen) {
+  if (event.key === "Escape" && (state.kanbanFiltersOpen || state.kanbanPropertiesOpen)) {
     state.kanbanFiltersOpen = false;
+    state.kanbanPropertiesOpen = false;
     renderRoute();
     return;
   }
@@ -40757,6 +40531,15 @@ function onKeyDown(event) {
         return;
       }
     }
+    if (modalForm && modalForm.dataset.mode === "messenger-group-manage") {
+      event.preventDefault();
+      void messengerController.handleAction(
+        "messenger-group-cancel",
+        modalForm.dataset.conversationKey || "",
+        modalForm
+      );
+      return;
+    }
     if (!modalOverlay?.hidden && modalOverlay) {
       closeModal();
       return;
@@ -40804,6 +40587,13 @@ function init() {
   document.addEventListener("scroll", closeConversationRowMenus, true);
   document.addEventListener("scroll", closeLeadStatusPopover, true);
   window.addEventListener("hashchange", renderRoute);
+  window.addEventListener("beforeunload", (event) => {
+    if (!hasUnsavedSettingsChanges()) {
+      return;
+    }
+    event.preventDefault();
+    event.returnValue = "";
+  });
   window.addEventListener("resize", closeLeadStatusPopover);
   window.addEventListener("resize", renderRoute);
   window.addEventListener("focus", onWindowFocus);
@@ -40812,11 +40602,24 @@ function init() {
 
   const services = initSupabase();
   if (services.configured) {
-    observeAuth(async (user) => {
+    observeAuth(async (user, authEvent = "") => {
+      const previousUser = state.signedInUser;
+      const previousUserKey = String(previousUser?.uid || previousUser?.id || previousUser?.email || "").trim().toLowerCase();
+      const nextUserKey = String(user?.uid || user?.id || user?.email || "").trim().toLowerCase();
+      const isSameUser = Boolean(previousUserKey && nextUserKey && previousUserKey === nextUserKey);
       state.signedInUser = user;
       if (!user) {
         applySignedOutUiState({ preserveInviteMessage: state.routeId === "invite" });
         renderRoute();
+        return;
+      }
+      const passiveAuthEvents = new Set(["INITIAL_SESSION", "SIGNED_IN", "TOKEN_REFRESHED"]);
+      if (isSameUser && state.authAccessState === "granted" && passiveAuthEvents.has(String(authEvent || "").toUpperCase())) {
+        updateHeaderMenus();
+        return;
+      }
+      if (authWorkspaceSyncPromise && authWorkspaceSyncUserKey === nextUserKey) {
+        await authWorkspaceSyncPromise;
         return;
       }
       const deferredSetupEmail = normalizeEmailAddress(state.deferredPasswordSetupEmail);
@@ -40843,7 +40646,17 @@ function init() {
       state.loginPendingPasswordSetupEmail = "";
       state.invitePendingPasswordSetupEmail = "";
       clearDeferredPasswordSetup();
-      await syncSupabaseWorkspaceAccess(user, { alertOnDeny: true, syncId: ++authSyncSequence });
+      const workspaceSync = syncSupabaseWorkspaceAccess(user, { alertOnDeny: true, syncId: ++authSyncSequence });
+      authWorkspaceSyncPromise = workspaceSync;
+      authWorkspaceSyncUserKey = nextUserKey;
+      try {
+        await workspaceSync;
+      } finally {
+        if (authWorkspaceSyncPromise === workspaceSync) {
+          authWorkspaceSyncPromise = null;
+          authWorkspaceSyncUserKey = "";
+        }
+      }
       renderRoute();
     });
   }

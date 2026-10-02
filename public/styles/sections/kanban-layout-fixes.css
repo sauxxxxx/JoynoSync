@@ -1,0 +1,36 @@
+/* Kanban-specific shell and table viewport corrections. */
+@media (min-width: 1025px) {
+  #appShell .workspace:has(> .view-content.is-kanban-view) {
+    background: var(--ui-color-surface, #fff);
+  }
+
+  #appShell .view-content.is-kanban-view {
+    padding: 0 !important;
+    background: var(--ui-color-surface, #fff) !important;
+  }
+
+  #appShell .view-content.is-kanban-view > .kanban-n-workspace {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+.kanban-n-table-wrap {
+  grid-template-rows: minmax(0, 1fr) 48px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kanban-n-table-scroll {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.kanban-n-table-footer {
+  position: relative;
+  z-index: 2;
+  background: var(--ui-color-surface, #fff);
+}

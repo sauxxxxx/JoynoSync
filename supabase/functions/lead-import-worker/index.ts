@@ -99,37 +99,6 @@ async function claimJobForProcessing(
   return data as LeadImportJobRecord | null;
 }
 
-async function updateJobProgress(
-  serviceClient: ReturnType<typeof createServiceClient>,
-  jobId: string,
-  counts: {
-    processed: number;
-    created: number;
-    updated: number;
-    skipped: number;
-    assigned: number;
-    leftUnassigned: number;
-  }
-) {
-  const { error } = await serviceClient
-    .from("lead_import_jobs")
-    .update({
-      status: "processing",
-      processed_count: counts.processed,
-      created_count: counts.created,
-      updated_count: counts.updated,
-      skipped_count: counts.skipped,
-      assigned_count: counts.assigned,
-      left_unassigned_count: counts.leftUnassigned,
-      last_error: "",
-      heartbeat_at: new Date().toISOString()
-    })
-    .eq("id", jobId);
-  if (error) {
-    throw error;
-  }
-}
-
 async function failJob(
   serviceClient: ReturnType<typeof createServiceClient>,
   jobId: string,
@@ -199,21 +168,36 @@ async function loadJobCreator(
   return data as CallerMember | null;
 }
 
-async function recordImportChange(
+async function recordImportProgress(
   serviceClient: ReturnType<typeof createServiceClient>,
   job: LeadImportJobRecord,
   row: ImportRow,
-  result: Awaited<ReturnType<typeof processLeadImportRow>>
+  result: Awaited<ReturnType<typeof processLeadImportRow>>,
+  counts: {
+    processed: number;
+    created: number;
+    updated: number;
+    skipped: number;
+    assigned: number;
+    leftUnassigned: number;
+  }
 ) {
-  const { error } = await serviceClient.from("lead_import_changes").upsert({
-    workspace_id: normalizeText(job.workspace_id),
-    job_id: normalizeText(job.id),
-    row_number: row.rowNumber,
-    operation: result.operation || "skipped",
-    lead_id: normalizeText(result.leadId) || null,
-    before_data: result.before || null,
-    reason: normalizeText(result.reason)
-  }, { onConflict: "job_id,row_number" });
+  const { error } = await serviceClient.rpc("record_lead_import_progress", {
+    p_job_id: normalizeText(job.id),
+    p_change: {
+      rowNumber: row.rowNumber,
+      operation: result.operation || "skipped",
+      leadId: normalizeText(result.leadId),
+      beforeData: result.before || null,
+      reason: normalizeText(result.reason),
+      reasonCode: normalizeText(result.reasonCode),
+      leadName: normalizeText(result.leadName || row.values.name),
+      ownerMemberId: normalizeText(result.ownerMemberId),
+      ownerName: normalizeText(result.ownerName),
+      wasAssigned: result.assigned > 0
+    },
+    p_counts: counts
+  });
   if (error) {
     throw error;
   }
@@ -253,14 +237,11 @@ async function runLeadImportJob(
     throw new Error("The queued lead import no longer has any active assignees.");
   }
 
-  let assignmentCursor = Number(job.assigned_count || 0);
   const nextAssignment = () => {
     if (distributionMode !== "auto-assign" || !selectedAssignees.length) {
       return null;
     }
-    const member = selectedAssignees[assignmentCursor % selectedAssignees.length] || null;
-    assignmentCursor += 1;
-    return member;
+    return selectedAssignees[counts.assigned % selectedAssignees.length] || null;
   };
 
   const nowIso = new Date().toISOString();
@@ -276,7 +257,7 @@ async function runLeadImportJob(
 
   for (let index = counts.processed; index < rows.length; index += 1) {
     const row = rows[index] as ImportRow;
-    const assignedMember = row.result === "ready" ? nextAssignment() : null;
+    const assignedMember = row.result === "ready" || row.result === "update" ? nextAssignment() : null;
     const result = await processLeadImportRow(serviceClient, {
       workspaceId,
       callerMember,
@@ -291,16 +272,16 @@ async function runLeadImportJob(
       nowIso,
       importMode: normalizeText(job.import_mode) || "new",
       restoreArchived: Boolean(job.restore_archived),
-      importJobId: normalizeText(job.id)
+      importJobId: normalizeText(job.id),
+      resetStatusToNew: Boolean(job.reset_blank_status)
     });
-    await recordImportChange(serviceClient, job, row, result);
     counts.processed += 1;
     counts.created += result.created;
     counts.updated += result.updated;
     counts.skipped += result.skipped;
     counts.assigned += result.assigned;
     counts.leftUnassigned += result.leftUnassigned;
-    await updateJobProgress(serviceClient, normalizeText(job.id), counts);
+    await recordImportProgress(serviceClient, job, row, result, counts);
   }
 
   await completeJob(serviceClient, normalizeText(job.id), counts);

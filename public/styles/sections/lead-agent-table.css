@@ -1,0 +1,264 @@
+/* Agent Leads table density, columns, row actions, and next-action treatment. */
+@media (min-width: 1025px) {
+  .crm-leads-list.is-agent-view > .data-table-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid var(--lead-agent-border);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 35, 62, 0.025);
+  }
+
+  .crm-leads-list.is-agent-view .data-table {
+    width: 100%;
+    min-width: 1050px;
+    table-layout: fixed;
+  }
+
+  .crm-leads-list.is-agent-view .data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #fbfcfe;
+  }
+
+  .crm-leads-list.is-agent-view .data-table th {
+    height: 46px;
+    padding: 0 6px;
+    color: #273b58;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .crm-leads-list.is-agent-view .data-table th button {
+    font: inherit;
+    text-transform: none;
+  }
+
+  .crm-leads-list.is-agent-view .data-table td {
+    height: 58px;
+    padding: 7px 6px;
+    color: #263d5b;
+    font-size: 11px;
+    font-weight: 400;
+    vertical-align: middle;
+  }
+
+  .crm-leads-list.is-agent-view .data-table tbody tr:first-child {
+    background: #f7faff;
+  }
+
+  .crm-leads-list.is-agent-view .data-table tbody tr:hover,
+  .crm-leads-list.is-agent-view .data-table tbody tr:focus-within {
+    background: #f3f7fd;
+  }
+
+  .crm-leads-list.is-agent-view .table-col-check { width: 3.5%; }
+  .crm-leads-list.is-agent-view .crm-col-lead { width: 17%; }
+  .crm-leads-list.is-agent-view .crm-col-progress { width: 7%; }
+  .crm-leads-list.is-agent-view .crm-col-phone { width: 12%; }
+  .crm-leads-list.is-agent-view .crm-col-timezone { width: 8%; }
+  .crm-leads-list.is-agent-view .crm-col-interest { width: 12%; }
+  .crm-leads-list.is-agent-view .crm-col-status { width: 10%; }
+  .crm-leads-list.is-agent-view .crm-col-last-touch { width: 12%; }
+  .crm-leads-list.is-agent-view .crm-col-next-followup { width: 14%; }
+  .crm-leads-list.is-agent-view .crm-col-agent-actions { width: 4.5%; }
+
+  .crm-leads-list.is-agent-view .crm-inline-avatar {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    font-size: 10px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-inline-avatar.is-person-tone {
+    color: hsl(var(--crm-avatar-hue, 214) 78% 25%);
+    background: hsl(var(--crm-avatar-hue, 214) 76% 92%);
+  }
+
+  .crm-leads-list.is-agent-view .crm-name-text {
+    max-width: 150px;
+    color: #10213e;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .crm-leads-list.is-agent-view .crm-name-sub,
+  .crm-leads-list.is-agent-view .crm-table-meta {
+    max-width: 150px;
+    color: #667b96;
+    font-size: 10px;
+    font-weight: 400;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-progress {
+    display: inline-grid;
+    gap: 3px;
+    padding: 0;
+    border: 0;
+    color: #123b7a;
+    background: transparent;
+    font-size: 10.5px;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-progress strong {
+    font-weight: 550;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-progress-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-progress-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cad5e5;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-progress-dots i.is-complete {
+    background: #1467ed;
+  }
+
+  .crm-leads-list.is-agent-view .crm-phone-cell {
+    gap: 7px;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-phone-icon {
+    color: #3c5c83;
+    font-size: 12px;
+  }
+
+  .crm-leads-list.is-agent-view .crm-phone-value {
+    color: #27466c;
+    font-size: 10.75px;
+  }
+
+  .crm-leads-list.is-agent-view .lead-status-trigger {
+    min-height: 26px;
+    padding: 0 9px;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+
+  .crm-leads-list.is-agent-view .crm-last-touch-cell > .crm-table-meta::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: #18b96b;
+    vertical-align: 1px;
+  }
+
+  .crm-leads-list.is-agent-view .lead-followup-cell-inner {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .crm-leads-list.is-agent-view .lead-admin-followup-icon {
+    color: #1467ed;
+    font-size: 12px;
+  }
+
+  .crm-leads-list.is-agent-view .waiting-due-pill {
+    overflow: hidden;
+    max-width: 120px;
+    padding: 0;
+    border: 0;
+    color: #0a5dd6;
+    background: transparent;
+    font-size: 10px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .crm-leads-list.is-agent-view .waiting-due-pill.is-overdue {
+    color: #c44536;
+  }
+
+  .crm-leads-list.is-agent-view .waiting-due-pill.is-not-set {
+    color: #6f8198;
+    font-weight: 400;
+  }
+
+  .crm-leads-list.is-agent-view .crm-agent-row-actions {
+    position: relative;
+    overflow: visible;
+    text-align: right;
+  }
+
+  .crm-leads-list.is-agent-view .lead-agent-quick-actions {
+    position: absolute;
+    top: 50%;
+    right: 28px;
+    z-index: 8;
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    padding: 3px;
+    border: 1px solid #d6e1ee;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(18, 43, 76, 0.12);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(4px);
+    transition: opacity 140ms ease, transform 140ms ease;
+  }
+
+  .crm-leads-list.is-agent-view tr:hover .lead-agent-quick-actions,
+  .crm-leads-list.is-agent-view tr:focus-within .lead-agent-quick-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .crm-leads-list.is-agent-view .lead-agent-quick-actions button {
+    display: inline-grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    color: #27466c;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .crm-leads-list.is-agent-view .lead-agent-quick-actions button:hover,
+  .crm-leads-list.is-agent-view .lead-agent-quick-actions button:focus-visible {
+    color: #075bd7;
+    background: #eaf2ff;
+    outline: none;
+  }
+
+  .crm-leads-list.is-agent-view .lead-agent-quick-actions button:disabled {
+    color: #aab7c7;
+    cursor: not-allowed;
+  }
+
+  .lead-agent-workflow-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: -2px 0 0 4px;
+    color: #637894;
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+
+  .lead-agent-workflow-hint i {
+    color: #3c78c7;
+  }
+}

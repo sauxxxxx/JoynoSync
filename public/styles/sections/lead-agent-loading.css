@@ -1,0 +1,101 @@
+/* Intentional first-load state for the personal lead queue. */
+.crm-leads-list.is-agent-view.is-loading .crm-lead-total-badge.is-loading {
+  width: 34px;
+  padding: 0;
+}
+
+.lead-agent-count-skeleton,
+.lead-agent-tab-count-skeleton {
+  display: inline-block;
+  background: linear-gradient(90deg, #dfe7f1 0%, #f2f5f8 50%, #dfe7f1 100%);
+  background-size: 180% 100%;
+  animation: leadAgentLoadingShimmer 1.35s ease-in-out infinite;
+}
+
+.lead-agent-count-skeleton {
+  width: 15px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+.lead-agent-tab-count-skeleton {
+  width: 18px;
+  min-width: 18px !important;
+  height: 8px !important;
+  padding: 0 !important;
+}
+
+.crm-leads-list.is-agent-view.is-loading .lead-agent-view-tab,
+.crm-leads-list.is-agent-view.is-loading .crm-lead-agent-action,
+.crm-leads-list.is-agent-view.is-loading .lead-agent-saved-views-btn,
+.crm-leads-list.is-agent-view.is-loading .lead-agent-view-settings {
+  cursor: wait;
+}
+
+.crm-leads-list.is-agent-view.is-loading .lead-agent-view-tab:disabled,
+.crm-leads-list.is-agent-view.is-loading .crm-lead-agent-action:disabled,
+.crm-leads-list.is-agent-view.is-loading .lead-agent-view-settings:disabled,
+.crm-leads-list.is-agent-view.is-loading .lead-agent-menu-shell[aria-disabled="true"] {
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.crm-leads-list.is-agent-view.is-loading > .data-table-shell {
+  position: relative;
+}
+
+.lead-agent-loading-line {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  height: 2px;
+  overflow: hidden;
+  background: #edf1f5;
+}
+
+.lead-agent-loading-line span {
+  display: block;
+  width: 34%;
+  height: 100%;
+  border-radius: 999px;
+  background: #6c8fbd;
+  animation: leadAgentLoadingTrack 1.25s ease-in-out infinite;
+}
+
+.crm-leads-list.is-agent-view.is-loading .crm-table-skeleton-row:first-child,
+.crm-leads-list.is-agent-view.is-loading .crm-table-skeleton-row:nth-child(even) {
+  background: #fff;
+}
+
+@keyframes leadAgentLoadingShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@keyframes leadAgentLoadingTrack {
+  0% { transform: translateX(-110%); }
+  55% { transform: translateX(115%); }
+  100% { transform: translateX(310%); }
+}
+
+:root[data-theme="dark"] .lead-agent-count-skeleton,
+:root[data-theme="dark"] .lead-agent-tab-count-skeleton {
+  background: linear-gradient(90deg, #353535 0%, #4a4a4a 50%, #353535 100%);
+  background-size: 180% 100%;
+}
+
+:root[data-theme="dark"] .lead-agent-loading-line {
+  background: #303030;
+}
+
+:root[data-theme="dark"] .lead-agent-loading-line span {
+  background: #91a9c8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lead-agent-count-skeleton,
+  .lead-agent-tab-count-skeleton,
+  .lead-agent-loading-line span {
+    animation: none;
+  }
+}

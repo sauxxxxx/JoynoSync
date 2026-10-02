@@ -1,0 +1,128 @@
+/* Responsive and dark-mode states for the Notion-inspired import flow. */
+@media (max-width: 760px) {
+  .modal-card.is-lead-import .modal-head {
+    min-height: 96px;
+    padding: 22px 20px 18px;
+  }
+
+  .modal-card.is-lead-import .modal-head h3 {
+    max-width: calc(100% - 42px);
+    font-size: 21px;
+  }
+
+  .modal-card.is-lead-import .lead-import-stepper {
+    position: static;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 18px;
+    border-bottom: 1px solid #e7ebf0;
+  }
+
+  .modal-card.is-lead-import .modal-form {
+    max-height: calc(100dvh - 96px);
+  }
+
+  .modal-card.is-lead-import .lead-import-panel,
+  .modal-card.is-lead-import .lead-import-review-panel,
+  .modal-card.is-lead-import .lead-import-confirm-panel {
+    padding: 20px;
+  }
+
+  .modal-card.is-lead-import .lead-import-review-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modal-card.is-lead-import .lead-import-review-stat:nth-child(3) {
+    border-left: 0;
+  }
+
+  .modal-card.is-lead-import .lead-import-review-stat:nth-child(n + 3) {
+    border-top: 1px solid #e7ebef;
+  }
+
+  .lead-import-mapping-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-card.is-lead-import .lead-import-actions {
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .modal-overlay:has(.modal-card.is-lead-import) {
+    padding: 0;
+  }
+
+  .modal-card.is-lead-import {
+    width: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .modal-card.is-lead-import .lead-import-mode-options,
+  .lead-import-confirm-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-import-confirm-stats > div + div {
+    border-top: 1px solid #e7ebef;
+    border-left: 0;
+  }
+
+  .modal-card.is-lead-import .lead-import-dropzone {
+    min-height: 176px;
+  }
+
+  .lead-import-mapping-overview-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modal-card.is-lead-import .lead-import-assignment-summary {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .modal-card.is-lead-import .lead-import-assignment-summary .lead-import-secondary-btn {
+    grid-column: 1 / -1;
+  }
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .modal-head,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-dropzone,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-detail-section,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-behavior-card,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-footer-action {
+  border-color: #3b3b3b;
+  background: #202020;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .modal-head h3,
+:root[data-theme="dark"] .lead-import-mapping-preview-row strong,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-review-stat strong,
+:root[data-theme="dark"] .lead-import-confirm-stats strong {
+  color: #efefef;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .modal-head h3 small,
+:root[data-theme="dark"] .lead-import-mapping-preview-row,
+:root[data-theme="dark"] .lead-import-report-note {
+  color: #aaa;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-review-stats,
+:root[data-theme="dark"] .lead-import-confirm-stats,
+:root[data-theme="dark"] .lead-import-mapping-preview-row,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-behavior-grid,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-behavior-card,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-final-section {
+  border-color: #3d3d3d;
+}
+
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-assignment-picker,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-final-section .lead-import-choice,
+:root[data-theme="dark"] .modal-card.is-lead-import .lead-import-option.is-selected {
+  background: #272727;
+}

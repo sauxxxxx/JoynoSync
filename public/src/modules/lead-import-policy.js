@@ -72,10 +72,16 @@ export function normalizeLeadImportHeader(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-export function inferLeadImportMode(headers = []) {
+export function isJoynoSyncLeadExport(headers = []) {
   const normalized = new Set(headers.map(normalizeLeadImportHeader));
-  const hasLeadId = LEAD_IMPORT_HEADER_ALIASES.leadId.some((alias) => normalized.has(alias));
-  return hasLeadId ? LEAD_IMPORT_MODE_UPDATE : LEAD_IMPORT_MODE_NEW;
+  const hasLeadId = ["lead id", "lead_id"].some((header) => normalized.has(header));
+  const hasUpdatedAt = ["updated at", "updated_at", "exported version"].some((header) => normalized.has(header));
+  const recognizableFields = ["lead name", "email", "phone", "status", "owner"].filter((header) => normalized.has(header));
+  return hasLeadId && hasUpdatedAt && recognizableFields.length >= 2;
+}
+
+export function inferLeadImportMode(headers = []) {
+  return isJoynoSyncLeadExport(headers) ? LEAD_IMPORT_MODE_UPDATE : LEAD_IMPORT_MODE_NEW;
 }
 
 export function isLeadUpdateImport(mode) {
@@ -83,23 +89,40 @@ export function isLeadUpdateImport(mode) {
 }
 
 export function resolveImportedStatus(rawStatus, options = {}) {
+  if (isLeadUpdateImport(options.mode) && options.resetBlankStatus) {
+    return {
+      value: "New",
+      provided: true,
+      warning: "",
+      error: ""
+    };
+  }
   const matched = LEAD_IMPORT_STATUS_OPTIONS.find(
     (status) => normalizeLeadImportHeader(status) === normalizeLeadImportHeader(rawStatus)
   );
   if (matched) {
-    return { value: matched, provided: true, warning: "" };
+    return { value: matched, provided: true, warning: "", error: "" };
   }
   if (String(rawStatus || "").trim()) {
-    return { value: "New", provided: true, warning: `Unknown status "${String(rawStatus).trim()}". Set to New.` };
+    return {
+      value: "",
+      provided: false,
+      warning: "",
+      error: `Unknown status "${String(rawStatus).trim()}". Choose a valid JoynoSync status before importing.`
+    };
   }
   if (isLeadUpdateImport(options.mode)) {
     return {
-      value: options.resetBlankStatus ? "New" : "",
-      provided: Boolean(options.resetBlankStatus),
-      warning: options.resetBlankStatus ? "Blank status will be reset to New." : ""
+      value: "",
+      provided: false,
+      warning: "",
+      error: ""
     };
   }
-  return { value: "New", provided: true, warning: "" };
+  // New records still receive the default value, but it is not an explicit
+  // file instruction. This prevents duplicate-update imports from resetting
+  // an existing lead's status when the source file leaves Status blank.
+  return { value: "New", provided: false, warning: "", error: "" };
 }
 
 export function validateManualLeadIdentity(values = {}) {

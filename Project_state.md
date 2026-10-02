@@ -1,6 +1,6 @@
 # JoynoSync project state
 
-Last updated: `2026-08-05`
+Last updated: `2026-09-04`
 
 ## Release posture
 
@@ -22,9 +22,10 @@ JoynoSync is in active hardening. The repository passes its automated release ga
 - Cursor-backed Leads pagination, server-side filtering, sorting, ownership, and soft archive
 - New-lead import and Lead ID round-trip update import
 - Duplicate review, background import jobs, result downloads, and rollback support
+- Newest-first lead intake, reliable column sorting, and duplicate-aware qualified handoff to Ms. Lyn
 - Attendance, breaks, team attendance, and manual adjustments
 - Team management, profiles, settings, and notifications
-- Internal Messenger and realtime updates
+- Internal Messenger with direct and selected-member group chats, history paging, presence, typing, read receipts, message pinning, reactions, attachments, retryable sends, group management, and realtime updates
 - Calls Live, Scheduler, and Performance views
 - RingCentral workspace verification, agent-to-extension mapping, RingOut calls, call synchronization, Last Activity, and required wrap-up
 - Localhost-only QA workspace using browser-only data
@@ -48,6 +49,7 @@ The current automated gate covers:
 - Local QA host and storage restrictions
 - SPA route rendering
 - Integration placement and setup UI
+- Messenger workflow, selective group creation, and compact desktop layout
 - Lead import UI modes and validation
 - Leads next/previous pagination stability
 

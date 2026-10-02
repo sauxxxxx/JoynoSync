@@ -109,8 +109,6 @@ function mapTask(entry) {
     day: normalizeText(entry?.day),
     status: normalizeText(entry?.status, "New"),
     priority: normalizeText(entry?.priority, "low"),
-    projectId: normalizeText(entry?.projectId),
-    projectName: normalizeText(entry?.projectName),
     linkType: normalizeText(entry?.linkType),
     linkId: normalizeText(entry?.linkId),
     linkLabel: normalizeText(entry?.linkLabel),
@@ -131,29 +129,6 @@ function mapTask(entry) {
     checklist: normalizeArray(entry?.checklist).map(mapTaskChecklistItem),
     attachments: normalizeArray(entry?.attachments).map(mapTaskAttachment),
     activity: normalizeArray(entry?.activity).map(mapWorkActivity)
-  };
-}
-
-function mapProject(entry) {
-  return {
-    id: normalizeText(entry?.id),
-    workspaceId: normalizeText(entry?.workspaceId),
-    name: normalizeText(entry?.name, "Untitled Project"),
-    ownerId: normalizeText(entry?.ownerId),
-    owner: normalizeText(entry?.owner),
-    status: normalizeText(entry?.status, "On Track"),
-    progress: normalizeInteger(entry?.progress, 0, 0),
-    deadline: normalizeDateOnly(entry?.deadline),
-    accountId: normalizeText(entry?.accountId),
-    accountName: normalizeText(entry?.accountName),
-    account: normalizeText(entry?.account, normalizeText(entry?.accountName)),
-    teamMemberIds: normalizeArray(entry?.teamMemberIds).map((item) => normalizeText(item)).filter(Boolean),
-    teamMembers: normalizeArray(entry?.teamMembers).map((item) => normalizeText(item)).filter(Boolean),
-    description: normalizeText(entry?.description),
-    risks: normalizeText(entry?.risks),
-    activity: normalizeArray(entry?.activity).map(mapWorkActivity),
-    createdAt: normalizeIso(entry?.createdAt),
-    updatedAt: normalizeIso(entry?.updatedAt)
   };
 }
 
@@ -197,7 +172,6 @@ function mapSnapshot(data) {
   const tasks = normalizeArray(snapshot.tasks).map(mapTask);
   return {
     tasks,
-    projects: normalizeArray(snapshot.projects).map(mapProject),
     waitingList: tasks.filter((task) => task.backlogState === "queue").map(buildTaskWaitingEntry)
   };
 }
@@ -219,7 +193,6 @@ function normalizeTaskPayload(payload = {}) {
     startTime: normalizeText(payload.startTime, "09:00"),
     endTime: normalizeText(payload.endTime),
     priority: normalizeText(payload.priority, "low").toLowerCase(),
-    projectId: normalizeText(payload.projectId) || null,
     linkType: normalizeText(payload.linkType),
     linkId: normalizeText(payload.linkId),
     linkLabel: normalizeText(payload.linkLabel),
@@ -259,9 +232,6 @@ function normalizeTaskUpdatePayload(payload = {}) {
   }
   if (hasOwnTaskPayloadField(payload, "priority")) {
     normalized.priority = normalizeText(payload.priority).toLowerCase();
-  }
-  if (hasOwnTaskPayloadField(payload, "projectId")) {
-    normalized.projectId = normalizeText(payload.projectId) || null;
   }
   if (hasOwnTaskPayloadField(payload, "linkType")) {
     normalized.linkType = normalizeText(payload.linkType);
@@ -304,21 +274,6 @@ function normalizeTaskUpdatePayload(payload = {}) {
   }
 
   return normalized;
-}
-
-function normalizeProjectPayload(payload = {}) {
-  return {
-    name: normalizeText(payload.name),
-    ownerId: normalizeText(payload.ownerId) || null,
-    status: normalizeText(payload.status, "On Track"),
-    progress: normalizeInteger(payload.progress, 0, 0),
-    deadline: normalizeDateOnly(payload.deadline),
-    accountId: normalizeText(payload.accountId) || null,
-    accountName: normalizeText(payload.accountName),
-    teamMemberIds: normalizeArray(payload.teamMemberIds).map((item) => normalizeText(item)).filter(Boolean),
-    description: normalizeText(payload.description),
-    risks: normalizeText(payload.risks)
-  };
 }
 
 function sanitizeStorageSegment(value, fallback = "file") {
@@ -392,32 +347,6 @@ export function toggleSupabaseTaskChecklistItem(itemId) {
 export function deleteSupabaseTaskChecklistItem(itemId) {
   return callWorkRpc("delete_task_checklist_item", {
     p_item_id: normalizeText(itemId)
-  });
-}
-
-export function createSupabaseProject(payload = {}) {
-  return callWorkRpc("create_project", {
-    p_payload: normalizeProjectPayload(payload)
-  });
-}
-
-export function updateSupabaseProject(projectId, payload = {}) {
-  return callWorkRpc("update_project", {
-    p_project_id: normalizeText(projectId),
-    p_payload: normalizeProjectPayload(payload)
-  });
-}
-
-export function setSupabaseProjectProgress(projectId, progress) {
-  return callWorkRpc("set_project_progress", {
-    p_project_id: normalizeText(projectId),
-    p_progress: normalizeInteger(progress, 0, 0)
-  });
-}
-
-export function deleteSupabaseProject(projectId) {
-  return callWorkRpc("delete_project", {
-    p_project_id: normalizeText(projectId)
   });
 }
 

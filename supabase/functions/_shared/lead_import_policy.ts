@@ -25,10 +25,25 @@ export type ImportRow = {
     archived: string;
   };
   provided: Record<string, boolean>;
+  validationIssues: string[];
 };
 
 export function normalizeText(value: unknown) {
   return String(value || "").trim();
+}
+
+export function timestampsMatch(left: unknown, right: unknown) {
+  const leftText = normalizeText(left);
+  const rightText = normalizeText(right);
+  if (!leftText || !rightText) {
+    return leftText === rightText;
+  }
+  if (leftText === rightText) {
+    return true;
+  }
+  const leftTimestamp = Date.parse(leftText);
+  const rightTimestamp = Date.parse(rightText);
+  return Number.isFinite(leftTimestamp) && Number.isFinite(rightTimestamp) && leftTimestamp === rightTimestamp;
 }
 
 export function normalizeEmail(value: unknown) {
@@ -45,7 +60,16 @@ export function normalizeMatch(value: unknown) {
 
 export function normalizeStatus(value: unknown) {
   const status = normalizeText(value);
-  return VALID_STATUSES.has(status) ? status : "New";
+  return [...VALID_STATUSES].find((candidate) => candidate.toLowerCase() === status.toLowerCase()) || "New";
+}
+
+export function validateProvidedStatus(value: unknown, provided: boolean) {
+  if (!provided) {
+    return "";
+  }
+  const status = normalizeText(value);
+  const matched = [...VALID_STATUSES].some((candidate) => candidate.toLowerCase() === status.toLowerCase());
+  return matched ? "" : `Unknown status "${status || "(blank)"}".`;
 }
 
 export function normalizeSource(value: unknown) {
@@ -97,6 +121,8 @@ export function sanitizeImportRow(row: unknown): ImportRow | null {
     return null;
   }
   const values = source.values && typeof source.values === "object" ? source.values as Record<string, unknown> : {};
+  const provided = normalizeBooleanMap(source.provided);
+  const statusIssue = validateProvidedStatus(values.status, provided.status);
   return {
     rowNumber: Number(source.rowNumber || 0) || 0,
     result,
@@ -119,7 +145,8 @@ export function sanitizeImportRow(row: unknown): ImportRow | null {
       notes: normalizeText(values.notes),
       archived: normalizeText(values.archived)
     },
-    provided: normalizeBooleanMap(source.provided)
+    provided,
+    validationIssues: statusIssue ? [statusIssue] : []
   };
 }
 

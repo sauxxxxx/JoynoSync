@@ -1,0 +1,288 @@
+/* Desktop Team directory: flat, list-first workspace. */
+@media (min-width: 1025px) {
+  #appShell:has(.nav-item[data-route="team"].is-active) .view-content {
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .view-content:has(> .team-directory-view) {
+    overflow: hidden;
+  }
+
+  #appShell .view-content > .view-block.crm-list-v2.team-directory-view {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--ui-space-3);
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .team-directory-view .team-section-head {
+    min-height: 96px;
+    padding: var(--ui-space-3) 0 var(--ui-space-5);
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border);
+  }
+
+  #appShell .team-directory-title {
+    display: grid;
+    gap: var(--ui-space-1);
+  }
+
+  #appShell .team-directory-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  #appShell .team-directory-title .block-title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  #appShell .team-directory-title p {
+    margin: 0;
+    color: var(--ui-color-text-secondary);
+    font-size: 12px;
+  }
+
+  #appShell .team-directory-count {
+    min-width: 22px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-surface-subtle);
+    font-size: 11px;
+    text-align: center;
+  }
+
+  #appShell .team-directory-view .team-head-actions > .table-ops-columns-btn {
+    min-height: 36px;
+    padding: 0 var(--ui-space-4);
+    border: 1px solid #25282d;
+    border-radius: var(--ui-radius-control);
+    color: #fff;
+    background: #25282d;
+    box-shadow: none;
+  }
+
+  #appShell .team-directory-view .team-head-actions > .table-ops-columns-btn:hover {
+    border-color: #25282d;
+    background: #25282d;
+  }
+
+  #appShell .team-directory-view .team-head-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  #appShell .team-view-switcher {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-color-surface-subtle);
+  }
+
+  #appShell .team-view-switcher button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    color: var(--ui-color-text-muted);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  #appShell .team-view-switcher button:hover {
+    color: var(--ui-color-text);
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .team-view-switcher button.is-active {
+    color: var(--ui-color-text);
+    background: var(--ui-color-surface);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+
+  #appShell .team-directory-view > .team-directory-table-shell {
+    min-height: 0;
+    margin-top: 0;
+    overflow: auto;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .team-directory-view .data-table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  #appShell .team-directory-view .data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .team-directory-view .data-table th {
+    height: 44px;
+    padding: 0 var(--ui-space-3);
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-surface);
+    border-bottom: 1px solid var(--ui-color-border);
+    font-size: 11px;
+    font-weight: 550;
+  }
+
+  #appShell .team-directory-view .data-table td {
+    height: 60px;
+    padding: var(--ui-space-2) var(--ui-space-3);
+    background: transparent;
+    border-bottom: 1px solid var(--ui-color-border);
+    font-size: 12px;
+  }
+
+  #appShell .team-directory-view .data-table tbody tr:hover {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .team-directory-view .data-table th:nth-child(1) { width: 34%; }
+  #appShell .team-directory-view .data-table th:nth-child(2) { width: 16%; }
+  #appShell .team-directory-view .data-table th:nth-child(3) { width: 15%; }
+  #appShell .team-directory-view .data-table th:nth-child(4) { width: 14%; }
+  #appShell .team-directory-view .data-table th:nth-child(5) { width: 17%; }
+  #appShell .team-directory-view .data-table th:nth-child(6) { width: 4%; }
+
+  #appShell .team-directory-view :is(.team-tag, .team-status-chip, .role-badge) {
+    border-radius: 3px;
+    box-shadow: none;
+  }
+
+  #appShell .team-directory-view .row-actions-table {
+    text-align: right;
+  }
+
+  #appShell .team-directory-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--ui-space-3);
+    padding: 2px 0 var(--ui-space-5);
+  }
+
+  #appShell .team-directory-card {
+    min-width: 0;
+    padding: var(--ui-space-4);
+    border: 0;
+    border-radius: var(--ui-radius-surface);
+    background: var(--ui-color-surface-subtle);
+    cursor: pointer;
+  }
+
+  #appShell .team-directory-card:hover {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .team-directory-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+  }
+
+  #appShell .team-directory-card-profile {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  #appShell .team-directory-card-profile:focus-visible {
+    outline: 2px solid var(--ui-color-primary);
+    outline-offset: 3px;
+  }
+
+  #appShell .team-directory-card-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  #appShell .team-directory-card-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-4) var(--ui-space-3);
+    margin: var(--ui-space-5) 0 0;
+  }
+
+  #appShell .team-directory-card-details div {
+    min-width: 0;
+  }
+
+  #appShell .team-directory-card-details dt {
+    margin-bottom: var(--ui-space-1);
+    color: var(--ui-color-text-muted);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  #appShell .team-directory-card-details dd {
+    min-width: 0;
+    margin: 0;
+    color: var(--ui-color-text);
+    font-size: 12px;
+  }
+
+  #appShell .team-directory-empty {
+    grid-column: 1 / -1;
+    padding: var(--ui-space-8) 0;
+    text-align: center;
+  }
+
+  #appShell .team-directory-view .team-directory-pagination {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 0 var(--ui-space-3);
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-surface);
+    border-top: 1px solid var(--ui-color-border);
+    font-size: 11px;
+  }
+
+  #appShell .team-directory-view .team-directory-pagination-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  #appShell .team-directory-view .team-directory-pagination button {
+    min-height: 32px;
+    padding: 0 var(--ui-space-3);
+    border: 1px solid var(--ui-color-border);
+    border-radius: var(--ui-radius-control);
+    color: var(--ui-color-text);
+    background: var(--ui-color-surface);
+  }
+
+  #appShell .team-directory-view .team-directory-pagination button:disabled {
+    color: var(--ui-color-text-muted);
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}

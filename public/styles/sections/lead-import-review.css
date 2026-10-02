@@ -1,0 +1,513 @@
+/* Progressive review and confirmation surfaces for lead imports. */
+.modal-card.is-lead-import {
+  width: min(820px, calc(100vw - 32px));
+}
+
+.modal-card.is-lead-import .modal-form {
+  max-height: calc(100dvh - 104px);
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.modal-card.is-lead-import .lead-import-review-panel,
+.modal-card.is-lead-import .lead-import-confirm-panel {
+  gap: 16px;
+  padding: 20px 24px 22px;
+}
+
+.lead-import-review-hero {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.lead-import-file-icon,
+.lead-import-confirm-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 10px;
+  background: #edf4ff;
+  color: #1769e8;
+  font-size: 18px;
+}
+
+.lead-import-review-file {
+  min-width: 0;
+}
+
+.lead-import-review-file .lead-import-section-title {
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lead-import-review-file .lead-import-section-subtitle {
+  margin-top: 2px;
+}
+
+.lead-import-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #e9f2ff;
+  color: #1759ad;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.lead-import-secondary-btn,
+.lead-import-text-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: #315b8b;
+  font: 600 11px/1.2 "Plus Jakarta Sans", sans-serif;
+  cursor: pointer;
+}
+
+.lead-import-secondary-btn {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid #d8e1eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #3b506a;
+}
+
+.lead-import-secondary-btn:hover {
+  border-color: #b8c8db;
+  background: #f8fafc;
+}
+
+.lead-import-text-btn:hover {
+  color: #0f5fd6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lead-import-secondary-btn:focus-visible,
+.lead-import-text-btn:focus-visible {
+  outline: 3px solid rgba(23, 105, 232, 0.18);
+  outline-offset: 2px;
+}
+
+.lead-import-review-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid #dfe7f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.lead-import-review-stat {
+  display: flex;
+  min-height: 54px;
+  align-items: baseline;
+  justify-content: center;
+  gap: 7px;
+  padding: 13px 10px;
+  color: #6f8094;
+}
+
+.lead-import-review-stat + .lead-import-review-stat {
+  border-left: 1px solid #e4eaf1;
+}
+
+.lead-import-review-stat strong {
+  color: #223750;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.lead-import-review-stat span {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lead-import-review-stat.is-ready strong {
+  color: #14825b;
+}
+
+.lead-import-review-stat.is-blocked strong {
+  color: #c43f3f;
+}
+
+.lead-import-review-stat.is-warning strong {
+  color: #a56605;
+}
+
+.lead-import-readiness,
+.lead-import-issues-summary,
+.lead-import-safeguard-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  border: 1px solid #cde9dc;
+  border-radius: 10px;
+  background: #f3fbf7;
+}
+
+.lead-import-readiness.has-blockers {
+  border-color: #f0d1ce;
+  background: #fff7f6;
+}
+
+.lead-import-readiness-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dff5ea;
+  color: #14825b;
+  font-size: 14px;
+}
+
+.lead-import-readiness.has-blockers .lead-import-readiness-icon {
+  background: #fbe5e3;
+  color: #b83c3c;
+}
+
+.lead-import-readiness strong,
+.lead-import-issues-summary strong,
+.lead-import-safeguard-note strong {
+  color: #20354d;
+  font-size: 11.5px;
+}
+
+.lead-import-readiness p,
+.lead-import-issues-summary p,
+.lead-import-safeguard-note span {
+  margin: 2px 0 0;
+  color: #718196;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.lead-import-detail-section,
+.lead-import-behavior-card {
+  padding: 14px;
+  border: 1px solid #dfe6ee;
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+
+.lead-import-mapping-section {
+  display: grid;
+  gap: 12px;
+}
+
+.lead-import-behavior-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lead-import-behavior-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.lead-import-behavior-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.lead-import-behavior-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 7px;
+  background: #edf3fa;
+  color: #426b9a;
+  font-size: 12px;
+}
+
+.lead-import-behavior-head strong,
+.lead-import-option strong,
+.lead-import-restore-option strong {
+  color: #20354d;
+  font-size: 11px;
+}
+
+.lead-import-behavior-head p {
+  margin: 2px 0 0;
+  color: #75859a;
+  font-size: 9.5px;
+}
+
+.lead-import-option-list {
+  display: grid;
+  gap: 7px;
+}
+
+.lead-import-option {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #e2e8ef;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.lead-import-option.is-selected {
+  border-color: #8db5ec;
+  background: #f4f8fe;
+  box-shadow: inset 0 0 0 1px rgba(23, 105, 232, 0.05);
+}
+
+.lead-import-option input {
+  width: 14px;
+  height: 14px;
+  margin: 1px 0 0;
+  accent-color: #1769e8;
+}
+
+.lead-import-radio-dot {
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  border: 4px solid #1769e8;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.lead-import-option small,
+.lead-import-restore-option small {
+  display: block;
+  margin-top: 2px;
+  color: #76869a;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.lead-import-clear-fields,
+.lead-import-advanced-options {
+  border: 1px solid #e2e8ef;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.lead-import-clear-fields summary,
+.lead-import-advanced-options summary {
+  display: flex;
+  min-height: 35px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  color: #304b69;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lead-import-clear-fields summary small {
+  color: #7b899a;
+  font-size: 9px;
+}
+
+.lead-import-clear-fields .lead-import-choice-grid,
+.lead-import-advanced-options-body {
+  padding: 9px 10px 10px;
+  border-top: 1px solid #e8edf3;
+}
+
+.lead-import-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #53677f;
+  font-size: 9.5px;
+}
+
+.lead-import-check input,
+.lead-import-restore-option input {
+  accent-color: #1769e8;
+}
+
+.lead-import-restore-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 13px;
+  border: 1px solid #dfe6ee;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.lead-import-restore-option input {
+  margin-top: 2px;
+}
+
+.lead-import-issues-summary {
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-color: #ecdcbf;
+  background: #fffaf0;
+}
+
+.lead-import-advanced-options {
+  margin-bottom: 10px;
+}
+
+.lead-import-confirm-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lead-import-impact-list {
+  overflow: hidden;
+  border: 1px solid #dfe6ee;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.lead-import-impact-list > div {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 14px;
+  color: #5f7187;
+  font-size: 10.5px;
+}
+
+.lead-import-impact-list > div + div {
+  border-top: 1px solid #e8edf3;
+}
+
+.lead-import-impact-list strong {
+  color: #1e334d;
+  font-size: 11px;
+  text-align: right;
+}
+
+.lead-import-safeguard-note {
+  grid-template-columns: 24px minmax(0, 1fr);
+  border-color: #d7e3f2;
+  background: #f6f9fd;
+  color: #42668e;
+}
+
+.lead-import-safeguard-note p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.modal-card.is-lead-import .lead-import-actions {
+  position: sticky;
+  z-index: 12;
+  bottom: 0;
+  box-shadow: 0 -8px 20px rgba(19, 40, 66, 0.04);
+}
+
+@media (max-width: 680px) {
+  .lead-import-review-hero {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .lead-import-file-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .lead-import-review-hero .lead-import-secondary-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .lead-import-behavior-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-import-readiness {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .lead-import-readiness .lead-import-text-btn {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 440px) {
+  .modal-card.is-lead-import .lead-import-review-panel,
+  .modal-card.is-lead-import .lead-import-confirm-panel {
+    padding: 16px;
+  }
+
+  .lead-import-review-stat {
+    display: grid;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+:root[data-theme="dark"] .lead-import-review-stats,
+:root[data-theme="dark"] .lead-import-review-stat,
+:root[data-theme="dark"] .lead-import-option,
+:root[data-theme="dark"] .lead-import-clear-fields,
+:root[data-theme="dark"] .lead-import-advanced-options,
+:root[data-theme="dark"] .lead-import-restore-option,
+:root[data-theme="dark"] .lead-import-impact-list,
+:root[data-theme="dark"] .lead-import-secondary-btn {
+  border-color: #404040;
+  background: #252525;
+}
+
+:root[data-theme="dark"] .lead-import-detail-section,
+:root[data-theme="dark"] .lead-import-behavior-card,
+:root[data-theme="dark"] .lead-import-safeguard-note {
+  border-color: #414141;
+  background: #242424;
+}
+
+:root[data-theme="dark"] .lead-import-readiness {
+  border-color: #315544;
+  background: #223229;
+}
+
+:root[data-theme="dark"] .lead-import-issues-summary {
+  border-color: #5b4d31;
+  background: #312c22;
+}
+
+:root[data-theme="dark"] .lead-import-option.is-selected {
+  border-color: #527fbd;
+  background: #26364d;
+}
+
+:root[data-theme="dark"] .lead-import-review-stat strong,
+:root[data-theme="dark"] .lead-import-readiness strong,
+:root[data-theme="dark"] .lead-import-issues-summary strong,
+:root[data-theme="dark"] .lead-import-behavior-head strong,
+:root[data-theme="dark"] .lead-import-option strong,
+:root[data-theme="dark"] .lead-import-restore-option strong,
+:root[data-theme="dark"] .lead-import-impact-list strong {
+  color: #ededed;
+}

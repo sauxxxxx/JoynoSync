@@ -119,6 +119,14 @@ function mapTopRep(entry) {
   };
 }
 
+function mapQualificationPerformance(entry) {
+  return {
+    memberId: normalizeText(entry?.memberId),
+    name: normalizeText(entry?.name, "Unknown"),
+    qualifiedCount: normalizeInteger(entry?.qualifiedCount, 0, 0)
+  };
+}
+
 function mapPipelineTrendPoint(entry) {
   const values = entry?.values && typeof entry.values === "object" ? entry.values : {};
   return {
@@ -193,6 +201,9 @@ function mapSnapshot(data) {
       ? normalizeArray(snapshot.leadStatusDistribution).map(mapLeadStatusDistribution)
       : null,
     salesFunnel: Array.isArray(snapshot.salesFunnel) ? normalizeArray(snapshot.salesFunnel).map(mapSalesFunnelStage) : null,
+    qualificationPerformance: Array.isArray(snapshot.qualificationPerformance)
+      ? normalizeArray(snapshot.qualificationPerformance).map(mapQualificationPerformance)
+      : null,
     topReps: Array.isArray(snapshot.topReps) ? normalizeArray(snapshot.topReps).map(mapTopRep) : null,
     pipelineTrend:
       snapshot.pipelineTrend && typeof snapshot.pipelineTrend === "object" ? mapPipelineTrend(snapshot.pipelineTrend) : null,

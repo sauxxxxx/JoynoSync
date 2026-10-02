@@ -3,6 +3,7 @@ import {
   fetchSupabaseMessengerSnapshot,
   setSupabaseMessengerPresence
 } from "../supabase/messenger.js";
+import { setMessengerBootstrapError } from "./messenger-bootstrap-state.js";
 
 const DEFAULT_MESSENGER_REALTIME_FALLBACK_MS = 5000;
 const DEFAULT_MESSENGER_REFRESH_DELAY_MS = 1200;
@@ -13,7 +14,7 @@ export function createMessengerRealtime(options = {}) {
   const {
     state = null,
     fallbackMs = DEFAULT_MESSENGER_REALTIME_FALLBACK_MS,
-    canAccessComms,
+    canAccessMessenger,
     isSupabaseMessengerEnabled,
     initSupabase,
     withRetryableSystemSync,
@@ -326,6 +327,8 @@ export function createMessengerRealtime(options = {}) {
     state.messengerSending = false;
     state.messengerSnapshotReady = !state.supabaseConfigured;
     state.messengerSnapshotError = "";
+    state.messengerHistoryByConversation = {};
+    state.messengerFailedMessages = [];
     clearCachedState();
     state.messengerTyping = [];
     state.messengerEditMessageId = "";
@@ -346,6 +349,17 @@ export function createMessengerRealtime(options = {}) {
   function setMessengerMessages(conversationId, targetType, messages) {
     const normalizedConversationId = String(conversationId || "").trim();
     const normalizedTargetType = targetType === "channel" ? "channel" : "direct";
+    const conversationCacheKey = getMessengerConversationCacheKey(normalizedConversationId, normalizedTargetType);
+    const preserveExpandedHistory = Boolean(state.messengerHistoryByConversation?.[conversationCacheKey]?.expanded);
+    const retainedConversationMessages = preserveExpandedHistory && Array.isArray(state.data.messages)
+      ? state.data.messages.filter((message) => {
+          const messageTargetType = message.targetType || (message.channelId ? "channel" : "direct");
+          const messageTargetId = message.targetId || message.channelId || "";
+          return Boolean(message?.isMessenger) &&
+            messageTargetType === normalizedTargetType &&
+            String(messageTargetId || "") === normalizedConversationId;
+        })
+      : [];
     const baseMessages = Array.isArray(state.data.messages)
       ? state.data.messages.filter((message) => {
           const messageTargetType = message.targetType || (message.channelId ? "channel" : "direct");
@@ -368,7 +382,10 @@ export function createMessengerRealtime(options = {}) {
       isMessenger: true,
       canEdit: String(message.senderId || "") === String(state.data.currentUser?.id || "")
     }));
-    state.data.messages = [...baseMessages, ...nextMessages];
+    const conversationMessagesById = new Map(
+      [...retainedConversationMessages, ...nextMessages].map((message) => [String(message?.id || ""), message])
+    );
+    state.data.messages = [...baseMessages, ...conversationMessagesById.values()];
     markMessengerConversationPrefetched(normalizedConversationId, normalizedTargetType);
   }
 
@@ -614,13 +631,17 @@ export function createMessengerRealtime(options = {}) {
       clearSupabaseMessengerState();
       return false;
     }
-    if (!canAccessComms()) {
+    if (!canAccessMessenger()) {
       unsubscribeMessengerRealtime();
       clearSupabaseMessengerState();
       return false;
     }
     if (!String(state.data.workspace?.id || "").trim()) {
       clearSupabaseMessengerState();
+      setMessengerBootstrapError(state, "Workspace information is unavailable. Refresh the page and try again.");
+      if (shouldRender) {
+        requestMessengerRouteRender();
+      }
       return false;
     }
     if (!background) {

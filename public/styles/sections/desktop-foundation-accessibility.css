@@ -1,0 +1,93 @@
+/* Phase 1 keyboard, focus, state, and motion primitives. */
+.skip-link {
+  position: fixed;
+  z-index: 10000;
+  top: var(--ui-space-2);
+  left: var(--ui-space-2);
+  padding: 9px 12px;
+  border: 1px solid var(--ui-color-primary);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-color-surface);
+  color: var(--ui-color-primary);
+  box-shadow: var(--ui-shadow-menu);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--ui-space-4)));
+  transition: transform var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.skip-link:focus-visible {
+  outline: 2px solid var(--ui-color-primary);
+  outline-offset: 2px;
+  box-shadow: var(--ui-focus-ring);
+  transform: translateY(0);
+}
+
+@media (min-width: 1025px) {
+  #appShell
+    .view-content:not(:has(> :is(.crm-leads-list, .lead-profile-page-view)))
+    :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible,
+  #appShell:not(:has(.nav-item[data-route="leads"].is-active))
+    .modal-card:not([class*="is-lead"])
+    :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ui-color-primary);
+    outline-offset: 2px;
+    box-shadow: var(--ui-focus-ring);
+  }
+
+  #appShell
+    .view-content:not(:has(> :is(.crm-leads-list, .lead-profile-page-view)))
+    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea):focus-visible {
+    border-color: var(--ui-color-primary);
+    outline: none;
+    box-shadow: var(--ui-focus-ring);
+  }
+
+  #appShell
+    .view-content:not(:has(> :is(.crm-leads-list, .lead-profile-page-view)))
+    :where(button, input, select, textarea):disabled,
+  #appShell:not(:has(.nav-item[data-route="leads"].is-active))
+    .modal-card:not([class*="is-lead"])
+    :where(button, input, select, textarea):disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  #appShell
+    .view-content:not(:has(> :is(.crm-leads-list, .lead-profile-page-view)))
+    [aria-busy="true"] {
+    cursor: progress;
+  }
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link,
+  #appShell .view-content,
+  #appShell .view-content *:not(.spinner):not(.lead-status-spinner) {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .skip-link,
+  #appShell .view-content :where(button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+}

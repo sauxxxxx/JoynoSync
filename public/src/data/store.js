@@ -88,7 +88,6 @@ function stripWorkCollections(data) {
   }
   const next = data;
   next.tasks = [];
-  next.projects = [];
   next.waitingList = [];
   return next;
 }

@@ -1,0 +1,319 @@
+/* Attendance typography hierarchy: compact, neutral, and consistent across views. */
+@media (min-width: 1025px) {
+  #appShell .attendance-view {
+    --attendance-type-title: 20px;
+    --attendance-type-section: 14px;
+    --attendance-type-body: 13px;
+    --attendance-type-label: 12px;
+    --attendance-type-meta: 11px;
+  }
+
+  #appShell .attendance-view .attendance-v2-tabs {
+    min-height: 42px;
+  }
+
+  #appShell .attendance-view .attendance-tab-btn {
+    min-height: 42px;
+    color: var(--ui-color-text-muted);
+    font-size: var(--attendance-type-label);
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0;
+  }
+
+  #appShell .attendance-view .attendance-tab-btn:hover,
+  #appShell .attendance-view .attendance-tab-btn.is-active {
+    color: var(--ui-color-text);
+  }
+
+  #appShell .attendance-view .attendance-tab-btn.is-active {
+    font-weight: 650;
+  }
+
+  /* Timeline */
+  #appShell .attendance-timeline-notion .attendance-today-time-block strong {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 36px;
+    letter-spacing: -0.03em;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-time-block span,
+  #appShell .attendance-timeline-notion .attendance-today-status-block span {
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-status-block strong {
+    font-size: var(--attendance-type-section);
+    font-weight: 650;
+    line-height: 20px;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-cta {
+    font-size: var(--attendance-type-label);
+    font-weight: 650;
+    line-height: 18px;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-secondary-actions button {
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-metrics span {
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-metrics strong {
+    font-size: var(--attendance-type-body);
+    font-weight: 650;
+    line-height: 18px;
+  }
+
+  #appShell .attendance-timeline-notion h2 {
+    font-size: var(--attendance-type-section);
+    font-weight: 650;
+    line-height: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-break-row-name {
+    color: var(--ui-color-text);
+    font-size: var(--attendance-type-body);
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  #appShell .attendance-timeline-notion :is(
+      .attendance-break-row-window,
+      .attendance-break-row-allowance,
+      .attendance-break-row-status,
+      .attendance-break-row-usage
+    ) {
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-timeline-notion :is(
+      .attendance-break-row-window,
+      .attendance-break-row-allowance,
+      .attendance-break-row-usage,
+      .attendance-today-timeline-table td:nth-child(n + 2)
+    ) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-timeline-table th {
+    font-size: var(--attendance-type-meta);
+    font-weight: 650;
+    line-height: 16px;
+    letter-spacing: 0;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-timeline-table td {
+    font-size: var(--attendance-type-body);
+    line-height: 20px;
+  }
+
+  #appShell .attendance-timeline-notion .attendance-today-timeline-event {
+    font-size: var(--attendance-type-body);
+    font-weight: 600;
+  }
+
+  /* Team attendance */
+  #appShell .attendance-manager-topbar-copy strong {
+    color: var(--ui-color-text);
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  #appShell .attendance-manager-topbar-copy span {
+    color: var(--ui-color-text-muted);
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-manager-summary-card span,
+  #appShell .attendance-manager-summary-card small {
+    color: var(--ui-color-text-muted);
+    font-size: var(--attendance-type-meta);
+    line-height: 16px;
+  }
+
+  #appShell .attendance-manager-summary-card strong {
+    color: var(--ui-color-text);
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 24px;
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table th {
+    color: var(--ui-color-text-muted);
+    font-size: var(--attendance-type-meta);
+    font-weight: 650;
+    line-height: 16px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table td {
+    color: var(--ui-color-text-secondary);
+    font-size: var(--attendance-type-body);
+    line-height: 20px;
+  }
+
+  #appShell .attendance-manager-table-panel .data-table td:nth-child(n + 2):nth-child(-n + 6) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-manager-namecell strong {
+    color: var(--ui-color-text);
+    font-size: var(--attendance-type-body);
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  #appShell .attendance-manager-namecell small,
+  #appShell .attendance-manager-statuscell small {
+    color: var(--ui-color-text-muted);
+    font-size: var(--attendance-type-meta);
+    line-height: 16px;
+  }
+
+  #appShell .attendance-manager-table-panel .attendance-status-pill {
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: var(--attendance-type-meta);
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  #appShell .attendance-manager-table-panel .attendance-status-pill.is-pending {
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-neutral-soft);
+  }
+
+  #appShell .attendance-manager-topbar-actions :is(.mini-btn, .table-ops-columns-btn),
+  #appShell .attendance-manager-search input {
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  /* Requests */
+  #appShell .attendance-requests-title-row h1,
+  #appShell .attendance-policy-head h1 {
+    font-size: var(--attendance-type-title);
+    font-weight: 650;
+    line-height: 26px;
+    letter-spacing: -0.025em;
+  }
+
+  #appShell .attendance-requests-head p,
+  #appShell .attendance-policy-head p {
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-request-tab {
+    font-size: var(--attendance-type-label);
+    font-weight: 500;
+    line-height: 18px;
+  }
+
+  #appShell .attendance-request-tab.is-active {
+    font-weight: 650;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table th {
+    font-size: var(--attendance-type-meta);
+    font-weight: 650;
+    line-height: 16px;
+    letter-spacing: 0;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table td {
+    font-size: var(--attendance-type-body);
+    line-height: 20px;
+  }
+
+  #appShell .attendance-request-member {
+    font-size: var(--attendance-type-body);
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  #appShell .attendance-requests-notion .attendance-status-pill {
+    font-size: var(--attendance-type-meta);
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  #appShell .attendance-request-approve,
+  #appShell .attendance-policy-edit {
+    font-size: var(--attendance-type-label);
+    font-weight: 650;
+    line-height: 18px;
+  }
+
+  /* Policy */
+  #appShell .attendance-policy-section h2 {
+    color: var(--ui-color-text);
+    font-size: var(--attendance-type-section);
+    font-weight: 650;
+    line-height: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  #appShell .attendance-policy-properties p {
+    color: var(--ui-color-text-secondary);
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-policy-properties strong {
+    color: var(--ui-color-text);
+    font-size: var(--attendance-type-body);
+    font-weight: 600;
+    line-height: 20px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-policy-break-head {
+    color: var(--ui-color-text-muted);
+    font-size: var(--attendance-type-meta);
+    font-weight: 650;
+    line-height: 16px;
+    letter-spacing: 0;
+  }
+
+  #appShell .attendance-policy-break-row {
+    color: var(--ui-color-text-secondary);
+    font-size: var(--attendance-type-label);
+    line-height: 18px;
+  }
+
+  #appShell .attendance-policy-break-row strong {
+    color: var(--ui-color-text);
+    font-size: var(--attendance-type-body);
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  #appShell .attendance-policy-break-row span:nth-child(n + 3) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-policy-meta,
+  #appShell .attendance-requests-footer {
+    font-size: var(--attendance-type-meta);
+    line-height: 16px;
+  }
+}

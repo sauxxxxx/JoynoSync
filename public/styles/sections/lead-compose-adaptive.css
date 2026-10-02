@@ -4,12 +4,12 @@
   bottom: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 18px;
-  min-height: 78px;
-  margin-top: 14px;
-  padding: 14px 24px;
+  min-height: 68px;
+  margin-top: 0;
+  padding: 12px 32px;
   border-top: 1px solid #e2e8f0;
   background: rgba(255, 255, 255, 0.98);
 }
@@ -26,7 +26,7 @@
 }
 
 .lead-compose-cancel:hover {
-  color: #1769e8;
+  color: #202124;
 }
 
 .lead-compose-security {
@@ -48,13 +48,96 @@
   min-width: 148px;
   min-height: 44px;
   gap: 14px;
-  border-radius: 8px;
-  background: #1769e8;
-  box-shadow: 0 7px 16px rgba(23, 105, 232, 0.2);
+  border-radius: 6px;
+  background: #202124;
+  box-shadow: none;
 }
 
 .lead-compose-submit:hover {
-  background: #105fda;
+  background: #303134;
+}
+
+/* Flat, document-like treatment: structure comes from spacing, not boxes. */
+.modal-card.is-lead-compose,
+.lead-compose-header,
+.lead-compose-workspace,
+.lead-compose-routing,
+.lead-compose-actions,
+.lead-more-card,
+.lead-more-body {
+  border-color: transparent;
+}
+
+.lead-compose-header,
+.lead-compose-actions {
+  background: #ffffff;
+}
+
+.lead-status-badge,
+.lead-compose-close,
+.lead-compose-shell .form-field input:not([type="hidden"]),
+.lead-compose-shell .form-field textarea,
+.lead-compose-shell .lead-owner-field .task-assignee-trigger,
+.lead-compose-shell .task-compose-deadline-preview.task-deadline-trigger.lead-followup-trigger {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lead-compose-shell .form-field input:not([type="hidden"]),
+.lead-compose-shell .form-field textarea {
+  border: 0;
+  border-bottom: 1px solid #e6e6e3;
+  border-radius: 0;
+}
+
+.lead-source-segment,
+.lead-followup-presets {
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+}
+
+.lead-source-btn,
+.lead-followup-chip {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lead-source-btn:hover,
+.lead-followup-chip:hover,
+.lead-compose-close:hover,
+.lead-more-toggle:hover {
+  border-color: transparent;
+  background: #efefed;
+}
+
+.lead-source-btn.is-active,
+.lead-source-btn[data-lead-source].is-active,
+.lead-followup-chip.is-active {
+  border-color: transparent;
+  background: #ffffff;
+  color: #202124;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.lead-followup-card {
+  border-top-color: transparent;
+}
+
+.lead-compose-shell .form-field input:focus,
+.lead-compose-shell .form-field textarea:focus {
+  border-bottom-color: #202124;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lead-compose-shell .task-assignee-trigger:focus-visible,
+.lead-compose-shell .lead-followup-trigger:focus-visible {
+  border-color: #9b9b98;
+  background: transparent;
+  box-shadow: 0 0 0 2px rgba(32, 33, 36, 0.1);
 }
 
 @media (max-width: 760px) {
@@ -149,7 +232,7 @@
 :root[data-theme="dark"] .lead-compose-shell,
 :root[data-theme="dark"] .lead-compose-header,
 :root[data-theme="dark"] .lead-compose-actions {
-  border-color: #3a3a3a;
+  border-color: transparent;
   background: #202020;
   color: #f3f3f3;
 }
@@ -179,7 +262,7 @@
 }
 
 :root[data-theme="dark"] .lead-compose-routing {
-  border-color: #3a3a3a;
+  border-color: transparent;
   background: #242424;
 }
 
@@ -194,34 +277,46 @@
 :root[data-theme="dark"] .lead-task-option-check,
 :root[data-theme="dark"] .lead-more-card,
 :root[data-theme="dark"] .lead-more-toggle {
-  border-color: #474747;
-  background: #292929;
+  border-color: transparent;
+  background: transparent;
   color: #eeeeee;
 }
 
 :root[data-theme="dark"] .lead-source-btn.is-active,
 :root[data-theme="dark"] .lead-followup-chip.is-active,
 :root[data-theme="dark"] .lead-task-option > input:checked + .lead-task-option-check {
-  border-color: #4c86f7;
-  background: #356fdf;
-  color: #ffffff;
+  border-color: #f0f0f0;
+  background: #f0f0f0;
+  color: #202124;
+}
+
+:root[data-theme="dark"] .lead-compose-submit {
+  border-color: #f0f0f0;
+  background: #f0f0f0;
+  color: #202124;
+}
+
+:root[data-theme="dark"] .lead-compose-submit:hover {
+  background: #ffffff;
+  color: #202124;
 }
 
 :root[data-theme="dark"] .lead-source-btn[data-lead-source].is-active {
-  border-color: #537ebd;
-  background: #26364d;
-  color: #dceaff;
-  box-shadow: inset 0 0 0 1px rgba(118, 165, 232, 0.12);
-}
-
-:root[data-theme="dark"] .lead-source-btn[data-lead-source].is-active > i {
-  color: #8db8ff;
+  border-color: #f0f0f0;
+  background: #f0f0f0;
+  color: #202124;
+  box-shadow: none;
 }
 
 :root[data-theme="dark"] .lead-followup-card,
 :root[data-theme="dark"] .lead-more-body,
 :root[data-theme="dark"] .lead-compose-workspace {
-  border-color: #3a3a3a;
+  border-color: transparent;
+}
+
+:root[data-theme="dark"] .lead-source-segment,
+:root[data-theme="dark"] .lead-followup-presets {
+  background: transparent;
 }
 
 :root[data-theme="dark"] .lead-more-toggle:hover,

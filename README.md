@@ -4,19 +4,19 @@ JoynoSync is an internal operations CRM for managing leads, follow-up work, team
 
 The repository contains the static web application, Supabase database migrations and Edge Functions, automated tests, and Firebase Hosting configuration.
 
-> Release status: active hardening. Automated checks pass, but production release still requires applied migrations, deployed Edge Functions, and live Owner/Manager/Agent UAT. See [Project_state.md](Project_state.md) and [docs/release-checklist.md](docs/release-checklist.md).
+> Release status: active hardening. Automated checks pass, but production release still requires applied migrations, deployed Edge Functions, and live Owner/Manager/Agent UAT. See [Project_state.md](Project_state.md), [docs/release-checklist.md](docs/release-checklist.md), and the [lead import workflow](docs/lead-import-workflow.md).
 
 ## Current product scope
 
 | Area | Current state |
 | --- | --- |
 | Authentication and workspace access | Supabase Auth, invitations, role-aware access, and profile setup |
-| Work management | Dashboard, My Work, Calendar, Kanban, Table, and Projects |
+| Work management | Dashboard, Calendar, Tasks (board, detailed, and table views), and Projects |
 | CRM | Leads, Contacts, Accounts, Deals, profiles, ownership, filtering, and soft archive |
 | Lead import and export | New-lead import, Lead ID round-trip updates, duplicate review, background jobs, result export, and rollback support |
 | Attendance | Personal attendance, breaks, manager views, and manual adjustments |
 | Team and settings | Team administration, permissions, workspace profile, user profile, appearance, and notification preferences |
-| Messenger | Supabase-backed internal conversations and realtime updates |
+| Messenger | Supabase-backed direct and group chat with presence, read receipts, history, pinning, attachments, retries, group management, and realtime updates |
 | Calls | RingCentral-assisted calling, call history, scheduler, performance views, automatic Last Activity, and required wrap-up |
 | SMS | Phased rollout; currently restricted in the product |
 | Email | Provider code exists, but product access remains restricted while rollout is incomplete |

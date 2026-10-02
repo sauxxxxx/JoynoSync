@@ -1,0 +1,694 @@
+/* Attendance requests and policy: compact, flat desktop workspace. */
+@media (min-width: 1025px) {
+  #appShell .view-content:has(> .attendance-view .attendance-requests-notion),
+  #appShell .view-content:has(> .attendance-view .attendance-policy-notion) {
+    height: calc(100vh - 49px);
+    min-height: calc(100vh - 49px);
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  #appShell .attendance-view:has(.attendance-requests-notion),
+  #appShell .attendance-view:has(.attendance-policy-notion) {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  #appShell .attendance-v2-panels:has(> .attendance-requests-notion),
+  #appShell .attendance-v2-panels:has(> .attendance-policy-notion) {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #appShell .attendance-requests-notion,
+  #appShell .attendance-policy-notion {
+    height: 100%;
+    min-height: 0;
+    padding: 20px 4px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-requests-notion {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  #appShell .attendance-policy-notion {
+    overflow: hidden;
+    padding-bottom: 8px;
+  }
+
+  #appShell .attendance-requests-head,
+  #appShell .attendance-policy-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  #appShell .attendance-requests-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #appShell .attendance-requests-title-row h1,
+  #appShell .attendance-policy-head h1 {
+    margin: 0;
+    color: var(--ui-color-text);
+    font-size: 20px;
+    font-weight: 650;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+
+  #appShell .attendance-requests-title-row > span {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-neutral-soft);
+    border-radius: 999px;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-requests-head p,
+  #appShell .attendance-policy-head p {
+    margin: 3px 0 0;
+    color: var(--ui-color-text-muted);
+    font-size: 12px;
+  }
+
+  #appShell .attendance-requests-search {
+    width: min(280px, 32vw);
+    height: 36px;
+    padding: 0 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ui-color-text-muted);
+    background: var(--ui-color-surface);
+    border: 1px solid var(--ui-color-border-subtle);
+    border-radius: 5px;
+  }
+
+  #appShell .attendance-requests-search:focus-within {
+    border-color: var(--ui-color-text-muted);
+    box-shadow: var(--ui-focus-ring);
+  }
+
+  #appShell .attendance-requests-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: var(--ui-color-text);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+  }
+
+  #appShell .attendance-request-tabs {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 22px;
+    border-bottom: 1px solid var(--ui-color-border-subtle);
+  }
+
+  #appShell .attendance-request-tab {
+    position: relative;
+    min-height: 38px;
+    padding: 0;
+    border: 0;
+    color: var(--ui-color-text-muted);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-request-tab span {
+    margin-left: 4px;
+    color: var(--ui-color-text-muted);
+    font-size: 10px;
+  }
+
+  #appShell .attendance-request-tab::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: transparent;
+  }
+
+  #appShell .attendance-request-tab:hover,
+  #appShell .attendance-request-tab.is-active {
+    color: var(--ui-color-text);
+  }
+
+  #appShell .attendance-request-tab.is-active::after {
+    background: var(--ui-color-text);
+  }
+
+  #appShell .attendance-requests-table-shell {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    border: 0 !important;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table {
+    width: 100%;
+    background: transparent;
+    border-collapse: collapse;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table th,
+  #appShell .attendance-requests-table-shell .data-table td {
+    height: 48px;
+    padding: 0 10px;
+    border: 0;
+    border-bottom: 1px solid var(--ui-color-border-subtle);
+    color: var(--ui-color-text-secondary);
+    background: transparent;
+    font-size: 12px;
+    text-align: left;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 42px;
+    color: var(--ui-color-text-muted);
+    background: var(--ui-color-surface);
+    font-weight: 500;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table tr::after {
+    display: none !important;
+  }
+
+  #appShell .attendance-requests-table-shell .data-table tbody tr:hover td {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .attendance-request-member {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--ui-color-text);
+    font-weight: 500;
+  }
+
+  #appShell .attendance-request-member > span {
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-neutral-soft);
+    border-radius: 50%;
+    font-size: 9px;
+  }
+
+  #appShell .attendance-requests-notion .attendance-status-pill {
+    padding: 3px 8px;
+    border-radius: 5px;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  #appShell .attendance-requests-notion .attendance-status-pill.is-pending {
+    color: var(--ui-color-text-secondary);
+    background: var(--ui-color-neutral-soft);
+  }
+
+  #appShell .attendance-request-approve {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 5px;
+    color: #fff;
+    background: #202124;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-request-approve:hover {
+    background: #343538;
+  }
+
+  #appShell .attendance-request-overflow {
+    position: relative;
+  }
+
+  #appShell .attendance-request-overflow summary {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    list-style: none;
+    color: var(--ui-color-text-secondary);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-request-overflow summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #appShell .attendance-request-overflow summary:hover {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .attendance-request-overflow button {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 4;
+    width: max-content;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 5px;
+    color: #b42318;
+    background: var(--ui-color-surface);
+    box-shadow: var(--ui-shadow-menu);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-request-empty {
+    position: absolute;
+    inset: 42px 0 0;
+    display: grid;
+    place-content: center;
+    gap: 5px;
+    text-align: center;
+  }
+
+  #appShell .attendance-request-empty[hidden] {
+    display: none;
+  }
+
+  #appShell .attendance-request-empty strong {
+    color: var(--ui-color-text);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #appShell .attendance-request-empty span,
+  #appShell .attendance-requests-footer {
+    color: var(--ui-color-text-muted);
+    font-size: 11px;
+  }
+
+  #appShell .attendance-requests-footer {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--ui-color-border-subtle);
+  }
+
+  #appShell .attendance-request-page-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  #appShell .attendance-request-page-controls button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    color: var(--ui-color-text-secondary);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-request-page-controls button:hover:not(:disabled) {
+    background: var(--ui-color-surface-hover);
+  }
+
+  #appShell .attendance-request-page-controls button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  #appShell .attendance-request-page-controls span {
+    min-width: 34px;
+    color: var(--ui-color-text-muted);
+    text-align: center;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #appShell .attendance-policy-head {
+    margin-bottom: 12px;
+  }
+
+  #appShell .attendance-policy-edit {
+    min-height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 5px;
+    color: #fff;
+    background: #202124;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #appShell .attendance-policy-edit:hover {
+    background: #343538;
+  }
+
+  #appShell .attendance-policy-section {
+    margin-top: 14px;
+  }
+
+  #appShell .attendance-policy-section h2 {
+    margin: 0 0 6px;
+    color: var(--ui-color-text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  #appShell .attendance-policy-properties p {
+    min-height: 32px;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 28px minmax(180px, 0.7fr) minmax(260px, 1.4fr);
+    align-items: center;
+    border-bottom: 1px solid var(--ui-color-border-subtle);
+    color: var(--ui-color-text-secondary);
+    font-size: 12px;
+  }
+
+  #appShell .attendance-policy-properties strong {
+    color: var(--ui-color-text);
+    font-weight: 500;
+  }
+
+  #appShell .attendance-policy-property-icon {
+    color: var(--ui-color-text-muted);
+    font-size: 14px;
+  }
+
+  #appShell .attendance-policy-break-head,
+  #appShell .attendance-policy-break-row {
+    display: grid;
+    grid-template-columns: 28px minmax(180px, 1.2fr) repeat(4, minmax(110px, 1fr));
+    align-items: center;
+    column-gap: 8px;
+  }
+
+  #appShell .attendance-policy-break-head {
+    min-height: 24px;
+    color: var(--ui-color-text-muted);
+    font-size: 10px;
+  }
+
+  #appShell .attendance-policy-break-head span:first-child {
+    grid-column: 1 / 3;
+  }
+
+  #appShell .attendance-policy-break-row {
+    min-height: 34px;
+    border-bottom: 1px solid var(--ui-color-border-subtle);
+    color: var(--ui-color-text-secondary);
+    font-size: 12px;
+  }
+
+  #appShell .attendance-policy-break-row strong {
+    color: var(--ui-color-text);
+    font-weight: 500;
+  }
+
+  #appShell .attendance-policy-meta {
+    margin: 10px 0 0;
+    color: var(--ui-color-text-muted);
+    font-size: 10px;
+  }
+
+  .modal-card.is-attendance-policy {
+    width: min(760px, calc(100vw - 40px));
+    max-height: calc(100vh - 40px);
+    padding: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+    border: 0;
+    border-radius: 5px;
+    box-shadow: 0 18px 48px rgba(18, 18, 18, 0.22);
+  }
+
+  .modal-card.is-attendance-policy .modal-head {
+    margin: 0;
+    padding: 18px 24px 4px;
+  }
+
+  .modal-card.is-attendance-policy .modal-head h3 {
+    color: var(--ui-color-text);
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  .modal-card.is-attendance-policy .icon-btn,
+  .modal-card.is-attendance-policy .icon-btn:hover {
+    border: 0;
+    color: var(--ui-color-text-secondary);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] {
+    min-height: 0;
+    padding: 0 24px;
+    overflow-y: auto;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-shell {
+    gap: 0;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-modal-subtitle {
+    margin: 0 0 14px;
+    color: var(--ui-color-text-muted);
+    font-size: 11px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-form-section {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ui-color-border-subtle);
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-form-section h4 {
+    margin: 0 0 12px;
+    color: var(--ui-color-text);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .form-field {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .form-field > span:first-child,
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-head {
+    color: var(--ui-color-text-muted);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-trigger,
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger,
+  .modal-form[data-mode="attendance-policy-compose"] input[type="number"] {
+    height: 34px;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--ui-color-border-subtle);
+    border-radius: 5px;
+    color: var(--ui-color-text);
+    background: transparent;
+    box-shadow: none;
+    font-size: 11px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-number-field {
+    position: relative;
+    display: block;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-number-field input {
+    width: 100%;
+    padding-right: 34px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-number-field > small {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: var(--ui-color-text-muted);
+    font-size: 9px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-workdays-field {
+    align-content: end;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-workdays {
+    min-height: 34px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-day-option {
+    min-width: 0;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-day-option span {
+    min-height: 34px;
+    padding: 0 4px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 5px;
+    color: var(--ui-color-text-secondary);
+    background: transparent;
+    font-size: 9px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-day-option input:checked + span {
+    color: var(--ui-color-text);
+    background: var(--ui-color-neutral-soft);
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] input[type="checkbox"] {
+    accent-color: #202124;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-time-trigger > i,
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-timezone-trigger > i {
+    color: var(--ui-color-text-muted);
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-head,
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1.15fr) 94px minmax(108px, 1fr) minmax(108px, 1fr) 72px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-head {
+    min-height: 24px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-row {
+    min-height: 44px;
+    border-top: 1px solid var(--ui-color-border-subtle);
+    color: var(--ui-color-text-secondary);
+    font-size: 10px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-row strong {
+    color: var(--ui-color-text);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .attendance-policy-break-editor-row .attendance-policy-time-popover {
+    top: auto;
+    bottom: calc(100% + 6px);
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    margin: 0 -24px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--ui-color-border-subtle);
+    background: var(--ui-color-surface);
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .form-actions .btn {
+    min-height: 34px;
+    border: 0;
+    border-radius: 5px;
+    box-shadow: none;
+    font-size: 11px;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .form-actions .btn-light {
+    color: var(--ui-color-text-secondary);
+    background: transparent;
+  }
+
+  .modal-form[data-mode="attendance-policy-compose"] .form-actions .btn-accent {
+    color: #fff;
+    background: #202124;
+  }
+}
+
+@media (min-width: 1025px) {
+  :root[data-theme="dark"] #appShell .attendance-request-approve,
+  :root[data-theme="dark"] #appShell .attendance-policy-edit,
+  :root[data-theme="dark"] .modal-form[data-mode="attendance-policy-compose"] .form-actions .btn-accent {
+    color: #202124;
+    background: #f1f1ef;
+  }
+
+  :root[data-theme="dark"] .modal-form[data-mode="attendance-policy-compose"] input[type="checkbox"] {
+    accent-color: #f1f1ef;
+  }
+}
