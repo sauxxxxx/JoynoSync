@@ -157,6 +157,7 @@ import {
   createEmptyLeadArchiveData,
   createLeadArchivePageController
 } from "./modules/lead-archive-page.js";
+import { shouldRefreshAccessControlledSidebar } from "./modules/sidebar-access.js";
 import {
   applyLeadAdminViewState,
   isLeadAdminRole,
@@ -13381,6 +13382,26 @@ function sidebarMarkup() {
   `;
 }
 
+function syncAccessControlledSidebar() {
+  const sidebar = document.querySelector("#appShell > .sidebar");
+  if (!sidebar) {
+    return;
+  }
+
+  const canManageArchivedLeads = canManageLeadArchive(resolveCurrentUserRole(state.data));
+  const hasArchivedLeadRoute = Boolean(sidebar.querySelector('[data-route="lead-archive"]'));
+  if (!shouldRefreshAccessControlledSidebar({ canManageArchivedLeads, hasArchivedLeadRoute })) {
+    return;
+  }
+
+  const preservedScrollTop = sidebar.scrollTop;
+  sidebar.outerHTML = sidebarMarkup();
+  const refreshedSidebar = document.querySelector("#appShell > .sidebar");
+  if (refreshedSidebar) {
+    refreshedSidebar.scrollTop = preservedScrollTop;
+  }
+}
+
 function shellMarkup() {
   return `
     <div class="app-shell" id="appShell">
@@ -15055,6 +15076,7 @@ function renderRoute() {
   document.body.classList.toggle("is-public-route", isStandalonePublic);
   document.body.classList.toggle("is-invite-route", state.routeId === "invite");
   document.body.classList.toggle("is-login-route", state.routeId === "login");
+  syncAccessControlledSidebar();
   const viewContent = document.getElementById("viewContent");
   const currentMessengerConversationKey = String(state.selectedConversationKey || "").trim();
   const shouldAutoScrollMessenger =
