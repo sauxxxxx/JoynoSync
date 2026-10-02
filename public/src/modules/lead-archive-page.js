@@ -15,6 +15,7 @@ export function createEmptyLeadArchiveData(overrides = {}) {
     error: "",
     hasMore: false,
     busyIds: [],
+    selectedIds: [],
     lastLoadedAt: 0,
     ...overrides
   };
@@ -88,6 +89,22 @@ export function createLeadArchivePageController({
     state.leadArchiveData = { ...getArchiveData(), busyIds: [...current] };
   }
 
+  function setBusyMany(leadIds, busy) {
+    const current = new Set(getArchiveData().busyIds || []);
+    leadIds.forEach((leadId) => {
+      const normalizedId = String(leadId || "").trim();
+      if (!normalizedId) return;
+      if (busy) current.add(normalizedId);
+      else current.delete(normalizedId);
+    });
+    state.leadArchiveData = { ...getArchiveData(), busyIds: [...current] };
+  }
+
+  function clearSelection() {
+    state.leadArchiveData = { ...getArchiveData(), selectedIds: [] };
+    renderRoute();
+  }
+
   async function refresh(options = {}) {
     if (!canManage()) {
       return false;
@@ -120,6 +137,9 @@ export function createLeadArchivePageController({
       state.leadArchiveData = createEmptyLeadArchiveData({
         ...current,
         ...pageData,
+        selectedIds: (current.selectedIds || []).filter((id) =>
+          (pageData.rows || []).some((lead) => String(lead?.id || "").trim() === String(id || "").trim())
+        ),
         statusFilter: request.statusFilter,
         loading: false,
         loaded: true,
@@ -150,7 +170,7 @@ export function createLeadArchivePageController({
 
   function scheduleSearch(value, preserveInput) {
     state.searchTerm = String(value || "");
-    state.leadArchiveData = createEmptyLeadArchiveData({ ...getArchiveData(), page: 1 });
+    state.leadArchiveData = createEmptyLeadArchiveData({ ...getArchiveData(), page: 1, selectedIds: [] });
     if (searchTimer) {
       window.clearTimeout(searchTimer);
     }
@@ -164,7 +184,8 @@ export function createLeadArchivePageController({
     state.leadArchiveData = createEmptyLeadArchiveData({
       ...getArchiveData(),
       page: 1,
-      statusFilter: String(value || "all").trim() || "all"
+      statusFilter: String(value || "all").trim() || "all",
+      selectedIds: []
     });
     void refresh();
   }
@@ -177,8 +198,70 @@ export function createLeadArchivePageController({
     if (nextPage === current.page || (nextPage > current.page && !current.hasMore)) {
       return;
     }
-    state.leadArchiveData = createEmptyLeadArchiveData({ ...current, page: nextPage });
+    state.leadArchiveData = createEmptyLeadArchiveData({ ...current, page: nextPage, selectedIds: [] });
     void refresh();
+  }
+
+  function runBulkAction(operation) {
+    const current = getArchiveData();
+    const selectedIds = new Set((current.selectedIds || []).map((id) => String(id || "").trim()).filter(Boolean));
+    const leads = current.rows.filter((lead) => selectedIds.has(String(lead?.id || "").trim()));
+    if (!leads.length) {
+      showToast("Select at least one archived lead first.", { tone: "warning" });
+      return;
+    }
+
+    const restoring = operation === "restore";
+    const countLabel = `${leads.length} lead${leads.length === 1 ? "" : "s"}`;
+    openConfirmModal({
+      title: restoring ? `Restore ${countLabel}?` : `Permanently delete ${countLabel}?`,
+      message: restoring
+        ? `Return the selected ${countLabel} to the active Leads list?`
+        : `Delete the selected ${countLabel} permanently? This cannot be undone.`,
+      confirmLabel: restoring ? "Restore selected" : "Delete permanently",
+      danger: !restoring,
+      onConfirm: async () => {
+        const leadIds = leads.map((lead) => String(lead.id || "").trim());
+        setBusyMany(leadIds, true);
+        renderRoute();
+        const results = await Promise.allSettled(
+          leads.map(async (lead) => {
+            if (isLiveEnabled()) {
+              if (restoring) await restoreRemote(lead.id);
+              else await deleteRemote(lead.id);
+            }
+            if (restoring) onRestored(lead);
+            else onDeleted(lead);
+            return lead;
+          })
+        );
+        const failedIds = results
+          .map((result, index) => result.status === "rejected" ? leadIds[index] : "")
+          .filter(Boolean);
+        const succeeded = leads.length - failedIds.length;
+        setBusyMany(leadIds, false);
+        state.leadArchiveData = {
+          ...getArchiveData(),
+          selectedIds: failedIds
+        };
+        if (succeeded) {
+          showToast(
+            restoring
+              ? `${succeeded} lead${succeeded === 1 ? " was" : "s were"} restored to Leads.`
+              : `${succeeded} lead${succeeded === 1 ? " was" : "s were"} permanently deleted.`,
+            { tone: "success" }
+          );
+        }
+        if (failedIds.length) {
+          showToast(`${failedIds.length} lead${failedIds.length === 1 ? " could" : "s could"} not be updated. Try again.`, { tone: "danger" });
+        }
+        const refreshed = getArchiveData();
+        if (succeeded === current.rows.length && refreshed.page > 1) {
+          state.leadArchiveData = createEmptyLeadArchiveData({ ...refreshed, page: refreshed.page - 1 });
+        }
+        await refresh({ renderStart: false });
+      }
+    });
   }
 
   function restore(leadId) {
@@ -252,9 +335,12 @@ export function createLeadArchivePageController({
 
   return {
     changePage,
+    clearSelection,
+    deleteSelected: () => runBulkAction("delete"),
     permanentlyDelete,
     refresh,
     restore,
+    restoreSelected: () => runBulkAction("restore"),
     scheduleSearch,
     setStatusFilter
   };

@@ -12554,6 +12554,10 @@ function syncLeadSelectionUi() {
   if (headerCheckbox instanceof HTMLInputElement) {
     headerCheckbox.indeterminate = headerCheckbox.dataset.indeterminate === "true";
   }
+  const archiveHeaderCheckbox = document.getElementById("archiveSelectAll");
+  if (archiveHeaderCheckbox instanceof HTMLInputElement) {
+    archiveHeaderCheckbox.indeterminate = archiveHeaderCheckbox.dataset.indeterminate === "true";
+  }
 }
 
 function getNextRecurringDueDate(currentDueDate, recurrence) {
@@ -35581,6 +35585,11 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-archive-status") {
+    leadArchivePageController.setStatusFilter(id);
+    return;
+  }
+
   if (action === "lead-archive-page") {
     leadArchivePageController.changePage(id);
     return;
@@ -35596,12 +35605,28 @@ async function handleRecordAction(action, id, sourceEl = null) {
     return;
   }
 
+  if (action === "lead-archive-restore-selected") {
+    leadArchivePageController.restoreSelected();
+    return;
+  }
+
+  if (action === "lead-archive-delete-selected") {
+    leadArchivePageController.deleteSelected();
+    return;
+  }
+
+  if (action === "lead-archive-clear-selection") {
+    leadArchivePageController.clearSelection();
+    return;
+  }
+
   if (action === "lead-archive-clear-filters") {
     state.searchTerm = "";
     state.leadArchiveData = createEmptyLeadArchiveData({
       ...state.leadArchiveData,
       page: 1,
-      statusFilter: "all"
+      statusFilter: "all",
+      selectedIds: []
     });
     void leadArchivePageController.refresh();
     return;
@@ -39227,6 +39252,39 @@ function onInput(event) {
       } else {
         state.selectedLeadIds.delete(leadId);
       }
+    });
+    renderRoute();
+    return;
+  }
+
+  if (event.target.id === "archiveSelectAll") {
+    const rowCheckboxes = [...document.querySelectorAll("input[name='archivedLeadSelect']")];
+    const checked = event.target.dataset.indeterminate === "true" ? false : Boolean(event.target.checked);
+    const selectedIds = new Set(state.leadArchiveData?.selectedIds || []);
+    rowCheckboxes.forEach((checkbox) => {
+      const leadId = String(checkbox.value || "").trim();
+      if (!leadId) return;
+      if (checked) selectedIds.add(leadId);
+      else selectedIds.delete(leadId);
+    });
+    state.leadArchiveData = createEmptyLeadArchiveData({
+      ...state.leadArchiveData,
+      selectedIds: [...selectedIds]
+    });
+    renderRoute();
+    return;
+  }
+
+  if (event.target.name === "archivedLeadSelect") {
+    const leadId = String(event.target.value || "").trim();
+    const selectedIds = new Set(state.leadArchiveData?.selectedIds || []);
+    if (leadId) {
+      if (event.target.checked) selectedIds.add(leadId);
+      else selectedIds.delete(leadId);
+    }
+    state.leadArchiveData = createEmptyLeadArchiveData({
+      ...state.leadArchiveData,
+      selectedIds: [...selectedIds]
     });
     renderRoute();
     return;

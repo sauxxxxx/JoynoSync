@@ -52,6 +52,26 @@ test("archive view exposes restore and permanent delete with an irreversible war
   assert.match(view.html, /data-action="lead-archive-restore"/);
   assert.match(view.html, /data-action="lead-archive-delete-permanently"/);
   assert.match(view.html, /Permanent deletion cannot be undone/);
+  assert.match(view.html, /crm-list-v2 crm-leads-list lead-archive-view is-admin-view/);
+  assert.match(view.html, /class="lead-admin-viewbar"/);
+  assert.match(view.html, /class="data-table lead-archive-table"/);
+  assert.match(view.html, /table-actions-menu/);
+});
+
+test("archive view exposes matching selection and bulk controls", () => {
+  const archive = createEmptyLeadArchiveData({
+    loaded: true,
+    totalCount: 1,
+    selectedIds: ["lead-1"],
+    rows: [{ id: "lead-1", name: "Ada Lovelace", status: "New", archivedAt: "2026-09-28T01:00:00Z" }]
+  });
+  const view = renderLeadArchive(
+    { currentUser: { role: "Owner" } },
+    { currentUserRole: "Owner", leadArchiveData: archive, searchTerm: "" }
+  );
+  assert.match(view.html, /name="archivedLeadSelect"/);
+  assert.match(view.html, /data-action="lead-archive-restore-selected"/);
+  assert.match(view.html, /data-action="lead-archive-delete-selected"/);
 });
 
 test("restoring a local archived lead clears its busy state", async () => {
@@ -84,5 +104,49 @@ test("restoring a local archived lead clears its busy state", async () => {
   await confirmation.onConfirm();
 
   assert.deepEqual(state.leadArchiveData.busyIds, []);
+  assert.equal(state.leadArchiveData.totalCount, 0);
+});
+
+test("bulk restore processes the selected archived leads", async () => {
+  const leads = [
+    { id: "lead-1", name: "Ada", archived: true, archivedAt: "2026-09-28T01:00:00Z" },
+    { id: "lead-2", name: "Grace", archived: true, archivedAt: "2026-09-27T01:00:00Z" }
+  ];
+  const state = {
+    data: { leads, teamMembers: [], workspace: { id: "workspace-1" } },
+    searchTerm: "",
+    leadArchiveData: createEmptyLeadArchiveData({
+      loaded: true,
+      totalCount: 2,
+      rows: leads,
+      selectedIds: leads.map((lead) => lead.id)
+    })
+  };
+  const restored = [];
+  let confirmation;
+  const controller = createLeadArchivePageController({
+    state,
+    canManage: () => true,
+    isLiveEnabled: () => false,
+    fetchPage: async () => null,
+    restoreRemote: async () => null,
+    deleteRemote: async () => null,
+    openConfirmModal: (options) => { confirmation = options; },
+    renderRoute: () => {},
+    renderRoutePreservingInput: () => {},
+    onRestored: (lead) => {
+      lead.archived = false;
+      lead.archivedAt = "";
+      restored.push(lead.id);
+    },
+    onDeleted: () => {},
+    showToast: () => {}
+  });
+
+  controller.restoreSelected();
+  await confirmation.onConfirm();
+
+  assert.deepEqual(restored.sort(), ["lead-1", "lead-2"]);
+  assert.deepEqual(state.leadArchiveData.selectedIds, []);
   assert.equal(state.leadArchiveData.totalCount, 0);
 });
